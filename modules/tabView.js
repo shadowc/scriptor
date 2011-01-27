@@ -1,6 +1,6 @@
 /* JavaScript Document
 *
-*  tabView 1.5.1
+*  tabView component
 *
 *  All purpose tab interface javascript class.
 *
@@ -28,11 +28,11 @@
 *  will be true after a succesfull render of the tab list. Should be read only.
 *
 */
-tabView = function(ulDiv, tabs) {
+tabView = Scriptor.tabView = function(ulDiv, tabs) {
 	// parameter control section
 	if (typeof(ulDiv) != 'string' || ulDiv == '') {
 		alert('Error: first parameter must be a non empty string.');
-		return false;
+		return;
 	}
 	
 	this.ulId = ulDiv;
@@ -40,7 +40,7 @@ tabView = function(ulDiv, tabs) {
 	
 	if (!(tabs instanceof Array)) {
 		alert('Error: second parameter must be an array of objects.');
-		return false;
+		return;
 	}
 	
 	// tab list translating and control
@@ -49,117 +49,93 @@ tabView = function(ulDiv, tabs) {
 	for (var n=0; n < tabs.length; n++) {
 		if (typeof(tabs[n].label) != 'string' || typeof(tabs[n].id) != 'string') {
 			alert('Error: Invalid tab collection object. (element ' + n + ')');
-			return false;
+			return;
 		}
 		
 		this.tabs[n] = {label : tabs[n].label, divStr : tabs[n].id };
 	}
 	this.visible = false;
 	
-	// add tabview register
-	TVE.tabViewRegisters[TVE.tabViewRegisters.length] = {obj : this, ulId : this.ulId};
-};
-
-/*
-* tabView.show()
-*
-* Use this function nmediately after successfully defining the tabView object in order
-* to create the tab list inside the empty UL element (shoud and will be emptied).
-*
-*/
-tabView.prototype.Show = function() {
-	this.ulElem = document.getElementById(this.ulId);
-	
-	if (!this.ulElem) {
-		alert('Error: UL does not exist.');
-		return false;
-	}
-	
-	while (this.ulElem.firstChild) 
-		this.ulElem.removeChild(this.ulElem.firstChild);
-	
-	var tmpLi, tmpA, tmpSpan, tmpImg, tmpImg2;
-	
-	for (var n = 0; n < this.tabs.length; n++) {
-		tmpLi = document.createElement('li');
-		if (this.selectedTab == n) 
-			tmpLi.className = 'tabViewLiSelected';
-		else 
-			tmpLi.className = 'tabViewLi';
-		
-		tmpA = document.createElement('a')
-		tmpA.setAttribute('href', 'javascript:TVE.selectTab(\'' + this.ulId + '\', '+n+');');
-		tmpSpan = document.createElement('span');
-		tmpSpan.appendChild(document.createTextNode(this.tabs[n].label));
-		tmpA.appendChild(tmpSpan);
-		
-		tmpLi.appendChild(tmpA);
-		this.ulElem.appendChild(tmpLi);
-	}
-	
-	for (var n=0; n < this.tabs.length; n++) {
-		if (!document.getElementById(this.tabs[n].divStr)) {
-			alert('Error: Tab panel div does not exist.');
+	/*
+	* tabView.selectTab(tabNdx)
+	*
+	* Use this function (rather than writing the tabView.selectedTab property) to select
+	* a tab panel by code. This is the function that will be used by the event handling system
+	* when a user clicks on a tab
+	*
+	*/
+	this.selectTab = function(tabNdx) {
+		if (!this.visible)
+		{
+			Scriptor.event.cancel(e, true);
 			return false;
 		}
 		
-		this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+		if (tabNdx >= 0 && tabNdx < this.tabs.length) {
+			var tabElems = this.ulElem.getElementsByTagName('li');
+			tabElems.item(this.selectedTab).className = 'tabViewLi';
+			this.tabs[this.selectedTab].divElem.style.display = 'none';
+			
+			tabElems.item(tabNdx).className = 'tabViewLiSelected';
+			this.tabs[tabNdx].divElem.style.display = 'block';
+			
+			this.selectedTab = tabNdx;
+		}
 		
-		if (n > 0)
-			this.tabs[n].divElem.style.display = 'none';
-	}
+		Scriptor.event.cancel(e, true);
+		return false;
+	};
 	
-	this.visible = true;
-};
-
-/*
-* tabView.selectTab(tabNdx)
-*
-* Use this functio (rather than writing the tabView.selectedTab property) to select
-* a tab panel by code. This is the function that will be used by the event handling system
-* when a user clicks on a tab
-*
-*/
-tabView.prototype.selectTab = function(tabNdx) {
-	if (!this.visible)
-		return;
-	
-	if (tabNdx >= 0 && tabNdx < this.tabs.length) {
-		var tabElems = this.ulElem.getElementsByTagName('li');
-		tabElems.item(this.selectedTab).className = 'tabViewLi';
-		this.tabs[this.selectedTab].divElem.style.display = 'none';
+	/*
+	* tabView.show()
+	*
+	* Use this function nmediately after successfully defining the tabView object in order
+	* to create the tab list inside the empty UL element (shoud and will be emptied).
+	*
+	*/
+	tabView.prototype.Show = function() {
+		this.ulElem = document.getElementById(this.ulId);
 		
-		tabElems.item(tabNdx).className = 'tabViewLiSelected';
-		this.tabs[tabNdx].divElem.style.display = 'block';
-		
-		this.selectedTab = tabNdx;
-	}
-};
-
-tabView_engine = function() {
-	this.tabViewRegisters = Array();
-};
-
-tabView_engine.prototype = {
-	selectTab : function (ulId, ndx) {
-		var obj = TVE.__searchTabView(ulId);
-		if (!obj) {
-			alert('Error: tabView onject not found.');
+		if (!this.ulElem) {
+			alert('Error: UL does not exist.');
 			return;
 		}
 		
-		if (ndx >= 0 && ndx < obj.tabs.length) {
-			obj.selectTab(ndx);
+		this.ulElem.innerHTML = '';
+		
+		var tmpLi, tmpA, tmpSpan, tmpImg, tmpImg2;
+		
+		for (var n = 0; n < this.tabs.length; n++) {
+			tmpLi = document.createElement('li');
+			if (this.selectedTab == n) 
+				tmpLi.className = 'tabViewLiSelected';
+			else 
+				tmpLi.className = 'tabViewLi';
+			
+			tmpA = document.createElement('a');
+			tmpA.setAttribute('href', '#');
+			tmpSpan = document.createElement('span');
+			tmpSpan.appendChild(document.createTextNode(this.tabs[n].label));
+			tmpA.appendChild(tmpSpan);
+			
+			tmpLi.appendChild(tmpA);
+			this.ulElem.appendChild(tmpLi);
+			
+			Scriptor.event.attach(tmpA, 'click', Scriptor.bind(this.selectTab, this, n));
 		}
-	},
-	
-	__searchTabView : function(str) {
-		for (var n=0; n < TVE.tabViewRegisters.length; n++) 
-			if (TVE.tabViewRegisters[n].ulId == str) 
-				return TVE.tabViewRegisters[n].obj;
-	
-		return false;
-	}
+		
+		for (var n=0; n < this.tabs.length; n++) {
+			if (!document.getElementById(this.tabs[n].divStr)) {
+				alert('Error: Tab panel div does not exist.');
+				return;
+			}
+			
+			this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+			
+			if (n > 0)
+				this.tabs[n].divElem.style.display = 'none';
+		}
+		
+		this.visible = true;
+	};
 };
-
-TVE = new tabView_engine();
