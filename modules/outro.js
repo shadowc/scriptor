@@ -1,0 +1,3 @@
+
+	return Scriptor;
+})(window, document);

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+rm Scriptor.en.js
+
+cat modules/intro.js 		>> Scriptor.en.js
+cat modules/core.js 		>> Scriptor.en.js
+cat modules/calendarView.js	>> Scriptor.en.js
+cat lang/calendarView.en.js >> Scriptor.en.js
+cat modules/dataView.js		>> Scriptor.en.js
+cat lang/dataView.en.js 	>> Scriptor.en.js
+cat modules/galleryView.js	>> Scriptor.en.js
+cat modules/httpRequest.js	>> Scriptor.en.js
+cat lang/httpRequest.en.js	>> Scriptor.en.js
+cat modules/tabView.js		>> Scriptor.en.js
+cat modules/treeView.js		>> Scriptor.en.js
+cat modules/outro.js		>> Scriptor.en.js
