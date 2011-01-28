@@ -76,7 +76,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	* when a user clicks on a tab
 	*
 	*/
-	this.selectTab = function(tabNdx) {
+	this.selectTab = function(tabNdx, e) {
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);
