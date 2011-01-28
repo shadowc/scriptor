@@ -82,25 +82,27 @@ var Scriptor = {
 	// tiny event system 
 	event : {
 		attach : function(htmlElement, evt, funcObj) {
-			if (htmlElement.addEventListener) {
-				htmlElement.addEventListener(evt, funcObj, false);
-			}
-			else {
-				if (htmlElement.attachEvent) {
-					htmlElement.attachEvent('on' + evt, funcObj);
+			if (htmlElement)
+				if (htmlElement.addEventListener) {
+					htmlElement.addEventListener(evt, funcObj, false);
 				}
-			}
+				else {
+					if (htmlElement.attachEvent) {
+						htmlElement.attachEvent('on' + evt, funcObj);
+					}
+				}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
-			if (htmlElement.removeEventListener) {
-				htmlElement.removeEventListener(evt, funcObj, false);
-			}
-			else {
-				if (htmlElement.detachEvent) {
-					htmlElement.detachEvent('on' + evt, funcObj);
+			if (htmlElement)
+				if (htmlElement.removeEventListener) {
+					htmlElement.removeEventListener(evt, funcObj, false);
 				}
-			}
+				else {
+					if (htmlElement.detachEvent) {
+						htmlElement.detachEvent('on' + evt, funcObj);
+					}
+				}
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
@@ -128,6 +130,20 @@ var Scriptor = {
 				y: evt.pageY || (evt.clientY +
 					(document.documentElement.scrollTop || document.body.scrollTop))
 		  };
+		}
+	},
+	
+	// error reporting system!
+	error : {
+		alertErrors : false,
+		muteErrors : true,
+		
+		report : function(msg) {
+			if (Scriptor.error.alertErrors)
+				alert(msg);
+			
+			if (!Scriptor.error.muteErrors)
+				throw msg;
 		}
 	}
 };	
@@ -3777,11 +3793,12 @@ httpRequest.prototype.lang = {
 * be passed along with the desired labels to the object. This will convert a list of
 * divs to a panelled tab system
 *
-* ulDiv: is a String with the name if the id of the Ul Html that will contain the
-*   tabs.
+* ulDiv: the id or the Ul Html that will contain the tabs.
 *
-* tabs is an Array og Objects on the form of [ { label : String(), id : String() }, ... ]
-*   Here you will define the different labels and DIV ids for the tab system
+* tabsDiv: the id or the Html container element for the tab panels.
+* 
+* tabs is an Array og Objects on the form of [ { label : String(), elem : HTML tap panel }, ... ]
+*   Here you will define the different labels and DIV ids (or actual ids) for the tab system
 *
 * tabView.selectedTab
 *  the currently selected tab
@@ -3790,32 +3807,43 @@ httpRequest.prototype.lang = {
 *  will be true after a succesfull render of the tab list. Should be read only.
 *
 */
-tabView = Scriptor.tabView = function(ulDiv, tabs) {
+tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	// parameter control section
-	if (typeof(ulDiv) != 'string' || ulDiv == '') {
-		alert('Error: first parameter must be a non empty string.');
+	if ((typeof(ulDiv) != 'string' && ulDiv.parentNode === undefined) || ulDiv == '') {
+		Scriptor.error.report('Error: first parameter must be a non empty string or a html object.');
 		return;
 	}
 	
-	this.ulId = ulDiv;
-	this.ulElem = null;
+	if ((typeof(tabsDiv) != 'string' && tabsDiv.parentNode === undefined) || tabsDiv == '') {
+		Scriptor.error.report('Error: second parameter bus be a non empty string or a html object.');
+		return;
+	}
 	
-	if (!(tabs instanceof Array)) {
-		alert('Error: second parameter must be an array of objects.');
+	this.ulElem = typeof(ulDiv) == 'string' ? document.getElementById(ulDiv) : ulDiv;
+	this.tabsElem = typeof(tabsElem) == 'string' ? document.getElementById(tabsElem) : ulDiv;;
+	this.ulId = typeof(ulDiv) == 'string' ? ulDiv : this.ulElem.id;
+	this.tabsId = typeof(tabsDiv) == 'string' ? tabsDiv : this.tabsElem.id;
+	
+	if (tabs && !(tabs instanceof Array)) {
+		Scriptor.error.report('Error: third parameter must be an array of objects.');
 		return;
 	}
 	
 	// tab list translating and control
-	this.tabs = Array();
+	this.tabs = [];
 	this.selectedTab = 0;
-	for (var n=0; n < tabs.length; n++) {
-		if (typeof(tabs[n].label) != 'string' || typeof(tabs[n].id) != 'string') {
-			alert('Error: Invalid tab collection object. (element ' + n + ')');
-			return;
+	if (tabs)
+		for (var n=0; n < tabs.length; n++) {
+			if (typeof(tabs[n].label) != 'string' || (typeof(tabs[n].elem) != 'string' && tabs[n].elem.parentNode === undefined)) {
+				Scriptor.error.report('Error: Invalid tab collection object. (element ' + n + ')');
+				return;
+			}
+			
+			var theElem = typeof(tabs[n].elem) == 'string' ? document.getElementById(tabs[n].elem) : tabs[n].elem;
+			var theId = typeof(tabs[n].elem) == 'string' ? tabs[n].elem : tabs[n].elem.id;
+			this.tabs[n] = {label : tabs[n].label, divStr : theId, divElem : theElem };
 		}
 		
-		this.tabs[n] = {label : tabs[n].label, divStr : tabs[n].id };
-	}
 	this.visible = false;
 	
 	/*
@@ -3835,6 +3863,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabs) {
 		
 		if (tabNdx >= 0 && tabNdx < this.tabs.length) {
 			var tabElems = this.ulElem.getElementsByTagName('li');
+			
 			tabElems.item(this.selectedTab).className = 'tabViewLi';
 			this.tabs[this.selectedTab].divElem.style.display = 'none';
 			
@@ -3855,51 +3884,50 @@ tabView = Scriptor.tabView = function(ulDiv, tabs) {
 	* to create the tab list inside the empty UL element (shoud and will be emptied).
 	*
 	*/
-	tabView.prototype.Show = function() {
-		this.ulElem = document.getElementById(this.ulId);
+	this.Show = function() {
+		if (!this.ulElem)
+			this.ulElem = document.getElementById(this.ulId);
+		if (!this.tabsElem)
+			this.tabsElem = document.getElementById(this.tabsId);
 		
 		if (!this.ulElem) {
-			alert('Error: UL does not exist.');
+			Scriptor.error.report('Error: UL does not exist.');
+			return;
+		}
+		
+		if (!this.tabsElem) {
+			Scriptor.error.report('Error: HTMLContainer does not exist');
 			return;
 		}
 		
 		this.ulElem.innerHTML = '';
-		
-		var tmpLi, tmpA, tmpSpan, tmpImg, tmpImg2;
-		
+		var template = '';
 		for (var n = 0; n < this.tabs.length; n++) {
-			tmpLi = document.createElement('li');
-			if (this.selectedTab == n) 
-				tmpLi.className = 'tabViewLiSelected';
-			else 
-				tmpLi.className = 'tabViewLi';
-			
-			tmpA = document.createElement('a');
-			tmpA.setAttribute('href', '#');
-			tmpSpan = document.createElement('span');
-			tmpSpan.appendChild(document.createTextNode(this.tabs[n].label));
-			tmpA.appendChild(tmpSpan);
-			
-			tmpLi.appendChild(tmpA);
-			this.ulElem.appendChild(tmpLi);
-			
-			Scriptor.event.attach(tmpA, 'click', Scriptor.bind(this.selectTab, this, n));
+			template += '<li class="' + (this.selectedTab == n ? 'tabViewLiSelected' : 'tabViewLi') + '">';
+			template += '<a href="#" id="' + this.ulId+'_tab'+n + '"><span>' + this.tabs[n].label + '</span></a></li>';
 		}
+		this.ulElem.innerHTML = template;
+		
+		for (var n=0; n < this.tabs.length; n++)
+			Scriptor.event.attach(document.getElementById(this.ulId+'_tab'+n), 'click', Scriptor.bind(this.selectTab, this, n));
 		
 		for (var n=0; n < this.tabs.length; n++) {
 			if (!document.getElementById(this.tabs[n].divStr)) {
-				alert('Error: Tab panel div does not exist.');
+				Scriptor.error.report('Error: Tab panel div does not exist.');
 				return;
 			}
 			
-			this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+			if (!tabs[n].divElem)
+				this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
 			
-			if (n > 0)
+			if (n != this.selectedTab)
 				this.tabs[n].divElem.style.display = 'none';
 		}
 		
 		this.visible = true;
 	};
+	
+	
 };
 // JavaScript Document
 /*

@@ -11,11 +11,11 @@
 		var myGalleryView;
 		var myTreeView;
 		
-		myTabView = new tabView('tabTest', [ {label: 'dataView', id : 'tab1'},
-												{label: 'dataView2', id : 'tab2'},
-												{label: 'treeView', id: 'tab4'},
-												{label: 'galleryView', id: 'tab5'},
-												{label: 'calendarView', id: 'tab3'}
+		myTabView = new tabView('tabTest', 'tabContainer', [ {label: 'dataView', elem : 'tab1'},
+												{label: 'dataView2', elem : 'tab2'},
+												{label: 'treeView', elem: 'tab4'},
+												{label: 'galleryView', elem: 'tab5'},
+												{label: 'calendarView', elem: 'tab3'}
 												 ] );
 		
 		
@@ -84,26 +84,28 @@
 		<div id="container">
 			<ul id="tabTest" class="tabViewUl"></ul>
 			
-			<div id="tab1" class="tabViewDiv">
-				<div id="somediv" class="dataView">Garbage</div>
-			</div>
-	
-			
-			<div id="tab2" class="tabViewDiv">
-				<div id="someotherdiv" class="dataView"></div>
-			</div>
-			
-			<div id="tab3" class="tabViewDiv">
-				<div id="calendarView" class="calendarView"></div>
-			</div>
-			
-			<div id="tab4" class="tabViewDiv">
-				<div id="treeView" class="treeView"></div>
-			</div>
-	
-			
-			<div id="tab5" class="tabViewDiv">
-				<div id="galleryView" class="galleryView"></div>
+			<div id="tabContainer">
+				<div id="tab1" class="tabViewDiv">
+					<div id="somediv" class="dataView">Garbage</div>
+				</div>
+		
+				
+				<div id="tab2" class="tabViewDiv">
+					<div id="someotherdiv" class="dataView"></div>
+				</div>
+				
+				<div id="tab3" class="tabViewDiv">
+					<div id="calendarView" class="calendarView"></div>
+				</div>
+				
+				<div id="tab4" class="tabViewDiv">
+					<div id="treeView" class="treeView"></div>
+				</div>
+		
+				
+				<div id="tab5" class="tabViewDiv">
+					<div id="galleryView" class="galleryView"></div>
+				</div>
 			</div>
 		</div>	
 	</body>

@@ -68,25 +68,27 @@ var Scriptor = {
 	// tiny event system 
 	event : {
 		attach : function(htmlElement, evt, funcObj) {
-			if (htmlElement.addEventListener) {
-				htmlElement.addEventListener(evt, funcObj, false);
-			}
-			else {
-				if (htmlElement.attachEvent) {
-					htmlElement.attachEvent('on' + evt, funcObj);
+			if (htmlElement)
+				if (htmlElement.addEventListener) {
+					htmlElement.addEventListener(evt, funcObj, false);
 				}
-			}
+				else {
+					if (htmlElement.attachEvent) {
+						htmlElement.attachEvent('on' + evt, funcObj);
+					}
+				}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
-			if (htmlElement.removeEventListener) {
-				htmlElement.removeEventListener(evt, funcObj, false);
-			}
-			else {
-				if (htmlElement.detachEvent) {
-					htmlElement.detachEvent('on' + evt, funcObj);
+			if (htmlElement)
+				if (htmlElement.removeEventListener) {
+					htmlElement.removeEventListener(evt, funcObj, false);
 				}
-			}
+				else {
+					if (htmlElement.detachEvent) {
+						htmlElement.detachEvent('on' + evt, funcObj);
+					}
+				}
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
@@ -114,6 +116,20 @@ var Scriptor = {
 				y: evt.pageY || (evt.clientY +
 					(document.documentElement.scrollTop || document.body.scrollTop))
 		  };
+		}
+	},
+	
+	// error reporting system!
+	error : {
+		alertErrors : false,
+		muteErrors : true,
+		
+		report : function(msg) {
+			if (Scriptor.error.alertErrors)
+				alert(msg);
+			
+			if (!Scriptor.error.muteErrors)
+				throw msg;
 		}
 	}
 };	
