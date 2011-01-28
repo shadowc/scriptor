@@ -65,6 +65,7 @@
 			myTreeView.Show(true);
 		}
 		
+		Scriptor.addOnLoad(loadView);
 	</script>
 	<style type="text/css">
 		h1 { font-weight: normal; font-size: 24px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 20px; }
@@ -78,7 +79,7 @@
 	</style>
 	</head>
 	
-	<body onload="javascript:loadView();">
+	<body>
 		<h1>Scriptor Test: Components are loaded inside a TabView</h1>
 	
 		<div id="container">

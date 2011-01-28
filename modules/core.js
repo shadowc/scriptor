@@ -119,6 +119,22 @@ var Scriptor = {
 		}
 	},
 	
+	addOnLoad : function(f) {
+		if (window.onload)
+		{
+			var oldF = window.onload;
+			window.onload = function()
+				{
+					oldF();
+					f();
+				};
+		}
+		else
+		{
+			window.onload = f;
+		}
+	},
+	
 	// error reporting system!
 	error : {
 		alertErrors : false,
