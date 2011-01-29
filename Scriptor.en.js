@@ -133,6 +133,41 @@ var Scriptor = {
 		}
 	},
 	
+	// function to identify if obj is an html element
+	isHtmlElement : function(o) {
+		// some common comarisons that would break the further testing
+		var body = document.getElementsByTagName('body')[0];
+		var head = document.getElementsByTagName('head')[0];
+		if (o === body || o === head)
+			return true;
+		if (o == document || o === window)
+			return false;
+		if (!o)
+			return false;
+		
+		if (typeof(o.cloneNode) != 'function')
+			return false;	// if we can't clone it, it's not a node
+		
+		// normal testing for other nodes
+		var a = document.createElement('div');
+		
+		try
+		{
+			var clone = o.cloneNode(false);
+			a.appendChild(clone);	// if we can append it, its an HTMLElement
+			a.removeChild(clone);
+			a = null;
+			clone = null;
+			return (o.nodeType != 3); // don't return text nodes as HTMLELements
+		}
+		catch (e)
+		{
+			a = null;
+			return false;
+		}
+	},
+	
+	// window addOnLoad system
 	addOnLoad : function(f) {
 		if (window.onload)
 		{
@@ -3835,18 +3870,18 @@ httpRequest.prototype.lang = {
 */
 tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	// parameter control section
-	if ((typeof(ulDiv) != 'string' && ulDiv.parentNode === undefined) || ulDiv == '') {
+	if ((typeof(ulDiv) != 'string' && !Scriptor.isHtmlElement(ulDiv)) || ulDiv == '') {
 		Scriptor.error.report('Error: first parameter must be a non empty string or a html object.');
 		return;
 	}
 	
-	if ((typeof(tabsDiv) != 'string' && tabsDiv.parentNode === undefined) || tabsDiv == '') {
+	if ((typeof(tabsDiv) != 'string' && !Scriptor.isHtmlElement(tabsDiv)) || tabsDiv == '') {
 		Scriptor.error.report('Error: second parameter bus be a non empty string or a html object.');
 		return;
 	}
 	
 	this.ulElem = typeof(ulDiv) == 'string' ? document.getElementById(ulDiv) : ulDiv;
-	this.tabsElem = typeof(tabsElem) == 'string' ? document.getElementById(tabsElem) : ulDiv;;
+	this.tabsElem = typeof(tabsDiv) == 'string' ? document.getElementById(tabsDiv) : tabsDiv;
 	this.ulId = typeof(ulDiv) == 'string' ? ulDiv : this.ulElem.id;
 	this.tabsId = typeof(tabsDiv) == 'string' ? tabsDiv : this.tabsElem.id;
 	
@@ -3860,7 +3895,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	this.selectedTab = 0;
 	if (tabs)
 		for (var n=0; n < tabs.length; n++) {
-			if (typeof(tabs[n].label) != 'string' || (typeof(tabs[n].elem) != 'string' && tabs[n].elem.parentNode === undefined)) {
+			if (typeof(tabs[n].label) != 'string' || (typeof(tabs[n].elem) != 'string' && !Scriptor.isHtmlElement(tabs[n].elem))) {
 				Scriptor.error.report('Error: Invalid tab collection object. (element ' + n + ')');
 				return;
 			}
@@ -3919,6 +3954,12 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*
 	*/
 	this.Show = function() {
+		if (this.visible)
+		{
+			this.Refresh();
+			return;
+		}
+		
 		if (!this.ulElem)
 		{
 			this.ulElem = document.getElementById(this.ulId);
@@ -3956,9 +3997,48 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			return;
 		}
 		
-		this.ulElem.innerHTML = '';
 		this.ulElem.className = 'tabViewUl';
+		this.ulElem.style.display = 'block';
+		this.tabsElem.style.display = 'block';
 		
+		for (var n=0; n < this.tabs.length; n++) {
+			var curTab = this.tabs[n];
+			if (Scriptor.isHtmlElement(curTab.divElem) && !curTab.parentNode)
+				this.tabsElem.appendChild(curTab.divElem);
+				
+			if (!curTab.divElem)
+			{
+				curTab.divElem = document.getElementById(curTab.divStr);
+			}
+			else
+			{
+				if (!curTab.divElem.id)
+				{
+					if (!curTab.divStr)
+						curTab.divStr = __getNextHtmlId();
+						
+					curTab.divElem.id = curTab.divStr;
+				}
+			}
+			
+			if (!curTab.divElem)
+			{
+				Scriptor.error.report('Error: Tab panel div does not exist.');
+				return;
+			}
+			
+			curTab.divElem.className = 'tabViewDiv';
+		}
+		
+		this.visible = true;
+		this.Refresh();
+	};
+	
+	this.Refresh = function() {
+		if (!this.visible)
+			return;
+		
+		this.ulElem.innerHTML = '';
 		var template = '';
 		for (var n = 0; n < this.tabs.length; n++) {
 			template += '<li class="' + (this.selectedTab == n ? 'tabViewLiSelected' : 'tabViewLi') + '">';
@@ -3970,37 +4050,108 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			Scriptor.event.attach(document.getElementById(this.ulId+'_tab'+n), 'click', Scriptor.bind(this.selectTab, this, n));
 		
 		for (var n=0; n < this.tabs.length; n++) {
-			if (!this.tabs[n].divElem)
+			if (n != this.selectedTab)
+				this.tabs[n].divElem.style.display = 'none';
+			else
+				this.tabs[n].divElem.style.display = 'block';
+		}
+	};
+	
+	this.Hide = function() {
+		if (this.ulElem)
+			this.ulElem.style.display = 'none';
+		if (this.tabsElem)
+			this.tabsElem.style.display = 'none';
+			
+		this.visible = false;
+	};
+	
+	this.addTab = function(tab, insertNdx) {
+		if (typeof(tab.label) != 'string' || (typeof(tab.elem) != 'string' && !Scriptor.isHtmlElement(tab.elem))) {
+			Scriptor.error.report('Error: Invalid tab object.');
+			return;
+		}
+		
+		var theElem = typeof(tab.elem) == 'string' ? document.getElementById(tab.elem) : tab.elem;
+		var theId = typeof(tab.elem) == 'string' ? tab.elem : tab.elem.id;
+		
+		if ((insertNdx === undefined || isNaN(Number(insertNdx))) ||
+			insertNdx < 0 || insertNdx > this.tabs.length-1)
+		{
+			this.tabs.push({label : tabs[n].label, divStr : theId, divElem : theElem });
+			insertNdx = this.tabs.length-1;
+		}
+		else
+		{
+			this.tabs.splice(insertNdx, 0, {label : tabs[n].label, divStr : theId, divElem : theElem });
+		}
+		
+		if (this.visible)
+		{
+			var curTab = this.tabs[insertNdx];
+			if (Scriptor.isHtmlElement(curTab.divElem) && !curTab.parentNode)
+				this.tabsElem.appendChild(curTab.divElem);
+				
+			if (!curTab.divElem)
 			{
-				this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+				curTab.divElem = document.getElementById(curTab.divStr);
 			}
 			else
 			{
-				if (!this.tabs[n].divElem.id)
+				if (!curTab.divElem.id)
 				{
-					if (!this.tabs[n].divStr)
-						this.tabs[n].divStr = __getNextHtmlId();
+					if (!curTab.divStr)
+						curTab.divStr = __getNextHtmlId();
 						
-					this.tabs[n].divElem.id = this.tabs[n].divStr;
+					curTab.divElem.id = curTab.divStr;
 				}
 			}
 			
-			if (!this.tabs[n].divElem)
+			if (!curTab.divElem)
 			{
 				Scriptor.error.report('Error: Tab panel div does not exist.');
 				return;
 			}
 			
-			this.tabs[n].divElem.className = 'tabViewDiv';
+			this.curTab.divElem.className = 'tabViewDiv';
 			
-			if (n != this.selectedTab)
-				this.tabs[n].divElem.style.display = 'none';
+			this.Refresh();
 		}
-		
-		this.visible = true;
 	};
 	
+	this.deleteTab = function(tabNdx) {
+		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
+		{
+			var curTab = this.tabs[tabNdx];
+			if (curTab.divElem && curTab.divElem.parentNode)
+			{
+				curTab.divElem.parentNode.removeChild(curTab.divElem);
+				curTab.divElem = null;
+			}
+			
+			this.tabs.splice(tabNdx, 1);
+			
+			if (this.selectedTab >= this.tabs.length)
+				this.selectedTab = this.tabs.length-1;
+				
+			if (this.visible)
+				this.Refresh();
+		}
+	};
 	
+	this.setTabLabel = function(tabNdx, label) {
+		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
+		{
+			this.tabs[tabNdx].label = label;
+			
+			if (this.visible && this.ulElem)
+			{
+				var tabElems = this.ulElem.getElementsByTagName('li');
+				tabElems[tabNdx].getElementsByTagName('span')[0].innerHTML = label;
+			}
+		}
+		
+	};
 };
 // JavaScript Document
 /*

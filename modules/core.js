@@ -119,6 +119,41 @@ var Scriptor = {
 		}
 	},
 	
+	// function to identify if obj is an html element
+	isHtmlElement : function(o) {
+		// some common comarisons that would break the further testing
+		var body = document.getElementsByTagName('body')[0];
+		var head = document.getElementsByTagName('head')[0];
+		if (o === body || o === head)
+			return true;
+		if (o == document || o === window)
+			return false;
+		if (!o)
+			return false;
+		
+		if (typeof(o.cloneNode) != 'function')
+			return false;	// if we can't clone it, it's not a node
+		
+		// normal testing for other nodes
+		var a = document.createElement('div');
+		
+		try
+		{
+			var clone = o.cloneNode(false);
+			a.appendChild(clone);	// if we can append it, its an HTMLElement
+			a.removeChild(clone);
+			a = null;
+			clone = null;
+			return (o.nodeType != 3); // don't return text nodes as HTMLELements
+		}
+		catch (e)
+		{
+			a = null;
+			return false;
+		}
+	},
+	
+	// window addOnLoad system
 	addOnLoad : function(f) {
 		if (window.onload)
 		{
