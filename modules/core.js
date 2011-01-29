@@ -138,7 +138,7 @@ var Scriptor = {
 	// error reporting system!
 	error : {
 		alertErrors : false,
-		muteErrors : true,
+		muteErrors : false,
 		
 		report : function(msg) {
 			if (Scriptor.error.alertErrors)
@@ -149,3 +149,13 @@ var Scriptor = {
 		}
 	}
 };	
+
+// internal id generation system
+var __nextIdNdx = 0;
+var __lastId = 'scriptor_' + __nextIdNdx++;
+var __getNextHtmlId = function() {
+	while (document.getElementById(__lastId))
+		__lastId = 'scriptor_' + __nextIdNdx++;
+	
+	return __lastId;
+};
