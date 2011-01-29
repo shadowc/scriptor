@@ -167,7 +167,7 @@ var Scriptor = {
 // internal id generation system
 var __nextIdNdx = 0;
 var __lastId = 'scriptor_' + __nextIdNdx++;
-/*var */__getNextHtmlId = function() {
+var __getNextHtmlId = function() {
 	while (document.getElementById(__lastId))
 		__lastId = 'scriptor_' + __nextIdNdx++;
 	
@@ -3888,13 +3888,21 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		}
 		
 		if (tabNdx >= 0 && tabNdx < this.tabs.length) {
+			if (!this.visible || !this.ulElem)
+			{
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+			
 			var tabElems = this.ulElem.getElementsByTagName('li');
 			
 			tabElems.item(this.selectedTab).className = 'tabViewLi';
-			this.tabs[this.selectedTab].divElem.style.display = 'none';
+			if (this.tabs[this.selectedTab] && this.tabs[this.selectedTab].divElem)
+				this.tabs[this.selectedTab].divElem.style.display = 'none';
 			
 			tabElems.item(tabNdx).className = 'tabViewLiSelected';
-			this.tabs[tabNdx].divElem.style.display = 'block';
+			if (this.tabs[tabNdx] && this.tabs[tabNdx].divElem)
+				this.tabs[tabNdx].divElem.style.display = 'block';
 			
 			this.selectedTab = tabNdx;
 		}
@@ -3912,9 +3920,31 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*/
 	this.Show = function() {
 		if (!this.ulElem)
+		{
 			this.ulElem = document.getElementById(this.ulId);
+		}
+		else
+		{
+			if (!this.ulElem.id)
+			{
+				if (!this.ulId)
+					this.ulId = __getNextHtmlId();
+					
+				this.ulElem.id = this.ulId;
+			}
+		}
+		
 		if (!this.tabsElem)
+		{
 			this.tabsElem = document.getElementById(this.tabsId);
+		}
+		else
+		{
+			if (!this.tabsId)
+				this.tabsId = __getNextHtmlId();
+			
+			this.tabsElem.id = this.tabsId;
+		}
 		
 		if (!this.ulElem) {
 			Scriptor.error.report('Error: UL does not exist.');
@@ -3927,6 +3957,8 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		}
 		
 		this.ulElem.innerHTML = '';
+		this.ulElem.className = 'tabViewUl';
+		
 		var template = '';
 		for (var n = 0; n < this.tabs.length; n++) {
 			template += '<li class="' + (this.selectedTab == n ? 'tabViewLiSelected' : 'tabViewLi') + '">';
@@ -3938,13 +3970,28 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			Scriptor.event.attach(document.getElementById(this.ulId+'_tab'+n), 'click', Scriptor.bind(this.selectTab, this, n));
 		
 		for (var n=0; n < this.tabs.length; n++) {
-			if (!document.getElementById(this.tabs[n].divStr)) {
+			if (!this.tabs[n].divElem)
+			{
+				this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+			}
+			else
+			{
+				if (!this.tabs[n].divElem.id)
+				{
+					if (!this.tabs[n].divStr)
+						this.tabs[n].divStr = __getNextHtmlId();
+						
+					this.tabs[n].divElem.id = this.tabs[n].divStr;
+				}
+			}
+			
+			if (!this.tabs[n].divElem)
+			{
 				Scriptor.error.report('Error: Tab panel div does not exist.');
 				return;
 			}
 			
-			if (!tabs[n].divElem)
-				this.tabs[n].divElem = document.getElementById(this.tabs[n].divStr);
+			this.tabs[n].divElem.className = 'tabViewDiv';
 			
 			if (n != this.selectedTab)
 				this.tabs[n].divElem.style.display = 'none';
