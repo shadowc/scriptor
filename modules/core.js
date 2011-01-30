@@ -78,9 +78,11 @@ var Scriptor = {
 		* Adds a custom event stack to start registering
 		* custom events
 		*/
-		registerCustomEvent : function(obj, customName, args) {
+		registerCustomEvent : function(obj, customName, context) {
+			context = context || obj;
+			
 			if (obj._customEventStacks)
-				obj._customEventStacks[customName] = { arguments : (args || []), stack : [] };
+				obj._customEventStacks[customName] = { context : context, stack : [] };
 		},
 		
 		attach : function(htmlElement, evt, funcObj) {
@@ -95,6 +97,9 @@ var Scriptor = {
 				}
 			else if (htmlElement._customEventStacks)
 				if (htmlElement._customEventStacks[evt]) {
+					// first, detach event if already attached, it will move to the end of
+					// the stack
+					Scriptor.event.detach(htmlElement, evt, funcObj);
 					htmlElement._customEventStacks[evt].stack.push(funcObj);
 				}
 		},
@@ -114,10 +119,33 @@ var Scriptor = {
 					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
 						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
 							htmlElement._customEventStacks[evt].stack.splice(n, 1);
-							n--;
+							break;
 						}
 					}
 				}
+		},
+	
+		// this will execute in the context of _customEvents object
+		fire : function(obj, evt, dynArgs) {
+			// create fake event object
+			var e = { evtName : evt, returnValue : true };
+			// no event registered? return
+			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
+				!obj._customEventStacks[evt].stack.length)
+				return e;
+			
+			// create argument list and push dynamic args and fake event to callback arguments
+			var args = [];
+			if (typeof(dynArgs) == 'object' && typeof(dynArgs.length) != 'undefined')
+				for (var n=0; n < dynArgs.length; n++)
+					args.push(dynArgs[n]);
+					
+			args.push(e);
+			
+			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
+				obj._customEventStacks[evt].stack[n].apply(obj._customEventStacks[evt].context, args);
+			
+			return e;
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
