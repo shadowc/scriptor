@@ -67,8 +67,24 @@ var Scriptor = {
 
 	// tiny event system 
 	event : {
+		/* init
+		* Initializes an object to work with custom events
+		*/
+		init : function(obj) {
+			obj._customEventStacks = {};
+		},
+		
+		/*
+		* Adds a custom event stack to start registering
+		* custom events
+		*/
+		registerCustomEvent : function(obj, customName, args) {
+			if (obj._customEventStacks)
+				obj._customEventStacks[customName] = { arguments : (args || []), stack : [] };
+		},
+		
 		attach : function(htmlElement, evt, funcObj) {
-			if (htmlElement)
+			if (Scriptor.isHtmlElement(htmlElement))
 				if (htmlElement.addEventListener) {
 					htmlElement.addEventListener(evt, funcObj, false);
 				}
@@ -77,16 +93,29 @@ var Scriptor = {
 						htmlElement.attachEvent('on' + evt, funcObj);
 					}
 				}
+			else if (htmlElement._customEventStacks)
+				if (htmlElement._customEventStacks[evt]) {
+					htmlElement._customEventStacks[evt].stack.push(funcObj);
+				}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
-			if (htmlElement)
+			if (Scriptor.isHtmlElement(htmlElement))
 				if (htmlElement.removeEventListener) {
 					htmlElement.removeEventListener(evt, funcObj, false);
 				}
 				else {
 					if (htmlElement.detachEvent) {
 						htmlElement.detachEvent('on' + evt, funcObj);
+					}
+				}
+			else if (htmlElement._customEventStacks)
+				if (htmlElement._customEventStacks[evt]) {
+					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
+						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
+							htmlElement._customEventStacks[evt].stack.splice(n, 1);
+							n--;
+						}
 					}
 				}
 		},
