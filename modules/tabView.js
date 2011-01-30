@@ -69,6 +69,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	// custom event system
 	Scriptor.event.init(this);
 	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onrefresh');
 	Scriptor.event.registerCustomEvent(this, 'onhide');
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	
@@ -128,6 +129,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*
 	*/
 	this.Show = function() {
+		var e = Scriptor.event.fire(this, 'onshow');
+		if (!e.returnValue)
+			return;
+		
 		if (this.visible)
 		{
 			this.Refresh();
@@ -212,6 +217,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		if (!this.visible)
 			return;
 		
+		var e = Scriptor.event.fire(this, 'onrefresh');
+		if (!e.returnValue)
+			return;
+		
 		this.ulElem.innerHTML = '';
 		var template = '';
 		for (var n = 0; n < this.tabs.length; n++) {
@@ -232,6 +241,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	};
 	
 	this.Hide = function() {
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
 		if (this.ulElem)
 			this.ulElem.style.display = 'none';
 		if (this.tabsElem)
