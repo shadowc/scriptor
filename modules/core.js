@@ -126,21 +126,23 @@ var Scriptor = {
 		},
 	
 		// this will execute in the context of _customEvents object
-		fire : function(obj, evt, dynArgs) {
+		// obj is the object with custom event system initialized
+		// evt is the event name register as a custom event
+		// evtExtend is the event object (if present) with any extensions you might like
+		fire : function(obj, evt, evtExtend) {
 			// create fake event object
-			var e = { evtName : evt, returnValue : true };
+			evtExtend = typeof(evtExtend) == 'object' ? evtExtend : {};
+			evtExtend.customEventName = evt;
+			if (evtExtend.returnValue === undefined)
+				evtExtend.returnValue = true;
+			
 			// no event registered? return
 			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
 				!obj._customEventStacks[evt].stack.length)
 				return e;
 			
-			// create argument list and push dynamic args and fake event to callback arguments
-			var args = [];
-			if (typeof(dynArgs) == 'object' && typeof(dynArgs.length) != 'undefined')
-				for (var n=0; n < dynArgs.length; n++)
-					args.push(dynArgs[n]);
-					
-			args.push(e);
+			// create argument list and push fake event to callback arguments
+			var args = [e];
 			
 			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
 				obj._customEventStacks[evt].stack[n].apply(obj._customEventStacks[evt].context, args);

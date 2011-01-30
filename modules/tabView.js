@@ -66,6 +66,12 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			this.tabs[n] = {label : tabs[n].label, divStr : theId, divElem : theElem };
 		}
 		
+	// custom event system
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	
 	this.visible = false;
 	
 	/*
@@ -78,6 +84,13 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*/
 	this.selectTab = function(tabNdx, e) {
 		if (!this.visible)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		Scriptor.mixin(e, Scriptor.fire(this, 'onselect', {selectedTab : this.selectedTab, selecting : tabNdx}));
+		if (e.returnValue == false)
 		{
 			Scriptor.event.cancel(e, true);
 			return false;
