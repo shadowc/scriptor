@@ -81,8 +81,26 @@ var Scriptor = {
 
 	// tiny event system 
 	event : {
+		/* init
+		* Initializes an object to work with custom events
+		*/
+		init : function(obj) {
+			obj._customEventStacks = {};
+		},
+		
+		/*
+		* Adds a custom event stack to start registering
+		* custom events
+		*/
+		registerCustomEvent : function(obj, customName, context) {
+			context = context || obj;
+			
+			if (obj._customEventStacks)
+				obj._customEventStacks[customName] = { context : context, stack : [] };
+		},
+		
 		attach : function(htmlElement, evt, funcObj) {
-			if (htmlElement)
+			if (Scriptor.isHtmlElement(htmlElement))
 				if (htmlElement.addEventListener) {
 					htmlElement.addEventListener(evt, funcObj, false);
 				}
@@ -91,10 +109,17 @@ var Scriptor = {
 						htmlElement.attachEvent('on' + evt, funcObj);
 					}
 				}
+			else if (htmlElement._customEventStacks)
+				if (htmlElement._customEventStacks[evt]) {
+					// first, detach event if already attached, it will move to the end of
+					// the stack
+					Scriptor.event.detach(htmlElement, evt, funcObj);
+					htmlElement._customEventStacks[evt].stack.push(funcObj);
+				}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
-			if (htmlElement)
+			if (Scriptor.isHtmlElement(htmlElement))
 				if (htmlElement.removeEventListener) {
 					htmlElement.removeEventListener(evt, funcObj, false);
 				}
@@ -103,6 +128,40 @@ var Scriptor = {
 						htmlElement.detachEvent('on' + evt, funcObj);
 					}
 				}
+			else if (htmlElement._customEventStacks)
+				if (htmlElement._customEventStacks[evt]) {
+					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
+						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
+							htmlElement._customEventStacks[evt].stack.splice(n, 1);
+							break;
+						}
+					}
+				}
+		},
+	
+		// this will execute in the context of _customEvents object
+		// obj is the object with custom event system initialized
+		// evt is the event name register as a custom event
+		// evtExtend is the event object (if present) with any extensions you might like
+		fire : function(obj, evt, evtExtend) {
+			// create fake event object
+			evtExtend = typeof(evtExtend) == 'object' ? evtExtend : {};
+			evtExtend.customEventName = evt;
+			if (evtExtend.returnValue === undefined)
+				evtExtend.returnValue = true;
+			
+			// no event registered? return
+			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
+				!obj._customEventStacks[evt].stack.length)
+				return evtExtend;
+			
+			// create argument list and push fake event to callback arguments
+			var args = [evtExtend];
+			
+			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
+				obj._customEventStacks[evt].stack[n].apply(obj._customEventStacks[evt].context, args);
+			
+			return evtExtend;
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
@@ -124,6 +183,10 @@ var Scriptor = {
 		},
 	
 		getPointXY : function(evt) {
+			// check we have a real event object
+			if (evt.pageX === undefined && evt.clientX === undefined)
+				return {x: 0, y : 0};
+			
 			return {
 				x: evt.pageX || (evt.clientX +
 					(document.documentElement.scrollLeft || document.body.scrollLeft)),
@@ -3906,6 +3969,13 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			this.tabs[n] = {label : tabs[n].label, divStr : theId, divElem : theElem };
 		}
 		
+	// custom event system
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onrefresh');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	
 	this.visible = false;
 	
 	/*
@@ -3918,6 +3988,13 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*/
 	this.selectTab = function(tabNdx, e) {
 		if (!this.visible)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		Scriptor.mixin(e, Scriptor.event.fire(this, 'onselect', {selectedTab : this.selectedTab, selecting : tabNdx}));
+		if (e.returnValue == false)
 		{
 			Scriptor.event.cancel(e, true);
 			return false;
@@ -3955,6 +4032,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	*
 	*/
 	this.Show = function() {
+		var e = Scriptor.event.fire(this, 'onshow');
+		if (!e.returnValue)
+			return;
+		
 		if (this.visible)
 		{
 			this.Refresh();
@@ -4039,6 +4120,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		if (!this.visible)
 			return;
 		
+		var e = Scriptor.event.fire(this, 'onrefresh');
+		if (!e.returnValue)
+			return;
+		
 		this.ulElem.innerHTML = '';
 		var template = '';
 		for (var n = 0; n < this.tabs.length; n++) {
@@ -4059,6 +4144,10 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	};
 	
 	this.Hide = function() {
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
 		if (this.ulElem)
 			this.ulElem.style.display = 'none';
 		if (this.tabsElem)

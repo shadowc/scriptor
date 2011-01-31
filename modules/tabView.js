@@ -90,7 +90,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			return false;
 		}
 		
-		Scriptor.mixin(e, Scriptor.fire(this, 'onselect', {selectedTab : this.selectedTab, selecting : tabNdx}));
+		Scriptor.mixin(e, Scriptor.event.fire(this, 'onselect', {selectedTab : this.selectedTab, selecting : tabNdx}));
 		if (e.returnValue == false)
 		{
 			Scriptor.event.cancel(e, true);

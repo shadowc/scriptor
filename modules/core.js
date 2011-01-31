@@ -139,15 +139,15 @@ var Scriptor = {
 			// no event registered? return
 			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
 				!obj._customEventStacks[evt].stack.length)
-				return e;
+				return evtExtend;
 			
 			// create argument list and push fake event to callback arguments
-			var args = [e];
+			var args = [evtExtend];
 			
 			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
 				obj._customEventStacks[evt].stack[n].apply(obj._customEventStacks[evt].context, args);
 			
-			return e;
+			return evtExtend;
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
@@ -169,6 +169,10 @@ var Scriptor = {
 		},
 	
 		getPointXY : function(evt) {
+			// check we have a real event object
+			if (evt.pageX === undefined && evt.clientX === undefined)
+				return {x: 0, y : 0};
+			
 			return {
 				x: evt.pageX || (evt.clientX +
 					(document.documentElement.scrollLeft || document.body.scrollLeft)),
