@@ -1053,15 +1053,11 @@ dataView_engine = function() {
 			}
 			else {
 				var dateCmp = dateParts[0].split('-');
-				ret.setYear(dateCmp[0]);
-				ret.setMonth(dateCmp[1]-1);
-				ret.setDate(dateCmp[2]);
+				ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2]);
 				
 				if (dateParts[1]) {
 					var timeCmp = dateParts[1].split(':');
-					ret.setHours(timeCmp[0]);
-					ret.setMinutes(timeCmp[1]);
-					ret.setSeconds(timeCmp[2]);
+					ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2], timeCmp[0], timeCmp[1], timeCmp[2]);
 				}
 			}
 		}
