@@ -83,7 +83,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	* when a user clicks on a tab
 	*
 	*/
-	this.selectTab = function(tabNdx, e) {
+	this.selectTab = function(e, tabNdx) {
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);
@@ -233,7 +233,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		this.ulElem.innerHTML = template;
 		
 		for (var n=0; n < this.tabs.length; n++)
-			Scriptor.event.attach(document.getElementById(this.ulId+'_tab'+n), 'click', Scriptor.bind(this.selectTab, this, n));
+			Scriptor.event.attach(document.getElementById(this.ulId+'_tab'+n), 'click', Scriptor.bindAsEventListener(this.selectTab, this, n));
 		
 		for (var n=0; n < this.tabs.length; n++) {
 			if (n != this.selectedTab)

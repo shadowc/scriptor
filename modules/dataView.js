@@ -30,11 +30,11 @@
 */
 var dataColumn = function(name, type, show, width, format, display_name, sql_name) {
 	this.Name = name;
-	this.Type = (typeof(DVE.dataTypes[type]) != 'undefined') ? type : 'num';
+	this.Type = (typeof(dataTypes[type]) != 'undefined') ? type : 'num';
 	this.show = show;
 	this.Width = isNaN(Number(width)) ? 80 : Number(width);
-	if (this.Width < (DVE.dataStyle.sepWidth + DVE.dataStyle.cellHorizontalPadding))
-		this.Width == DVE.dataStyle.sepWidth + DVE.dataStyle.cellHorizontalPadding;
+	if (this.Width < (dataViewStyle.sepWidth + dataViewStyle.cellHorizontalPadding))
+		this.Width = dataViewStyle.sepWidth + dataViewStyle.cellHorizontalPadding;
 		
 	this.Format = format;
 	this.displayName = display_name ? display_name : name;
@@ -219,7 +219,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  dataColumn publicly
 	*/
 	this.createColumn = function(colName, colType, colShow, width, colFormat, display_name, sql_name) {
-		return new dataColumn(colName, colType, solShow, width, colFormat, display_name, sql_name);
+		return new dataColumn(colName, colType, colShow, width, colFormat, display_name, sql_name);
 	};
 	
 	/*
@@ -606,23 +606,23 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		
 		//assign some events
 		if (this.multiselect) 
-			Scriptor.event.attach(document.getElementById(this.div + '_selectAll'), 'click', Scriptor.bind(this.__selectAll, this));
+			Scriptor.event.attach(document.getElementById(this.div + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this));
 		
 		if (this.paginating) {
-			Scriptor.event.attach(document.getElementById(this.div + '_goToPagePrev'), 'click', Scriptor.bind(this.__goToPagePrev, this));
-			Scriptor.event.attach(document.getElementById(this.div + '_goToPageNext'), 'click', Scriptor.bind(this.__goToPageNext, this));
-			Scriptor.event.attach(document.getElementById(this.div + '_pageInput'), 'keypress', Scriptor.bind(this.__checkGoToPage, this));
-			Scriptor.event.attach(document.getElementById(this.div + '_pageInputBtn'), 'click', Scriptor.bind(this.__goToPage, this));
+			Scriptor.event.attach(document.getElementById(this.div + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this));
+			Scriptor.event.attach(document.getElementById(this.div + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this));
+			Scriptor.event.attach(document.getElementById(this.div + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this));
+			Scriptor.event.attach(document.getElementById(this.div + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this));
 		}
 		
 		for (var n=0; n < this.columns.length; n++) {
 			if (this.columns[n].show) {
-				Scriptor.event.attach(document.getElementById(this.div+'_columnHeader_'+n), 'click', Scriptor.bind(this.__setOrder, this, n));
-				Scriptor.event.attach(document.getElementById(this.div + '_sep' + n), 'mousedown', Scriptor.bind(this.activateResizing, this));
+				Scriptor.event.attach(document.getElementById(this.div+'_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n));
+				Scriptor.event.attach(document.getElementById(this.div + '_sep' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n));
 			}
 		}
 		
-		Scriptor.event.attach(document.getElementById(this.div + '_optionsMenuBtn'), 'click', Scriptor.bind(this.showOptionsMenu, this));
+		Scriptor.event.attach(document.getElementById(this.div + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this));
 		
 		this.visible = true;
 		if (withRefresh) 
@@ -660,14 +660,17 @@ dataView = Scriptor.dataView = function(div, width, height) {
 				for (var n=0; n < this.rows.length; n++)
 					this.selectedRows.push(n);
 					
-				obj.updateRows();
+				this.updateRows();
 			}
 			else {
 				this.selectedRow = -1;
 				this.selectedRows = [];
 				
-				obj.updateRows();
+				this.updateRows();
 			}
+		}
+		else {
+			elem.checked = false;
 		}
 	};
 	
@@ -676,8 +679,6 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  This function executes when changing the page on a paginated dataView
 	*/
 	this.__goToPage = function (e) {
-		if (!e) e = window.event;
-		
 		if (!this.enabled)
 			return;
 			
@@ -711,9 +712,6 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  This function executes to capture <enter> key press on the dataView page input
 	*/
 	this.__checkGoToPage = function (e) {
-		if (!e)
-			e = window.event;
-		
 		if (e.keyCode == 13) {
 			this.__goToPage(e)
 		}
@@ -724,7 +722,6 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  This function executes when clicked on the "previous" link
 	*/
 	this.__goToPagePrev = function () {
-		
 		if (!this.enabled) 
 			return;
 		
@@ -866,11 +863,11 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		// assign onclick events and search for complex formatted cells
 		for (var n=0; n < this.rows.length; n++) {		
 			if (this.multiselect)
-				Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + n), 'click', Scriptor.bind(this.__markRow, this, n));
+				Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + n), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
 				
 			for (var a=0; a < this.columns.length; a++) {
 				if (this.columns[a].show) {
-					Scriptor.event.attach(document.getElementById(this.div + '_cell_' + n + '_' + a), 'click', Scriptor.bind(this.__selectRow, this, n));
+					Scriptor.event.attach(document.getElementById(this.div + '_cell_' + n + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
 					
 					if (typeof(this.columns[a].Format) == 'function') {
 						var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
@@ -961,7 +958,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  colName the javascript Name of the column in which order must be performed. Ordering way
 	*  will be switched upon subsecuent calls to __setOrder()
 	*/
-	this.__setOrder = function (colNdx, e) {
+	this.__setOrder = function (e, colNdx) {
 		if (!this.enabled) 
 			return;
 		
@@ -998,9 +995,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	* __selectRow()
 	*  This function executes when clicking on a dataView row and selects that row.
 	*/
-	this.__selectRow = function (rowNdx, e) {
-		if (!e) e = window.event;
-		
+	this.__selectRow = function (e, rowNdx) {
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1115,7 +1110,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 						for (n=0; n < rows[this.selectedRows[a]].childNodes.length; n++) {
 							if (n==0)
 								rows[this.selectedRows[a]].childNodes[n].firstChild.checked = true;
-							rows[obj.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
+							rows[this.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
 						}
 					}
 				}
@@ -1130,9 +1125,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	* __markRow()
 	*  This function executes when clicking on a dataView row checkmox in multiselect and selects that row.
 	*/
-	this.__markRow = function(rowNdx, e) {
-		if (!e) e = window.event;
-		
+	this.__markRow = function(e, rowNdx) {
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1158,7 +1151,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 			if (this.columns[n].show)
 				colStyles.push(this.columns[n].Type);
 		
-		elem = document.getElementById(this.div + '_selectRow_' + n);
+		elem = document.getElementById(this.div + '_selectRow_' + rowNdx);
 		if (elem.checked) {	// add row to selected rows list
 			this.selectedRows.push(rowNdx)
 			this.selectedRow = rowNdx;
@@ -1186,8 +1179,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 			}
 		}
 		
-		Scriptor.event.cancel(e);
-		return false;
+		return true;
 	};
 	
 	/*
@@ -1226,9 +1218,9 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		targetDiv.innerHTML = oTemplate;
 
 		// Attach menu item events		
-		Scriptor.event.attach(document.getElementById(this.div+"_optionsMenuRefresh"), 'clicl', Scriptor.bind(this.Refresh, this));
+		Scriptor.event.attach(document.getElementById(this.div+"_optionsMenuRefresh"), 'click', Scriptor.bindAsEventListener(this.Refresh, this));
 		for (var n=0; n < this.columns.length; n++)
-			Scriptor.event.attach(document.getElementById(+this.div+'_optionsMenuItem_'+n), 'click', Scriptor.bind(this.toggleColumn, this, n));
+			Scriptor.event.attach(document.getElementById(+this.div+'_optionsMenuItem_'+n), 'click', Scriptor.bindAsEventListener(this.toggleColumn, this, n));
 	};
 
 	/* showOptionsMenu
@@ -1357,7 +1349,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*   Toggles a column on or off. OptionsMenu feature. Use dataColumn.show property along with
 	*   dataView.Show(false) instead to change column configuration manually.
 	*/
-	this.toggleColumn = function(colNdx, e) {
+	this.toggleColumn = function(e, colNdx) {
 		
 		this.hideOptionsMenu();
 		
@@ -1519,29 +1511,16 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	/* activateResizing
 	*  This function will search for a valid dataView id and mark it for column resizing
 	*/
-	this.activateResizing = function(e) {
-		if (!e) e = window.event;
-		
-		if (!obj.enabled) {
+	this.activateResizing = function(e, colNdx) {
+		if (!this.enabled) {
 			Scriptor.event.cancel(e);
 			return false;
 		}
 		
-		var targetTable = document.getElementById(this.div+'_columsHeader');
+		var targetTable = document.getElementById(this.div+'_columnsHeader');
 		
 		// calculate the resized column
-		var curResCol = 0;
-		var dColumns = targetTable.firstChild.getElementsByTagName('li');
-		for (var n= obj.multiselect ? 2 : 0; n < dColumns.length; n++) {
-			if (dColumns.item(n).className == 'dataViewFieldSep') {
-				if (dColumns.item(n) == elem) {
-					this.resColumnId = curResCol;
-				}
-				else {
-					curResCol++;
-				}
-			}
-		}
+		this.resColumnId = colNdx;
 		
 		// set x cache value for resizing
 		var x;
@@ -1560,8 +1539,8 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		
 		this.resizingXCache = x;
 		
-		Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bind(this.doResizing, this));
-		Scriptor.evnet.attach(document, 'mouseup', this._mouseUpBind = Scriptor.bind(this.deactivateResizing, this));
+		Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bindAsEventListener(this.doResizing, this));
+		Scriptor.event.attach(document, 'mouseup', this._mouseUpBind = Scriptor.bindAsEventListener(this.deactivateResizing, this));
 		
 		Scriptor.event.cancel(e);
 		return false;
@@ -1583,8 +1562,6 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  This function calculates the resizing upon mouse movement
 	*/
 	this.doResizing = function(e) {
-		if (!e) e = window.event;
-		
 		// get delta x
 		var x;
 	

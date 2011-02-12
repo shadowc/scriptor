@@ -11,9 +11,14 @@ var Scriptor = {
 			
 			return function()
 			{
+				var defArgs = [];
 				for (var i = 0; i < arguments.length; i++)
-					staticArguments[staticArguments.length] = arguments[i];
-				return func.apply(obj, staticArguments);
+					defArgs.push(arguments[i]);
+				
+				for (var i=0; i < staticArguments.length; i++)
+					defArgs.push(staticArguments[i]);
+					
+				return func.apply(obj, defArgs);
 			};
 		}
 		else
@@ -21,6 +26,32 @@ var Scriptor = {
 			return function()
 			{
 				return func.apply(obj, arguments);
+			};
+		}
+	},
+	
+	bindAsEventListener : function(func, obj/*, staticArg1, staticArg2... */) {
+		if (arguments.length > 2)
+		{
+			var staticArguments = [];
+			for (var n=2; n < arguments.length; n++)
+				staticArguments.push(arguments[n]);
+			
+			return function(e)
+			{
+				var defArgs = [e || window.event];
+				
+				for (var i=0; i < staticArguments.length; i++)
+					defArgs.push(staticArguments[i]);
+					
+				return func.apply(obj, defArgs);
+			};
+		}
+		else
+		{
+			return function(e)
+			{
+				return func.apply(obj, [e || window.event]);
 			};
 		}
 	},
@@ -86,7 +117,7 @@ var Scriptor = {
 		},
 		
 		attach : function(htmlElement, evt, funcObj) {
-			if (Scriptor.isHtmlElement(htmlElement))
+			if (Scriptor.isHtmlElement(htmlElement) || htmlElement === document || htmlElement === window)
 				if (htmlElement.addEventListener) {
 					htmlElement.addEventListener(evt, funcObj, false);
 				}
@@ -105,7 +136,7 @@ var Scriptor = {
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
-			if (Scriptor.isHtmlElement(htmlElement))
+			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
 				if (htmlElement.removeEventListener) {
 					htmlElement.removeEventListener(evt, funcObj, false);
 				}

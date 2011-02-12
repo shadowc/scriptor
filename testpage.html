@@ -20,22 +20,22 @@
 		
 		
 		
-		myDataView = new dataView('somediv', 'xml/getData.php', 720, 200);
+		myDataView = new dataView('somediv', 720, 200);
 		
-		myDataView.addColumn( new dataColumn( 'Id', 'num', true, 60, function(n) { return 'xxx' }, 'Id' ));
-		myDataView.addColumn( new dataColumn( 'parentId', 'num', true, 60, false, 'Padre' ));
-		myDataView.addColumn( new dataColumn( 'Title', 'alpha', true, 200, false, 'Título' ));
-		myDataView.addColumn( new dataColumn( 'Link', 'alpha', true, 200, false, 'Link' ));
-		myDataView.addColumn( new dataColumn( 'DateCreated', 'date', true, 140, dateFormat, 'Fecha de Creación' ));
-		myDataView.multiselect = true;
+		myDataView.addColumn( myDataView.createColumn( 'Id', 'num', true, 60, function(n) { return 'xxx' }, 'Id' ));
+		myDataView.addColumn( myDataView.createColumn( 'parentId', 'num', true, 60, false, 'Padre' ));
+		myDataView.addColumn( myDataView.createColumn( 'Title', 'alpha', true, 200, false, 'Título' ));
+		myDataView.addColumn( myDataView.createColumn( 'Link', 'alpha', true, 200, false, 'Link' ));
+		myDataView.addColumn( myDataView.createColumn( 'DateCreated', 'date', true, 140, dateFormat, 'Fecha de Creación' ));
 		
-		myDataView2 = new dataView('someotherdiv', 'xml/getData2.php', 720, 200);
+		myDataView2 = new dataView('someotherdiv', 720, 200);
 		
-		myDataView2.addColumn( new dataColumn( 'id', 'num', false, 30, 'Id' ));
-		myDataView2.addColumn( new dataColumn( 'User', 'alpha', true, 80, false, 'Usuario' ));
-		myDataView2.addColumn( new dataColumn( 'Pass', 'alpha', false, 200, false, 'Clave' ));
-		myDataView2.addColumn( new dataColumn( 'FirstName', 'alpha', true, 150, false, 'Nombre' ));
-		myDataView2.addColumn( new dataColumn( 'LastName', 'alpha', true, 150, false, 'Apellido' ));
+		myDataView2.addColumn( myDataView.createColumn( 'id', 'num', false, 30, 'Id' ));
+		myDataView2.addColumn( myDataView.createColumn( 'User', 'alpha', true, 80, false, 'Usuario' ));
+		myDataView2.addColumn( myDataView.createColumn( 'Pass', 'alpha', false, 200, false, 'Clave' ));
+		myDataView2.addColumn( myDataView.createColumn( 'FirstName', 'alpha', true, 150, false, 'Nombre' ));
+		myDataView2.addColumn( myDataView.createColumn( 'LastName', 'alpha', true, 150, false, 'Apellido' ));
+		myDataView2.multiselect = false;
 		
 		myCalendarView = new calendarView('calendarView');
 		
