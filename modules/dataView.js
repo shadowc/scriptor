@@ -1651,7 +1651,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		Scriptor.event.detach(document, 'mouseup', this._mouseUpBind);
 		
 		this.resColumnId = null;
-		this.Show(false);
+		//this.Show(false);
 		this.resizingXCache = 0;
 	};
 	
@@ -1763,6 +1763,38 @@ dataView = Scriptor.dataView = function(div, opts) {
 					cols[offset+(colNdx*2)].firstChild.style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
 				else 
 					cols[offset+(colNdx*2)].firstChild.style.width = '0px';
+			}
+		}
+		
+		// restore colNdx for next iteration
+		if (changedNextColSize)
+			colNdx--;
+			
+		// update row cells
+		var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
+		
+		// calculate total width of columns in table
+		var totalWidth = 0;
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n].show) 
+				totalWidth += this.columns[n].Width;
+		}
+		if (this.multiselect) 
+			totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+		document.getElementById(this.div+'_body').style.width = totalWidth+'px';	
+		
+		for (var n=0; n < rows.length; n++)
+		{
+			var cols = rows[n].getElementsByTagName('li');
+			var offset = 0;
+			if (this.multiselect)
+				offset = 1;
+				
+			cols[offset+(colNdx)].style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - 2) + 'px'; 			
+			
+			if (changedNextColSize) {
+				colNdx++;
+				cols[offset+(colNdx)].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - 2) + 'px';
 			}
 		}
 	};
