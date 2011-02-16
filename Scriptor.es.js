@@ -3207,7 +3207,15 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	this._onRefresh = function(e) {
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
-		this.httpRequest.send(this.parameters);
+		
+		var params = 'orderby=' + this.dataView.orderBy + '&orderway=' + this.dataView.orderWay;
+		if (this.dataView.paginating)
+			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ', ' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
+		
+		if (this.parameters)
+			params += '&' + this.parameters;
+			
+		this.httpRequest.send(params);
 		
 		Scriptor.event.cancel(e);
 	};

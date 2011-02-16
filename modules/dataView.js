@@ -1880,7 +1880,15 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	this._onRefresh = function(e) {
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
-		this.httpRequest.send(this.parameters);
+		
+		var params = 'orderby=' + this.dataView.orderBy + '&orderway=' + this.dataView.orderWay;
+		if (this.dataView.paginating)
+			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ', ' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
+		
+		if (this.parameters)
+			params += '&' + this.parameters;
+			
+		this.httpRequest.send(params);
 		
 		Scriptor.event.cancel(e);
 	};
@@ -1952,65 +1960,3 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 			onLoad : Scriptor.bind(this._onLoad, this)
 		});
 };
-
-/* dataView.loadXmlData
-*  for internal use only - TODO: Port to dataSet object
-*/
-/*dataView.prototype.loadXmlData = function(xmlData, dv) {
-	var root = xmlData.getElementsByTagName('root').item(0);
-	
-	dv.rows.length = 0;
-	if (root.getAttribute('success') == '1') {
-		dv.totalRows = root.getAttribute('totalrows');
-		var rows = root.getElementsByTagName('row');
-
-		for (var n=0; n < rows.length; n++) {
-			var tempR = dv.createRow();				
-			var cols = rows.item(n).getElementsByTagName('column');
-			
-			for (var a=0; a < cols.length; a++) {
-				if (dv.colum_exists(cols.item(a).getAttribute('name')) && cols.item(a).firstChild) {
-					var cType = dv.columns[dv.__findColumn(cols.item(a).getAttribute('name'))].Type;
-					tempR[cols.item(a).getAttribute('name')] = DVE.dataTypes[cType](cols.item(a).firstChild.data);
-				}
-			}
-			
-			dv.rows[dv.rows.length] = tempR;
-							
-		}
-			
-		if (dv.onrefresh)
-			dv.onrefresh(dv);
-		
-		if (dv.visible) {
-			dv.updateRows()
-		}
-		else {
-			dv.Show(false);
-		}
-		
-	}
-	else {
-		alert( 'Unsuccessfull XML call.\nMessage: '+ root.getAttribute('error'));
-		if (dv.visible) {
-			dv.updateRows()
-		}
-		else {
-			dv.Show(false);
-		}
-	}
-};*/
-
-/* dataView.loadError
-*  for internal use only
-*/
-/*dataView.prototype.loadError = function(status, dv) {
-	dv.rows.length = 0;
-	
-	if (dv.visible) {
-		dv.updateRows()
-	}
-	else {
-		dv.Show(false);
-	}
-};*/
