@@ -3882,7 +3882,7 @@ httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnlo
 	};
 	
 	// create the http_request object we're going to use
-	this.http_request = this.createRequest();
+	this.createRequest();
 	
 	/*
 	* httpRequest.send
@@ -3899,7 +3899,13 @@ httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnlo
 		
 		this.http_request.open(this.method, this.ApiCall, true );
 		if (this.method == 'POST')
-			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			this.http_request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		if (this.requestHeaders.length)
+		{
+			for (var n=0; n < this.requestHeaders.length; n++)
+				this.http_request.setRequestHeader(this.requestHeaders[n][0], this.requestHeaders[n][1]);
+		}
+		
 		this.http_request.onreadystatechange = Scriptor.bind(this.handleRequest, this);
 		this.http_request.send(params);
 		
