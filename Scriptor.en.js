@@ -293,6 +293,216 @@ var Scriptor = {
 	}
 };	
 
+// local support for JSON parsing
+// JSON implementation for unsupported browsers
+if (!window.JSON) {
+    window.JSON = {};
+}
+
+(function () {
+
+    function f(n) {
+        // Format integers to have at least two digits.
+        return n < 10 ? '0' + n : n;
+    }
+
+    if (typeof Date.prototype.toJSON !== 'function') {
+
+        Date.prototype.toJSON = function (key) {
+
+            return isFinite(this.valueOf()) ?
+                   this.getUTCFullYear()   + '-' +
+                 f(this.getUTCMonth() + 1) + '-' +
+                 f(this.getUTCDate())      + 'T' +
+                 f(this.getUTCHours())     + ':' +
+                 f(this.getUTCMinutes())   + ':' +
+                 f(this.getUTCSeconds())   + 'Z' : null;
+        };
+
+        String.prototype.toJSON =
+        Number.prototype.toJSON =
+        Boolean.prototype.toJSON = function (key) {
+            return this.valueOf();
+        };
+    }
+
+    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        gap,
+        indent,
+        meta = {    // table of character substitutions
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"' : '\\"',
+            '\\': '\\\\'
+        },
+        rep;
+
+
+    function quote(string) {
+
+        escapable.lastIndex = 0;
+        return escapable.test(string) ?
+            '"' + string.replace(escapable, function (a) {
+                var c = meta[a];
+                return typeof c === 'string' ? c :
+                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+            }) + '"' :
+            '"' + string + '"';
+    }
+
+
+    function str(key, holder) {
+        var i,          // The loop counter.
+            k,          // The member key.
+            v,          // The member value.
+            length,
+            mind = gap,
+            partial,
+            value = holder[key];
+
+        if (value && typeof value === 'object' &&
+                typeof value.toJSON === 'function') {
+            value = value.toJSON(key);
+        }
+
+        if (typeof rep === 'function') {
+            value = rep.call(holder, key, value);
+        }
+
+        switch (typeof value) {
+        case 'string':
+            return quote(value);
+
+        case 'number':
+
+            return isFinite(value) ? String(value) : 'null';
+
+        case 'boolean':
+        case 'null':
+
+            return String(value);
+
+        case 'object':
+
+            if (!value) {
+                return 'null';
+            }
+
+            gap += indent;
+            partial = [];
+
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || 'null';
+                }
+                v = partial.length === 0 ? '[]' :
+                    gap ? '[\n' + gap +
+                            partial.join(',\n' + gap) + '\n' +
+                                mind + ']' :
+                          '[' + partial.join(',') + ']';
+                gap = mind;
+                return v;
+            }
+
+            if (rep && typeof rep === 'object') {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    k = rep[i];
+                    if (typeof k === 'string') {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            } else {
+                for (k in value) {
+                    if (Object.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            }
+
+            v = partial.length === 0 ? '{}' :
+                gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
+                        mind + '}' : '{' + partial.join(',') + '}';
+            gap = mind;
+            return v;
+        }
+    }
+
+    if (typeof JSON.stringify !== 'function') {
+        JSON.stringify = function (value, replacer, space) {
+
+            var i;
+            gap = '';
+            indent = '';
+            if (typeof space === 'number') {
+                for (i = 0; i < space; i += 1) {
+                    indent += ' ';
+                }
+            } else if (typeof space === 'string') {
+                indent = space;
+            }
+            rep = replacer;
+            if (replacer && typeof replacer !== 'function' &&
+                    (typeof replacer !== 'object' ||
+                     typeof replacer.length !== 'number')) {
+                throw new Error('JSON.stringify');
+            }
+            return str('', {'': value});
+        };
+    }
+
+    if (typeof JSON.parse !== 'function') {
+        JSON.parse = function (text, reviver) {
+
+            var j;
+
+            function walk(holder, key) {
+
+                var k, v, value = holder[key];
+                if (value && typeof value === 'object') {
+                    for (k in value) {
+                        if (Object.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+            cx.lastIndex = 0;
+            if (cx.test(text)) {
+                text = text.replace(cx, function (a) {
+                    return '\\u' +
+                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+
+            if (/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+                j = eval('(' + text + ')');
+                return typeof reviver === 'function' ?
+                    walk({'': j}, '') : j;
+            }
+            throw new SyntaxError('JSON.parse');
+        };
+    }
+}());
+
+
 // internal id generation system
 var __nextIdNdx = 0;
 var __lastId = 'scriptor_' + __nextIdNdx++;
@@ -3164,7 +3374,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 *  (does not include error messages which are in English)
 */
 
-dataView.prototype.langObj = { 'en': { 'noRows' : 'No rows to show.', 'rows' : 'rows.', 'row' : 'row.', 'pageStart' : 'Page ', 'pageMiddle' : ' og ', 'pageEnd' : ' Go to page: ', 'pageGo' : 'Go', 'pagePrev' : '<< Previous', 'pageNext' : 'Next >>', 'refresh' : 'Refresh', 'of' : 'of' }};
+dataView.prototype.langObj = { 'en': { 'noRows' : 'No rows to show.', 'rows' : 'rows.', 'row' : 'row.', 'pageStart' : 'Page ', 'pageMiddle' : ' of ', 'pageEnd' : ' Go to page: ', 'pageGo' : 'Go', 'pagePrev' : '<< Previous', 'pageNext' : 'Next >>', 'refresh' : 'Refresh', 'of' : 'of' }};
 				  
 dataView.prototype.Lang = 'en';// JavaScript Document
 /*
@@ -3568,151 +3778,170 @@ GVE = new galleryView_engine();
 *
 *  Manages multiple asyncronous xmlHttpRequests easily.
 *
-* Part of the scriptor javascript modular loader
+* Part of the Scriptor framework
 */
 
 /* httpRequest
 *
-*
+*  Parameters are:
+*  ApiCall : String determining the api to call
+*  method : POST or GET
+*  Type : text, xml or json to parse data if necessary
+*  onLoad : function to call on load
+*  onError : function to call on error
+*  requestHeaders : Optional reques headers as an array of array strings
+*  example (this is automatically provided by httprequest):
+*  	[ ['Content-Type', 'text/plain'] ]
 */
-httpRequest = function(xmlService, method, xmlOnload, xmlOnError, callerObj, requestHeaders) {
-	if (typeof(xmlService) != 'string' || xmlService == '') {
-		alert('Error: first parameter must be a string.');	
-		return false;
-	}
-		
-	this.xmlService = xmlService;
+httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnload, xmlOnError, callerObj, requestHeaders*/) {
+	var localOpts = {
+		ApiCall : null,
+		method : 'POST',
+		Type : 'json',
+		onLoad : null,
+		onError : null,
+		requestHeaders : []
+	};
+	Scriptor.mixin(localOpts, opts);
 	
-	this.method = 'POST';
-	if (typeof(method) == 'string')
-		this.method = method.toUpperCase() == 'POST' ? 'POST' : 'GET';
-	
-	this.xmlOnload = null;
-	if (typeof(xmlOnload) == 'function') 
-		this.xmlOnload = xmlOnload;
-	
-	this.xmlOnError = null;
-	if (typeof(xmlOnError) == 'function')
-		this.xmlOnError = xmlOnError;
-		
-	this.requestHeaders = Array();
-	if (requestHeaders) {
-		if (requestHeaders.length) {
-			for (var n=0; n < requestHeaders.length; n++) {
-				if (typeof(requestHeaders[n][0]) == 'string' && typeof(requestHeaders[n][1]) == 'string') {
-					this.requestHeaders[this.requestHeaders.length] = [requestHeaders[n][0], requestHeaders[n][1]];
-				}
-			}
-		}
-	}
-	
-	this.callerObj = callerObj;
-	this.inRequest = false;
-	this.requestNumber = null;
-};
-
-/* httpRequest.send
-*
-*/
-httpRequest.prototype.send = function(params) {
-	if (this.requestNumber) {
-		HTTPE.stack[this.requestNumber].req = null;
-		HTTPE.stack[this.requestNumber] = null;
-	}
-	
-	if (!(this.requestNumber = HTTPE.createRequest(this))) {
-		alert(this.lang.errors.createRequestError);
+	if (typeof(localOpts.ApiCall) != 'string' || localOpts.ApiCall == '') {
+		Scriptor.error.report('httpRequest Error: first parameter must be a string.');	
 		return;
 	}
+		
+	this.ApiCall = localOpts.ApiCall;
+	
+	this.method = 'POST';
+	if (typeof(localOpts.method) == 'string')
+		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
+	
+	this.Type = 'text';
+	if (typeof(localOpts.Type) == 'string')
+	{
+		switch (localOpts.Type.toLowerCase())
+		{
+			case ('xml'):
+				this.Type = 'xml';
+				break;
+			case ('json'):
+				this.Type = 'json';
+				break;
+			case ('text'):
+			default:
+				this.Type = 'text';
+				break;
+		}
+	}
+	
+	this._mimeTypes = { xml : 'text/xml', text : 'text/plain', json : 'text/plain' };
+	
+	this.onLoad = null;
+	if (typeof(localOpts.onLoad) == 'function') 
+		this.onLoad = localOpts.onLoad;
+	
+	this.onError = null;
+	if (typeof(localOpts.onError) == 'function')
+		this.onError = localOpts.onError;
+		
+	this.requestHeaders = [];
+	if (localOpts.requestHeaders && localOpts.requestHeaders.length) {
+		for (var n=0; n < localOpts.requestHeaders.length; n++) {
+			if (typeof(localOpts.requestHeaders[n][0]) == 'string' && typeof(localOpts.requestHeaders[n][1]) == 'string') {
+				this.requestHeaders.push([localOpts.requestHeaders[n][0], localOpts.requestHeaders[n][1]]);
+			}
+		}
+	}
 	
 	this.inRequest = false;
+	this.http_request = null;
 	
-	HTTPE.sendRequest(this.requestNumber, params);
-}
-
-/* http_request engine */
-http_request_engine = function() {
-	this.stack = [null];
-};
-
-http_request_engine.prototype = {
-	
-/* createRequest 
-*
-*/
-createRequest : function(obj) {
-	var num = HTTPE.stack.length;
-	HTTPE.stack[num] = {req: null, obj: null};
-	
-	if (window.XMLHttpRequest) {
-		HTTPE.stack[num].req = new XMLHttpRequest();
-		if (HTTPE.stack[num].req.overrideMimeType) {
-			HTTPE.stack[num].req.overrideMimeType('text/xml');
-		}
-	} else if (window.ActiveXObject) {
-		try {
-			HTTPE.stack[num].req = new ActiveXObject("Msxml2.XMLHTTP");
-		} catch (e) {
-			try {
-				HTTPE.stack[num].req = new ActiveXObject("Microsoft.XMLHTTP");
-			} catch(e) {}
-		}
-	}
-	
-	if (HTTPE.stack[num].req) {
-		HTTPE.stack[num].obj = obj;
-		return num;
-	}
-	else {
-		return null;
-	}
-},
-
-/* sendRequest
-*
-*/
-sendRequest : function(num, params) {
-	var obj = HTTPE.stack[num].obj;
-	var req = HTTPE.stack[num].req;
-	
-	req.open( obj.method, obj.xmlService, true );
-	if (obj.method == 'POST')
-		req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	req.onreadystatechange = HTTPE.handleRequest;
-	req.send('httpRequestId='+num+'&'+params);
-	
-	obj.inRequest = true;
-},
-
-/* handleRequest 
-*
-*/
-handleRequest : function() {
-	for (var n=1; n < HTTPE.stack.length; n++) {
-		if (HTTPE.stack[n]) {
-			if (HTTPE.stack[n].req && HTTPE.stack[n].obj) {
-				var req = HTTPE.stack[n].req;
-				var obj = HTTPE.stack[n].obj;
-				if (req.readyState == 4 && obj.inRequest) {
-					obj.inRequest = false;
-					if (req.status == 200) {
-						if (obj.xmlOnload)
-							obj.xmlOnload(req.responseXML, obj.callerObj);
-					}
-					else {
-						alert(obj.lang.errors.requestHandleError + ' (' + req.status + ')');
-						if (obj.xmlOnError)
-							obj.xmlOnError(req.satus, obj.callerObj);
+	/* httpRequest.createRequest 
+	*
+	*  Creates the http_request internal object. For internal use only
+	*/
+	this.createRequest = function() {
+		if (!this.http_request)
+		{
+			if (window.XMLHttpRequest) {
+				this.http_request = new XMLHttpRequest();
+				if (this.http_request.overrideMimeType) {
+					this.http_request.overrideMimeType(this._mimeTypes[this.Type]);
+				}
+			} else if (window.ActiveXObject) {
+				try {
+					this.http_request = new ActiveXObject("Msxml2.XMLHTTP");
+				} catch (e) {
+					try {
+						this.http_request = new ActiveXObject("Microsoft.XMLHTTP");
+					} catch(e) {
+						Scriptor.error.report('httpRequest could not create Ajax object.');
 					}
 				}
 			}
 		}
-	}
-}
-
-};
-
-HTTPE = new http_request_engine();// JavaScript Document
+	};
+	
+	// create the http_request object we're going to use
+	this.http_request = this.createRequest();
+	
+	/*
+	* httpRequest.send
+	*
+	* Send the request to the specified api
+	* Params: String with optional query string parameters 
+	*/
+	this.send = function(params) {
+		if (this.inRequest)
+		{
+			this.http_request.abort();
+			this.inRequest = false;
+		}
+		
+		this.http_request.open(this.method, this.ApiCall, true );
+		if (this.method == 'POST')
+			req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		this.http_request.onreadystatechange = Scriptor.bind(this.handleRequest, this);
+		this.http_request.send(params);
+		
+		this.inRequest = true;
+	};
+	
+	/* handleRequest 
+	*
+	*/
+	this.handleRequest = function() {
+		if (this.inRequest && this.http_request.readyState == 4)
+		{		
+			this.inRequest = false;
+			if (this.http_request.status == 200) {
+				if (this.onLoad)
+				{
+					// TODO: handle different types
+					var response = null;
+					switch (this.Type)
+					{
+						case ('xml'):
+							response = this.http_request.responseXML;
+							break;
+						case ('json'):
+							response = JSON.parse(this.http_request.responseText);
+							break;
+						case ('text'):
+						default:
+							response = this.http_request.responseText;
+							break;
+					}
+					this.onLoad(response);
+				}
+			}
+			else {
+				Scriptor.error.report(this.lang.errors.requestHandleError + ' (' + this.http_request.status + ')');
+				if (this.onError)
+					this.onError(this.http_request.satus);
+			}	
+		}
+	};
+};// JavaScript Document
 /*
 * httpRequest language pack Spanish
 */
