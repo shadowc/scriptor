@@ -36,8 +36,12 @@ switch ($contentOption)
 		else if ($contentType == 'xml')
 		{
 			echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
-			?><root success="1" msg="bla bla">
-				<todo>Add some dataview rows</todo>
+			?><root success="1" totalrows="1">
+				<row>
+					<column name="id">1</column>
+					<column name="parentId">4</column>
+					<column name="Title"><![CDATA[Un titulo]]></column>
+				</row>
 			</root>
 			<?php
 		}

@@ -1800,6 +1800,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 *		{ "id" : 1, "username" : "user1" },
 *		{ "id" : 2, "username" : "user2" }
 *    ]}
+*
 */
 dataViewApi = Scriptor.dataViewApi = function(opts) {
 	var localOpts = {
@@ -1846,6 +1847,7 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 		
 	this._onRefresh = function(e) {
 		this.dataView.setLoading(true);
+		this.dataView.__refreshFooter();
 		this.httpRequest.send(this.parameters);
 		
 		Scriptor.event.cancel(e);
@@ -1854,7 +1856,53 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	this._onLoad = function(data) {
 		this.dataView.setLoading(false);
 		
+		if (this.type == 'xml')	// xml parsing
+		{
+			var root = data.getElementsByTagName('root').item(0);
+	
+			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
+			//   upgrade addRow, deleteRow to avoid using updateRows
+			// fake visible = false so we call updateRows only once
+			var oldVisible = this.dataView.visible;
+			this.dataView.visible = false;
+			this.dataView.rows.length = 0;
+			
+			if (root.getAttribute('success') == '1') {
+				dataView.totalRows = root.getAttribute('totalrows');
+				var rows = root.getElementsByTagName('row');
 		
+				for (var n=0; n < rows.length; n++) {
+					var tempR = {};
+					var cols = rows[n].getElementsByTagName('column');
+					
+					for (var a=0; a < cols.length; a++) {
+						var colName = cols[a].getAttribute('name');
+						if (colName && cols[a].firstChild)
+						{
+							var cType = this.dataView.__findColumn(colName) != -1 ?
+								this.dataView.columns[this.dataView.__findColumn(colName)].Type :
+								'alpha';
+							tempR[colName] = dataTypes[cType](cols[a].firstChild.data);
+						}
+					}
+					
+					this.dataView.addRow(this.dataView.createRow(tempR));
+				}
+			}
+			else {
+				// TODO: show an error message in the dataView component
+			}
+			
+			if (oldVisible)
+			{
+				this.dataView.visible = oldVisible;
+				this.dataView.updateRows();
+			}
+		}
+		else	// json
+		{
+			
+		}
 	};
 	
 	this._onError = function(status) {
