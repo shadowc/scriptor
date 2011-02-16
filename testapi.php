@@ -43,7 +43,7 @@ switch ($contentOption)
 		}
 		else	// json
 		{
-			?>{ 'todo' : 'Add some rows here' }
+			?>{ "todo" : "Add some rows here" }
 			<?php 
 		}
 		break;

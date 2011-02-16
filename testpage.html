@@ -21,6 +21,8 @@
 		
 		
 		myDataView = new dataView('somediv', { width : 720, height : 200,
+			paginating : true,
+			rowsPerPage : 7,
 			columns : [
 				{
 					Name : 'Id',
@@ -40,7 +42,8 @@
 					Name : 'Title',
 					Type : 'alpha',
 					Width: 200,
-					displayName : 'Título'
+					displayName : 'Título',
+					showToolTip : true
 				},
 				{
 					Name : 'Link',
@@ -49,6 +52,14 @@
 				}
 			]
 		});
+		
+		myDataViewApi = new dataViewApi({
+				dataView : myDataView,
+				api : 'testapi.phps',
+				parameters : 'type=json',
+				method : 'POST',
+				type:  'json'
+			});
 		
 		myDataView.addColumn( myDataView.createColumn( {
 			Name : 'DateCreated',
@@ -107,10 +118,7 @@
 		}
 		
 		function loadView() {
-			myDataView.paginating = true;
-			myDataView.rowsPerPage = 7;
-			myDataView.columns[2].showToolTip = true;
-			myDataView.Show(false);
+			myDataView.Show(true);
 			
 			myDataView2.Show(false);
 			

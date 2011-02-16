@@ -19,7 +19,7 @@
 *  example (this is automatically provided by httprequest):
 *  	[ ['Content-Type', 'text/plain'] ]
 */
-httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnload, xmlOnError, callerObj, requestHeaders*/) {
+httpRequest = Scriptor.httpRequest = function(opts) {
 	var localOpts = {
 		ApiCall : null,
 		method : 'POST',
@@ -171,7 +171,6 @@ httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnlo
 				}
 			}
 			else {
-				Scriptor.error.report(this.lang.errors.requestHandleError + ' (' + this.http_request.status + ')');
 				if (this.onError)
 					this.onError(this.http_request.satus);
 			}	

@@ -1769,6 +1769,110 @@ dataView = Scriptor.dataView = function(div, opts) {
 
 };
 
+/*
+* dataViewApi
+* 	Api object that will connect a dataView with an api call, so every time
+* 	you call dataView.Refresh() it will call its api to truly refresh
+* 	the object in real time
+*
+* 	constructor parameters:
+* 	dataView: A reference to a dataView object
+* 	api: A String containig the path to the api file
+* 	type: either json or xml, the format of the api file
+*	parameters: query string to be passed on each call to api
+*
+* 	Examples for Api files
+* 	XML:
+* 	<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
+* 	<root success="1" errormessage="" totalrows="2">
+* 	   <row>
+* 	   	<column name="id">1</column>
+* 	   	<column name="uername">user1</column>
+* 	   </row>
+* 	   <row>
+* 	   	<column name="id">2</column>
+* 	   	<column name="username">user2</column>
+* 	   </row>
+* 	</root>
+*
+* 	JSON:
+* 	{ "success" : 1, "errormessage" : "", "totalrows" : 2, "rows" : [
+*		{ "id" : 1, "username" : "user1" },
+*		{ "id" : 2, "username" : "user2" }
+*    ]}
+*/
+dataViewApi = Scriptor.dataViewApi = function(opts) {
+	var localOpts = {
+		dataView : null,
+		api : null,
+		method : 'POST',
+		type : 'json',
+		parameters : ''
+	};
+	
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!localOpts.dataView)
+	{
+		Scriptor.error.report('Must provide dataView reference to dataViewApi object.');
+		return;
+	}
+	
+	if (typeof(localOpts.api) != 'string' || localOpts.api == '')
+	{
+		Scriptor.error.report('Invalid Api string.');
+		return;
+	}
+	
+	this.api = localOpts.api;
+	this.dataView = localOpts.dataView;
+	this.type = 'json';
+	this.parameters = localOpts.parameters;
+	if (localOpts.type)
+		switch (localOpts.type.toLowerCase())
+		{
+			case ('xml'):
+				this.type = 'xml';
+				break;
+			case ('json'):
+			default:
+				this.type = 'json';
+				break;
+		}
+		
+	this.method = 'POST';
+	if (typeof(localOpts.method) == 'string')
+		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
+		
+	this._onRefresh = function(e) {
+		this.dataView.setLoading(true);
+		this.httpRequest.send(this.parameters);
+		
+		Scriptor.event.cancel(e);
+	};
+	
+	this._onLoad = function(data) {
+		this.dataView.setLoading(false);
+		
+		
+	};
+	
+	this._onError = function(status) {
+		this.dataView.setLoading(false);
+	};
+	
+	// event attaching and httpRequest setup
+	Scriptor.event.attach(this.dataView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
+	
+	this.httpRequest = new Scriptor.httpRequest({
+			ApiCall : this.api,
+			method : this.method,
+			Type : this.type,
+			onError : Scriptor.bind(this._onError, this),
+			onLoad : Scriptor.bind(this._onLoad, this)
+		});
+};
+
 /* dataView.loadXmlData
 *  for internal use only - TODO: Port to dataSet object
 */
