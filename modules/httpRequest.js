@@ -123,7 +123,11 @@ httpRequest = Scriptor.httpRequest = function(opts /*xmlService, method, xmlOnlo
 			this.inRequest = false;
 		}
 		
-		this.http_request.open(this.method, this.ApiCall, true );
+		var url = this.ApiCall;
+		if (this.method == 'GET')
+			url += '?' + params;
+			
+		this.http_request.open(this.method, url, true );
 		if (this.method == 'POST')
 			this.http_request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		if (this.requestHeaders.length)

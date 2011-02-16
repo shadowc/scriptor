@@ -2,8 +2,8 @@
 $contentType = 'text';
 $contentHeader = 'text/plain';
 
-$type = $_GET['type'];
-$contentOption = (int)($_GET['option']) || 0;
+$type = $_REQUEST['type'];
+$contentOption = (int)($_REQUEST['option']) || 0;
 
 switch ($type)
 {
@@ -14,6 +14,7 @@ switch ($type)
 	case ('json'):
 		$contentType = 'json';
 		$contentHeader = 'text/plain';
+		break;
 	case ('text');
 	default:
 		$contentType = 'text';
