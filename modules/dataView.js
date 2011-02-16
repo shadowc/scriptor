@@ -1883,7 +1883,7 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 		
 		var params = 'orderby=' + this.dataView.orderBy + '&orderway=' + this.dataView.orderWay;
 		if (this.dataView.paginating)
-			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ', ' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
+			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ',' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
 		
 		if (this.parameters)
 			params += '&' + this.parameters;
