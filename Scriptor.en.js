@@ -1951,11 +1951,9 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		// Create table paginating header
 		if (this.paginating) {
-			var totalPages = this.getTotalPages();		
-			
 			dvTemplate += '<div class="dataViewPaginationHeader"><ul><li>';
 			dvTemplate += '<label class="dataViewPaginationPages">' + this.langObj[this.Lang].pageStart + (this.curPage + 1) +
-								this.langObj[this.Lang].pageMiddle + (totalPages);
+								this.langObj[this.Lang].pageMiddle + '<span id="' + this.div + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 			dvTemplate += '</label></li><li>';
 			dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.div + '_goToPagePrev"> </a>';
 			dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.div + '_goToPageNext"> </a>';		
@@ -3210,7 +3208,7 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 		
 		var params = 'orderby=' + this.dataView.orderBy + '&orderway=' + this.dataView.orderWay;
 		if (this.dataView.paginating)
-			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ', ' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
+			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ',' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
 		
 		if (this.parameters)
 			params += '&' + this.parameters;
@@ -3235,7 +3233,12 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 			this.dataView.rows.length = 0;
 			
 			if (root.getAttribute('success') == '1') {
-				dataView.totalRows = root.getAttribute('totalrows');
+				var totRows = Number(root.getAttribute('totalrows'));
+				if (!isNaN(totRows))
+				{
+					this.dataView.totalRows = root.getAttribute('totalrows');
+					document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+				}
 				var rows = root.getElementsByTagName('row');
 		
 				for (var n=0; n < rows.length; n++) {
@@ -3286,69 +3289,7 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 			onError : Scriptor.bind(this._onError, this),
 			onLoad : Scriptor.bind(this._onLoad, this)
 		});
-};
-
-/* dataView.loadXmlData
-*  for internal use only - TODO: Port to dataSet object
-*/
-/*dataView.prototype.loadXmlData = function(xmlData, dv) {
-	var root = xmlData.getElementsByTagName('root').item(0);
-	
-	dv.rows.length = 0;
-	if (root.getAttribute('success') == '1') {
-		dv.totalRows = root.getAttribute('totalrows');
-		var rows = root.getElementsByTagName('row');
-
-		for (var n=0; n < rows.length; n++) {
-			var tempR = dv.createRow();				
-			var cols = rows.item(n).getElementsByTagName('column');
-			
-			for (var a=0; a < cols.length; a++) {
-				if (dv.colum_exists(cols.item(a).getAttribute('name')) && cols.item(a).firstChild) {
-					var cType = dv.columns[dv.__findColumn(cols.item(a).getAttribute('name'))].Type;
-					tempR[cols.item(a).getAttribute('name')] = DVE.dataTypes[cType](cols.item(a).firstChild.data);
-				}
-			}
-			
-			dv.rows[dv.rows.length] = tempR;
-							
-		}
-			
-		if (dv.onrefresh)
-			dv.onrefresh(dv);
-		
-		if (dv.visible) {
-			dv.updateRows()
-		}
-		else {
-			dv.Show(false);
-		}
-		
-	}
-	else {
-		alert( 'Unsuccessfull XML call.\nMessage: '+ root.getAttribute('error'));
-		if (dv.visible) {
-			dv.updateRows()
-		}
-		else {
-			dv.Show(false);
-		}
-	}
-};*/
-
-/* dataView.loadError
-*  for internal use only
-*/
-/*dataView.prototype.loadError = function(status, dv) {
-	dv.rows.length = 0;
-	
-	if (dv.visible) {
-		dv.updateRows()
-	}
-	else {
-		dv.Show(false);
-	}
-};*/// JavaScript Document
+};// JavaScript Document
 /*
 * dataLangs
 * This object contains the strings that have to be output by dataView in different languages.

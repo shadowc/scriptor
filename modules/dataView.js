@@ -624,11 +624,9 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		// Create table paginating header
 		if (this.paginating) {
-			var totalPages = this.getTotalPages();		
-			
 			dvTemplate += '<div class="dataViewPaginationHeader"><ul><li>';
 			dvTemplate += '<label class="dataViewPaginationPages">' + this.langObj[this.Lang].pageStart + (this.curPage + 1) +
-								this.langObj[this.Lang].pageMiddle + (totalPages);
+								this.langObj[this.Lang].pageMiddle + '<span id="' + this.div + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 			dvTemplate += '</label></li><li>';
 			dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.div + '_goToPagePrev"> </a>';
 			dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.div + '_goToPageNext"> </a>';		
@@ -1908,7 +1906,12 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 			this.dataView.rows.length = 0;
 			
 			if (root.getAttribute('success') == '1') {
-				dataView.totalRows = root.getAttribute('totalrows');
+				var totRows = Number(root.getAttribute('totalrows'));
+				if (!isNaN(totRows))
+				{
+					this.dataView.totalRows = root.getAttribute('totalrows');
+					document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+				}
 				var rows = root.getElementsByTagName('row');
 		
 				for (var n=0; n < rows.length; n++) {
