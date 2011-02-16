@@ -6,6 +6,6 @@
 *  (does not include error messages which are in English)
 */
 
-dataView.prototype.langObj = { 'en': { 'noRows' : 'No rows to show.', 'rows' : 'rows.', 'row' : 'row.', 'pageStart' : 'Page ', 'pageMiddle' : ' og ', 'pageEnd' : ' Go to page: ', 'pageGo' : 'Go', 'pagePrev' : '<< Previous', 'pageNext' : 'Next >>', 'refresh' : 'Refresh', 'of' : 'of' }};
+dataView.prototype.langObj = { 'en': { 'noRows' : 'No rows to show.', 'rows' : 'rows.', 'row' : 'row.', 'pageStart' : 'Page ', 'pageMiddle' : ' of ', 'pageEnd' : ' Go to page: ', 'pageGo' : 'Go', 'pagePrev' : '<< Previous', 'pageNext' : 'Next >>', 'refresh' : 'Refresh', 'of' : 'of' }};
 				  
 dataView.prototype.Lang = 'en';
