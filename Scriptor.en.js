@@ -1342,7 +1342,7 @@ calendarView.prototype.lang = {
 * Object for each of the dataView columns. Add to dataView via the addColumn method
 * use deleteColum method to delete a column
 * 
-* members are:
+* Options are:
 *   Name: The Javascript name of the column, for use inside Javascript. It is usefull to equal
 *    Name to sqlName
 *   Type: The dataType of the column. Provide a string that matches any of the memebrs of the
@@ -1354,19 +1354,38 @@ calendarView.prototype.lang = {
 *   sqlName: provide if different from Name. dataView uses sqlName when interacting with
 *    its designated XML Service.
 *   shoToolTip: Will display a tooltip (tittle attribute) for the cell to show large contents
+*   Compare : functino pointer for sorting by the column
 */
-var dataColumn = function(name, type, show, width, format, display_name, sql_name) {
-	this.Name = name;
-	this.Type = (typeof(dataTypes[type]) != 'undefined') ? type : 'num';
-	this.show = show;
-	this.Width = isNaN(Number(width)) ? 80 : Number(width);
+var dataColumn = function(opts) {
+	var localOpts = {Name : null,
+		Type : 'alpha',
+		show : true,
+		Width : 80,
+		Format : null,
+		displayName : null,
+		sqlName : null,
+		showToolTip : false,
+		Comparator : null };
+	
+	Scriptor.mixin(localOpts, opts)
+	if (!localOpts.Name)
+	{
+		Scriptor.error.report('DataColumn, invalid column data provided to constructor');
+		return;
+	}
+	
+	this.Name = localOpts.Name;
+	this.Type = (typeof(dataTypes[localOpts.Type]) != 'undefined') ? localOpts.Type : 'alpha';
+	this.show = localOpts.show;
+	this.Width = isNaN(Number(localOpts.Width)) ? 80 : Number(localOpts.Width);
 	if (this.Width < (dataViewStyle.sepWidth + dataViewStyle.cellHorizontalPadding))
 		this.Width = dataViewStyle.sepWidth + dataViewStyle.cellHorizontalPadding;
 		
-	this.Format = format;
-	this.displayName = display_name ? display_name : name;
-	this.sqlName = sql_name ? sql_name : name;
-	this.showToolTip = false;
+	this.Format = localOpts.Format;
+	this.displayName = localOpts.displayName ? localOpts.displayName : localOpts.Name;
+	this.sqlName = localOpts.sqlName ? localOpts.sqlName : localOpts.Name;
+	this.showToolTip = localOpts.showToolTip;
+	this.Compare = localOpts.Compare;
 	
 };
 
@@ -1376,19 +1395,28 @@ var dataColumn = function(name, type, show, width, format, display_name, sql_nam
 * instantiate with a columnCollection which should be an array of columns. You can
 * provide dataView.columns as a parameter for instantiation which is equivalent to
 * calling the createRow method.
+* Optionally the initialData object can be passed to indicate the initial values
+* of each column
 *
 * members are:
 *  [colName]: Each column in the column collection creates a member in the row object
 *   using the column's javascript name and initializes it with its dataType default value.
 *   can be accessed directly: dataRow.<colName> or dataRow.['<colName>']
-*  visible:
-*   Set to false to filter the row from being shown in a dataView. Use dataView.onbeforeshow
-*   event to set filtering before showing a dataView. Should not filter multipage dataViews,
-*   but provide filtering information to the XML service instead (not implemented).
 */
-var dataRow = function(columnCollection) {
+var dataRow = function(columnCollection, initialData) {
+	initialData = initialData ? initialData : {};
+	
 	for (var n=0; n < columnCollection.length; n++) {
-		this[columnCollection[n].Name] = dataTypes[columnCollection[n].Type]();
+		var name = columnCollection[n].Name;
+		var type = columnCollection[n].Type;
+		this[name] = initialData[name] ? dataTypes[type](initialData[name]) : dataTypes[type]();
+	}
+	
+	// now get some values like #id which could be outside of the columnCollection object
+	for (var prop in initialData)
+	{
+		if (this[prop] === undefined)
+			this[prop] = initialData[prop];
 	}
 };
 
@@ -1401,7 +1429,6 @@ var dataRow = function(columnCollection) {
 *
 * TODO: You can define your custom dataTypes here and they will be automatically
 * implemented to the object as long as they have toString method and are comparable.
-* An optional compare function might be provided for complex objects compare
 */
 var dataTypes = {'num' : Number, 'alpha' : String, 'date' : function (str) {
 	var ret = new Date();
@@ -1494,19 +1521,28 @@ var dataViewStyle = {
 *  langObj: set to dataLangs. You can redefine this object and set other languages. Point to the
 *   language member in the object with Lang
 */
-dataView = Scriptor.dataView = function(div, width, height) {
+dataView = Scriptor.dataView = function(div, opts) {
 	// parameter control section
 	if ((typeof(div) != 'string' && !Scriptor.isHtmlElement(div)) || div == '') {
 		Scriptor.error.report('Error: first parameter must be a non empty string or a html object.');
 		return;
 	}
 	
-	this.rows = Array();
-	this.columns = Array();
+	var localOpts = { width : 250,
+		height: 300,
+		multiselect : true,
+		paginating: false,
+		rowsPerPage : 20,
+		columns : [] }
+	Scriptor.mixin(localOpts, opts);
+	
+	
+	this.rows = [];
+	this.columns = [];
 	
 	this.selectedRow = -1;
 	this.selectedRows = [];
-	this.multiselect = true;	// true since 3.0
+	this.multiselect = localOpts.multiselect;	// true since 3.0
 	this.enabled = true;
 	
 	Scriptor.event.init(this);
@@ -1522,12 +1558,12 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	this.orderBy = false;
 	this.orderWay = 'ASC';
 	
-	this.Width = isNaN(Number(width)) ? 250 : Number(width);
-	this.Height = isNaN(Number(height)) ? 250 : Number(height);
+	this.Width = isNaN(Number(localOpts.width)) ? 250 : Number(localOpts.width);
+	this.Height = isNaN(Number(localOpts.height)) ? 250 : Number(localOpts.height);
 	this.style = dataViewStyle;
 	
-	this.paginating = false;
-	this.rowsPerPage = 20;
+	this.paginating = localOpts.paginating;
+	this.rowsPerPage = localOpts.rowsPerPage;
 	this.curPage = 0;
 	this.totalRows = 0;
 	
@@ -1537,16 +1573,39 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	this.resizingXCache = 0;
 	this.resColumnId = null;
 	
-	/*DVE.dataRegisters[DVE.dataRegisters.length] = {'dobj' : this, 'ddiv' : this.div, 
-		'resizing' : false, 'resColumnId' : null, 'optionsMenu' : false };*/
+	this.nextRowId = 1;
+	
+	/*
+	* dataView.getNextRowId()
+	*   Since every row needs a unique id field, we will assign one automatically if
+	*   not provided
+	*/
+	this.getNextRowId = function() {
+		found = true;
+		while (found)
+		{
+			found = false;
+			var rowId = this.nextRowId++;
+			for (var n=0; n < this.rows.length; n++)
+			{
+				if (this.rows[n].id == rowId)
+				{
+					found = true;
+					break;
+				}
+			}
+		}
+		
+		return rowId;
+	};
 	
 	/*
 	* dataView.createColumn()
 	*  Use this function to get a column object instanciated. This function exposes
 	*  dataColumn publicly
 	*/
-	this.createColumn = function(colName, colType, colShow, width, colFormat, display_name, sql_name) {
-		return new dataColumn(colName, colType, colShow, width, colFormat, display_name, sql_name);
+	this.createColumn = function(opts) {
+		return new dataColumn(opts);
 	};
 	
 	/*
@@ -1571,6 +1630,26 @@ dataView = Scriptor.dataView = function(div, width, height) {
 				this.Show(false);
 		}
 	};
+	
+	/*
+	* dataView.__findColumn()
+	*  Internal function that returns the index of a column in its collection or -1 if not found.
+	*  Pass the column Name property in colName
+	*/
+	this.__findColumn = function(colName) {
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n].Name == colName) 
+				return n;
+		}
+		return -1;
+	};
+	
+	// add predefined columns
+	for (var n=0; n < localOpts.columns.length; n++)
+	{
+		this.addColumn(this.createColumn(localOpts.columns[n]));
+	}
+	// end add
 	
 	/*
 	* dataView.deleteColumn()
@@ -1611,6 +1690,9 @@ dataView = Scriptor.dataView = function(div, width, height) {
 				}
 			}
 			
+			if (this.orderBy == colName)
+				this.orderBy = this.columns[this.columns.length-1].Name;
+				
 			if (this.visible)
 				this.Show(false);
 		}
@@ -1622,8 +1704,13 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*  dataView object. You can initialize its values before using dataView.addRow() to
 	*  add it to the row list.
 	*/
-	this.createRow = function() {
-		return new dataRow(this.columns);
+	this.createRow = function(data) {
+		data = data ? data : {};
+	
+		if (!data.id)
+			data.id = this.getNextRowId();
+		
+		return new dataRow(this.columns, data);
 	};
 
 	/*
@@ -1635,7 +1722,10 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	this.addRow = function(rowObj) {
 		if (!rowObj) 
 			rowObj = this.createRow();
-			
+		else
+			if (!rowObj.id)
+				rowObj.id = this.getNextRowId();
+		
 		this.rows.push(rowObj);
 			
 		if (this.visible) 
@@ -1675,7 +1765,10 @@ dataView = Scriptor.dataView = function(div, width, height) {
 			
 		if (!rowObj)
 			rowObj = this.createRow();
-			
+		else
+			if (!rowObj.id)
+				rowObj.id = this.getNextRowId();
+				
 		this.rows.splice(ndx, 0, rowObj);
 		
 		if (this.selectedRow >= ndx)
@@ -1745,21 +1838,27 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	* Dynamically updates the value in a cell, performing visual updates if needed
 	* returns true on success, false on error
 	*/
-	this.setCellValue = function(row, columnName, value) {
-		if (isNaN(Number(row)))
-			return false;
-			
-		if (row < 0 || row > this.rows.length-1)
-			return false;
-			
+	this.setCellValue = function(rowId, columnName, value) {	
 		var colNdx = this.__findColumn(columnName);
 		if (colNdx == -1)
 			return false;
-			
-		this.rows[row][columnName] = value;
+		
+		var rowNdx = null;
+		for (var n=0; n < this.rows.length; n++)
+		{
+			if (this.rows[n].id == rowId)
+			{
+				rowNdx = n;
+				break;
+			}
+		}
+		if (rowNdx === null)
+			return false;
+		
+		this.rows[rowNdx][columnName] = value;
 		
 		if (this.visible && this.columns[colNdx].show) {	// update value
-			var cell = document.getElementById(this.div + '_cell_' + row + '_' + colNdx);
+			var cell = document.getElementById(this.div + '_cell_' + rowId + '_' + colNdx);
 			
 			if (typeof(this.columns[colNdx].Format) == 'function') {
 				var funcRet = this.columns[colNdx].Format(value);
@@ -2088,7 +2187,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 	*/
 	this.updateRows = function() {
 		if (!this.visible) {
-			alert( "Can't update rows on non visible dataView object.");
+			Scriptor.error.report( "Can't update rows on non visible dataView object.");
 			return;
 		}
 		
@@ -2102,8 +2201,9 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		
 		for (var n=0; n < this.rows.length; n++) {		
 			
+			var rowId = this.rows[n].id;
 			var firstCol = true;
-			rTemplate += '<ul id="' + this.div + '_row_' + n + '">';
+			rTemplate += '<ul id="' + this.div + '_row_' + rowId + '">';
 			
 			if (this.multiselect) {
 				var check = false;
@@ -2125,7 +2225,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 				}
 				
 				rTemplate += '">';
-				rTemplate += '<input type="checkbox" id="' + this.div + '_selectRow_' + n + '" class="dataViewCheckBox" ';
+				rTemplate += '<input type="checkbox" id="' + this.div + '_selectRow_' + rowId + '" class="dataViewCheckBox" ';
 				if (check)
 					rTemplate += 'checked="checked" ';
 				rTemplate += '/></li>';
@@ -2161,7 +2261,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 						}
 					}
 							
-					rTemplate += '" id="' + this.div + '_cell_' + n + '_' + a + '" style="width: ' + colWidth + 'px;"';
+					rTemplate += '" id="' + this.div + '_cell_' + rowId + '_' + a + '" style="width: ' + colWidth + 'px;"';
 					if (this.columns[a].showToolTip) 
 						rTemplate += ' title="' + this.rows[n][this.columns[a].Name] + '"';
 					rTemplate += '>';
@@ -2188,18 +2288,20 @@ dataView = Scriptor.dataView = function(div, width, height) {
 		targetTable.innerHTML = rTemplate;
 		
 		// assign onclick events and search for complex formatted cells
-		for (var n=0; n < this.rows.length; n++) {		
+		for (var n=0; n < this.rows.length; n++) {
+			var rowId = this.rows[n].id;
+			
 			if (this.multiselect)
-				Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + n), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
+				Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + rowId), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
 				
 			for (var a=0; a < this.columns.length; a++) {
 				if (this.columns[a].show) {
-					Scriptor.event.attach(document.getElementById(this.div + '_cell_' + n + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
+					Scriptor.event.attach(document.getElementById(this.div + '_cell_' + rowId + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
 					
 					if (typeof(this.columns[a].Format) == 'function') {
 						var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
 						if (typeof(funcRet) != 'string')
-							document.getElementById(this.div + '_cell_' + n + '_' + a).appendChild(funcRet);
+							document.getElementById(this.div + '_cell_' + rowId + '_' + a).appendChild(funcRet);
 					}
 				}
 			}
@@ -2478,12 +2580,14 @@ dataView = Scriptor.dataView = function(div, width, height) {
 			if (this.columns[n].show)
 				colStyles.push(this.columns[n].Type);
 		
-		elem = document.getElementById(this.div + '_selectRow_' + rowNdx);
+		var rowId = this.rows[rowNdx].id;
+		
+		elem = document.getElementById(this.div + '_selectRow_' + rowId);
 		if (elem.checked) {	// add row to selected rows list
 			this.selectedRows.push(rowNdx)
 			this.selectedRow = rowNdx;
 					
-			var row = document.getElementById(this.div + '_row_' + rowNdx);
+			var row = document.getElementById(this.div + '_row_' + rowId);
 			for (var a = 0; a < row.childNodes.length; a++) 
 				row.childNodes[a].className = 'dataView' + colStyles[a] + ' selectedRow';
 			
@@ -2497,7 +2601,7 @@ dataView = Scriptor.dataView = function(div, width, height) {
 					else 
 						this.selectedRow = -1;
 				
-					var row = document.getElementById(this.div + '_row_' + rowNdx);
+					var row = document.getElementById(this.div + '_row_' + rowId);
 					for (var a = 0; a < row.childNodes.length; a++) {
 						row.childNodes[a].className = 'dataView' + colStyles[a];
 					}
@@ -2761,13 +2865,19 @@ dataView = Scriptor.dataView = function(div, width, height) {
 			return;
 			
 		for (n = start+1; n < this.rows.length; n++) {
-			swap = false;
-					
-			if (this.orderWay == 'ASC') {	
-				swap = (this.rows[start][this.orderBy] > this.rows[n][this.orderBy])
+			var swap = false;
+			var	func = this.columns[this.orderBy].Comparator;
+			
+			if (this.orderWay == 'ASC') {
+				
+				swap = (typeof(func) == 'function') ?
+					func(this.rows[start][this.orderBy], this.rows[n][this.orderBy]) > 0 : 
+					(this.rows[start][this.orderBy] > this.rows[n][this.orderBy]);
 			}
 			else {
-				swap = (this.rows[start][this.orderBy] < this.rows[n][this.orderBy])
+				swap = (typeof(func) == 'function') ?
+					func(this.rows[start][this.orderBy], this.rows[n][this.orderBy] < 0) :
+					(this.rows[start][this.orderBy] < this.rows[n][this.orderBy]);
 			}
 			
 			if (swap) {
@@ -2808,19 +2918,6 @@ dataView = Scriptor.dataView = function(div, width, height) {
 				return true;
 		}
 		return false;
-	};
-	
-	/*
-	* dataView.__findColumn()
-	*  Internal function that returns the index of a column in its collection or -1 if not found.
-	*  Pass the column Name property in colName
-	*/
-	this.__findColumn = function(colName) {
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].Name == colName) 
-				return n;
-		}
-		return -1;
 	};
 	
 	/*

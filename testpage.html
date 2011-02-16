@@ -20,22 +20,80 @@
 		
 		
 		
-		myDataView = new dataView('somediv', 720, 200);
+		myDataView = new dataView('somediv', { width : 720, height : 200,
+			columns : [
+				{
+					Name : 'Id',
+					Type : 'num',
+					Width: 60,
+					Format : function (n) {
+						return 'xxx';
+					}
+				},
+				{
+					Name : 'parentId',
+					Type : 'num',
+					Width : 60,
+					displayName : 'Padre'
+				},
+				{
+					Name : 'Title',
+					Type : 'alpha',
+					Width: 200,
+					displayName : 'Título'
+				},
+				{
+					Name : 'Link',
+					Type : 'alpha',
+					Width: 200
+				}
+			]
+		});
 		
-		myDataView.addColumn( myDataView.createColumn( 'Id', 'num', true, 60, function(n) { return 'xxx' }, 'Id' ));
-		myDataView.addColumn( myDataView.createColumn( 'parentId', 'num', true, 60, false, 'Padre' ));
-		myDataView.addColumn( myDataView.createColumn( 'Title', 'alpha', true, 200, false, 'Título' ));
-		myDataView.addColumn( myDataView.createColumn( 'Link', 'alpha', true, 200, false, 'Link' ));
-		myDataView.addColumn( myDataView.createColumn( 'DateCreated', 'date', true, 140, dateFormat, 'Fecha de Creación' ));
+		myDataView.addColumn( myDataView.createColumn( {
+			Name : 'DateCreated',
+			Type : 'date', 
+			Width : 140,
+			Format : dateFormat,
+			displayName : 'Fecha de Creación'
+		}));
 		
-		myDataView2 = new dataView('someotherdiv', 720, 200);
-		
-		myDataView2.addColumn( myDataView.createColumn( 'id', 'num', false, 30, 'Id' ));
-		myDataView2.addColumn( myDataView.createColumn( 'User', 'alpha', true, 80, false, 'Usuario' ));
-		myDataView2.addColumn( myDataView.createColumn( 'Pass', 'alpha', false, 200, false, 'Clave' ));
-		myDataView2.addColumn( myDataView.createColumn( 'FirstName', 'alpha', true, 150, false, 'Nombre' ));
-		myDataView2.addColumn( myDataView.createColumn( 'LastName', 'alpha', true, 150, false, 'Apellido' ));
-		myDataView2.multiselect = false;
+		myDataView2 = new dataView('someotherdiv', { width : 720, height : 200, multiselect : false,
+			columns : [
+				{
+					Name : 'id',
+					Type : 'num',
+					show: false,
+					displayName : 'Id',
+					Width : 30
+				},
+				{
+					Name : 'User',
+					Type : 'alpha',
+					displayName : 'Usuario',
+					Width : 80,
+				},
+				{
+					Name : 'Pass',
+					Type : 'alpha',
+					show : false,
+					width : 200,
+					displayName : 'Clave'
+				},
+				{
+					Name : 'FirstName',
+					Type : 'alpha',
+					Width : 150,
+					displayName : 'Nombre'
+				},
+				{
+					Name : 'LastName',
+					Type : 'alpha',
+					Width : 150,
+					displayName : 'Apellido'
+				}
+			]
+		});
 		
 		myCalendarView = new calendarView('calendarView');
 		
