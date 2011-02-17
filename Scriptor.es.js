@@ -1430,28 +1430,32 @@ var dataRow = function(columnCollection, initialData) {
 * TODO: You can define your custom dataTypes here and they will be automatically
 * implemented to the object as long as they have toString method and are comparable.
 */
-var dataTypes = {'num' : Number, 'alpha' : String, 'date' : function (str) {
-	var ret = new Date();
-	
-	if (str) {
-		var dateParts = str.split(' ');
+var dataTypes = {
+	'num' : Number,
+	'alpha' : String,
+	'date' : function (str) {
+		var ret = new Date();
 		
-		if (dateParts[0] == '0000-00-00') {	//empty sql date field
-			return '';
-		}
-		else {
-			var dateCmp = dateParts[0].split('-');
-			ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2]);
+		if (str) {
+			var dateParts = str.split(' ');
 			
-			if (dateParts[1]) {
-				var timeCmp = dateParts[1].split(':');
-				ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2], timeCmp[0], timeCmp[1], timeCmp[2]);
+			if (dateParts[0] == '0000-00-00') {	//empty sql date field
+				return '';
+			}
+			else {
+				var dateCmp = dateParts[0].split('-');
+				ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2]);
+				
+				if (dateParts[1]) {
+					var timeCmp = dateParts[1].split(':');
+					ret = new Date(dateCmp[0], dateCmp[1]-1, dateCmp[2], timeCmp[0], timeCmp[1], timeCmp[2]);
+				}
 			}
 		}
+		
+		return ret;
 	}
-	
-	return ret;
-} };
+};
 
 /*
 * This style object complements the stylesheet (default.css). If you change styling
@@ -1460,22 +1464,22 @@ var dataTypes = {'num' : Number, 'alpha' : String, 'date' : function (str) {
 */
 var dataViewStyle = {
 	'objectVerticalPadding' : 6,
-		'objectHorizontalPadding' : 6,
-		'paginationHeaderHeight' : 25, 
-		'headerHeight' : 24, 
-		'footerHeight' : 24,
-		'rowHeight' : 17, 
-		'cellVerticalPadding' : 0, 
-		'cellHorizontalPadding' : 10, 
-		'sepWidth' : 4,
-		'sortWidth' : 14,
-		
-		'optionsIconWidth' : 25,
-		'multiSelectColumnWidth' : 13,
-		'optionsMenuHeight' : 20,
-		'optionsMenuHorizontalPadding' : 20,
-		'optionsMenuVerticalPadding' : 4,
-		'optionsMenuSepHeight' : 4
+	'objectHorizontalPadding' : 6,
+	'paginationHeaderHeight' : 25, 
+	'headerHeight' : 24, 
+	'footerHeight' : 24,
+	'rowHeight' : 17, 
+	'cellVerticalPadding' : 0, 
+	'cellHorizontalPadding' : 10, 
+	'sepWidth' : 4,
+	'sortWidth' : 14,
+	
+	'optionsIconWidth' : 25,
+	'multiSelectColumnWidth' : 13,
+	'optionsMenuHeight' : 20,
+	'optionsMenuHorizontalPadding' : 20,
+	'optionsMenuVerticalPadding' : 4,
+	'optionsMenuSepHeight' : 4
 };
 
 /*
@@ -1517,9 +1521,6 @@ var dataViewStyle = {
 *    before showing to adjust to the length of the column names.
 *   optionsMenuHeight: The height of the options menu. for internal use only.
 *
-*  Lang: String. This is the language prefix of the dataLangs object.
-*  langObj: set to dataLangs. You can redefine this object and set other languages. Point to the
-*   language member in the object with Lang
 */
 dataView = Scriptor.dataView = function(div, opts) {
 	// parameter control section
@@ -1535,8 +1536,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		rowsPerPage : 20,
 		columns : [] }
 	Scriptor.mixin(localOpts, opts);
-	
-	
+		
 	this.rows = [];
 	this.columns = [];
 	
@@ -1575,12 +1575,21 @@ dataView = Scriptor.dataView = function(div, opts) {
 	
 	this.nextRowId = 1;
 	
+	// add predefined columns
+	for (var n=0; n < localOpts.columns.length; n++)
+	{
+		this.addColumn(this.createColumn(localOpts.columns[n]));
+	}
+	// end add
+};
+
+dataView.prototype = {
 	/*
 	* dataView.getNextRowId()
 	*   Since every row needs a unique id field, we will assign one automatically if
 	*   not provided
 	*/
-	this.getNextRowId = function() {
+	getNextRowId : function() {
 		found = true;
 		while (found)
 		{
@@ -1597,23 +1606,23 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		return rowId;
-	};
+	},
 	
 	/*
 	* dataView.createColumn()
 	*  Use this function to get a column object instanciated. This function exposes
 	*  dataColumn publicly
 	*/
-	this.createColumn = function(opts) {
+	createColumn : function(opts) {
 		return new dataColumn(opts);
-	};
+	},
 	
 	/*
 	* dataView.addColumn()
 	*  Adds the passed column instance to the dataView columnCollection. Updates rows information 
 	*  if needed with empty objects and if dataView is visible performs a Show() to refresh.
 	*/
-	this.addColumn = function( column ) {
+	addColumn : function( column ) {
 		if (this.__findColumn(column.Name) == -1) {
 			this.columns.push(column);
 		
@@ -1629,27 +1638,20 @@ dataView = Scriptor.dataView = function(div, opts) {
 			if (this.visible)
 				this.Show(false);
 		}
-	};
+	},
 	
 	/*
 	* dataView.__findColumn()
 	*  Internal function that returns the index of a column in its collection or -1 if not found.
 	*  Pass the column Name property in colName
 	*/
-	this.__findColumn = function(colName) {
+	__findColumn : function(colName) {
 		for (var n=0; n < this.columns.length; n++) {
 			if (this.columns[n].Name == colName) 
 				return n;
 		}
 		return -1;
-	};
-	
-	// add predefined columns
-	for (var n=0; n < localOpts.columns.length; n++)
-	{
-		this.addColumn(this.createColumn(localOpts.columns[n]));
-	}
-	// end add
+	},
 	
 	/*
 	* dataView.deleteColumn()
@@ -1657,7 +1659,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  a column index in the collection or an instance of a Column object inside the collection.
 	*  will update row information if needed discarting the deleted column.
 	*/
-	this.deleteColumn = function( identifier ) {
+	deleteColumn : function( identifier ) {
 		var colName = '';
 		
 		if (typeof(identifier) == 'string') {
@@ -1696,7 +1698,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 			if (this.visible)
 				this.Show(false);
 		}
-	};
+	},
 		
 	/*
 	* dataView.createRow()
@@ -1704,14 +1706,14 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  dataView object. You can initialize its values before using dataView.addRow() to
 	*  add it to the row list.
 	*/
-	this.createRow = function(data) {
+	createRow : function(data) {
 		data = data ? data : {};
 	
 		if (!data.id)
 			data.id = this.getNextRowId();
 		
 		return new dataRow(this.columns, data);
-	};
+	},
 
 	/*
 	* dataView.addRow()
@@ -1719,7 +1721,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  as an argument, an empty row will be added. If dataView is visible it will call
 	*  updateRows to reflect the changes.
 	*/
-	this.addRow = function(rowObj) {
+	addRow : function(rowObj) {
 		if (!rowObj) 
 			rowObj = this.createRow();
 		else
@@ -1730,20 +1732,20 @@ dataView = Scriptor.dataView = function(div, opts) {
 			
 		if (this.visible) 
 			this.updateRows();
-	};
+	},
 
 	/*
 	* dataView.curRow()
 	*  returns the currently selected row at any time
 	*/
-	this.curRow = function() {
+	curRow : function() {
 		return this.selectedRow != -1 ? this.rows[this.selectedRow] : null;
-	};
+	},
 	
 	/* dataView.curRows()
 	*  multiselect: Returns an array of the currently selected rows at any time
 	*/
-	this.curRows = function() {
+	curRows : function() {
 		var rows = [];
 		if (this.multiselect)
 		{
@@ -1752,14 +1754,14 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		return this.multiselect ? rows : this.curRow();
-	};
+	},
 	
 	/*
 	* dataView.insertRow()
 	*  Use this the same way as addRow() to inset the row before the indicated row index.
 	*  If dataView is visible it will call updateRows() to reflect changes.
 	*/
-	this.insertRow = function(ndx, rowObj) {
+	insertRow : function(ndx, rowObj) {
 		if (isNaN(Number(ndx)))
 			return;
 			
@@ -1785,7 +1787,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		if (this.visible) 
 			this.updateRows();
-	};
+	},
 	
 	/*
 	* dataView.deleteRow()
@@ -1793,7 +1795,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  array of rows (i.e.: dataView.selectedRow when != -1) or an instance of a row object 
 	*  in the array. If dataView is visible it will call updateRows to reflect the changes.
 	*/
-	dataView.prototype.deleteRow = function(identifier) {
+	deleteRow : function(identifier) {
 		var rowNdx = -1;
 		
 		if (typeof(identifier) == 'number') {
@@ -1831,14 +1833,14 @@ dataView = Scriptor.dataView = function(div, opts) {
 			
 		if (rowNdx != -1 && this.visible) 
 			this.updateRows();
-	};
+	},
 	
 	/*
 	* dataView.setCellValue();
 	* Dynamically updates the value in a cell, performing visual updates if needed
 	* returns true on success, false on error
 	*/
-	this.setCellValue = function(rowId, columnName, value) {	
+	setCellValue : function(rowId, columnName, value) {	
 		var colNdx = this.__findColumn(columnName);
 		if (colNdx == -1)
 			return false;
@@ -1874,7 +1876,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		return true;
-	};
+	},
 	
 	/*
 	* dataView.Refresh();
@@ -1883,21 +1885,21 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  and this will automatically retrieve information assync every time
 	*  you call refresh() method.
 	*/
-	dataView.prototype.Refresh = function() {
+	Refresh : function() {
 		var e = Scriptor.event.fire(this, 'onrefresh');
 		if (!e.returnValue)
 			return;
 		
 		if (this.visible)
 			this.updateRows();
-	};
+	},
 	
 	/*
 	*  dataView.Show()
 	*   Renders the object inside the object pointed by dataView.div as its id.
 	*   If passed true on withRefresh, this will perform a Refresh() after showing. 
 	*/
-	this.Show = function(withRefresh) {
+	Show : function(withRefresh) {
 		var e = Scriptor.event.fire(this, 'onshow');
 		if (!e.returnValue)
 			return;
@@ -1952,14 +1954,14 @@ dataView = Scriptor.dataView = function(div, opts) {
 		// Create table paginating header
 		if (this.paginating) {
 			dvTemplate += '<div class="dataViewPaginationHeader"><ul><li>';
-			dvTemplate += '<label class="dataViewPaginationPages">' + this.langObj[this.Lang].pageStart + (this.curPage + 1) +
-								this.langObj[this.Lang].pageMiddle + '<span id="' + this.div + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
+			dvTemplate += '<label class="dataViewPaginationPages">' + this.lang.pageStart + (this.curPage + 1) +
+								this.lang.pageMiddle + '<span id="' + this.div + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 			dvTemplate += '</label></li><li>';
 			dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.div + '_goToPagePrev"> </a>';
 			dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.div + '_goToPageNext"> </a>';		
-			dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.div + '_pageInput">' + this.langObj[this.Lang].pageEnd + '</label>';
+			dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.div + '_pageInput">' + this.lang.pageEnd + '</label>';
 			dvTemplate += '<input type="text" class="dataViewPaginationInput" id="' + this.div + '_pageInput" />';
-			dvTemplate += '<input type="button" value="' + this.langObj[this.Lang].pageGo + '" class="dataViewPageButton" id="' + this.div + '_pageInputBtn" />';
+			dvTemplate += '<input type="button" value="' + this.lang.pageGo + '" class="dataViewPageButton" id="' + this.div + '_pageInputBtn" />';
 			dvTemplate += '</li></ul></div>';
 			
 		}
@@ -2053,27 +2055,26 @@ dataView = Scriptor.dataView = function(div, opts) {
 			this.Refresh();
 		else
 			this.__refreshFooter();
-		
-	};
+	},
 	
 	/*
 	* dataView.setLoading(val)
 	*   If val is true, show loading spinner, else show the actual rows,
 	*   usefull for assync updates
 	*/
-	this.setLoading = function(val) {
+	setLoading : function(val) {
 		var body = document.getElementById(this.div + '_body');
 		
 		body.style.display = val ? 'none' : '';
 		body.parentNode.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
 		
-	};
+	},
 	
 	/*
 	* __selectAll()
 	*  This function executes when clicking on a dataView header checkmox in multiselect and selects all rows.
 	*/
-	this.__selectAll = function(e) {
+	__selectAll : function(e) {
 		var elem = document.getElementById(this.div + '_selectAll');
 		
 		if (this.rows.length) {
@@ -2096,13 +2097,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 		else {
 			elem.checked = false;
 		}
-	};
+	},
 	
 	/*
 	* __goToPage()
 	*  This function executes when changing the page on a paginated dataView
 	*/
-	this.__goToPage = function (e) {
+	__goToPage : function (e) {
 		if (!this.enabled)
 			return;
 			
@@ -2129,23 +2130,23 @@ dataView = Scriptor.dataView = function(div, opts) {
 			
 			document.getElementById(this.div + '_pageInput').focus();
 		}
-	};
+	},
 	
 	/*
 	* __checkGoToPage()
 	*  This function executes to capture <enter> key press on the dataView page input
 	*/
-	this.__checkGoToPage = function (e) {
+	__checkGoToPage : function (e) {
 		if (e.keyCode == 13) {
 			this.__goToPage(e)
 		}
-	};
+	},
 	
 	/*
 	* __goToPagePrev
 	*  This function executes when clicked on the "previous" link
 	*/
-	this.__goToPagePrev = function () {
+	__goToPagePrev : function () {
 		if (!this.enabled) 
 			return;
 		
@@ -2156,13 +2157,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 				
 			this.Show(true);
 		}
-	};
+	},
 	
 	/*
 	* __goToPageNext
 	*  This function executes when clicked on the "next" link
 	*/
-	this.__goToPageNext = function () {
+	__goToPageNext : function () {
 		if (!this.enabled) 
 			return;
 			
@@ -2175,7 +2176,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 				
 			this.Show(true);
 		}
-	};
+	},
 
 	/*
 	*  dataView.updateRows()
@@ -2183,7 +2184,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*   dataView.updateRows() directly to update row information only without spending additional
 	*   resources on the dataView frame rendering.
 	*/
-	this.updateRows = function() {
+	updateRows : function() {
 		if (!this.visible) {
 			Scriptor.error.report( "Can't update rows on non visible dataView object.");
 			return;
@@ -2336,13 +2337,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 			
 		this.__refreshFooter();
-	};
+	},
 	
 	/*
 	* dataView.__refreshFooter()
 	*   Internal function. Refreshes the footer text.
 	*/
-	this.__refreshFooter = function() {
+	__refreshFooter : function() {
 		if (!this.visible) {
 			Scriptor.error.report( "Can't update rows on non visible dataView object.");
 			return;
@@ -2354,29 +2355,29 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		if (!this.paginating) {
 			if (this.rows.length == 0) {
-				fTemplate += this.langObj[this.Lang].noRows;
+				fTemplate += this.lang.noRows;
 			}
 			else {
 				if (this.rows.length == 1)
-					fTemplate += '1 ' + ' ' + this.langObj[this.Lang].row;
+					fTemplate += '1 ' + ' ' + this.lang.row;
 				else
-					fTemplate += this.rows.length + ' ' + this.langObj[this.Lang].rows;
+					fTemplate += this.rows.length + ' ' + this.lang.rows;
 			}
 		}
 		else {
 			if (this.rows.length == 0) {
-				fTemplate += this.langObj[this.Lang].noRows;
+				fTemplate += this.lang.noRows;
 			}
 			else {
 				var firstRow = (this.rowsPerPage * this.curPage);
 				var lastRow = (firstRow + this.rowsPerPage) > this.totalRows ? this.totalRows : (firstRow + this.rowsPerPage);
-				fTemplate += (firstRow+1) + ' - ' + lastRow + ' ' + this.langObj[this.Lang].of + ' ' + this.totalRows + ' ' + this.langObj[this.Lang].rows;
+				fTemplate += (firstRow+1) + ' - ' + lastRow + ' ' + this.lang.of + ' ' + this.totalRows + ' ' + this.lang.rows;
 			}
 		}
 		fTemplate += '</li></ul>';
 		
 		targetDiv.innerHTML = fTemplate;
-	};
+	},
 	
 	/*
 	* __setOrder()
@@ -2385,7 +2386,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  colName the javascript Name of the column in which order must be performed. Ordering way
 	*  will be switched upon subsecuent calls to __setOrder()
 	*/
-	this.__setOrder = function (e, colNdx) {
+	__setOrder : function (e, colNdx) {
 		if (!this.enabled) 
 			return;
 		
@@ -2422,7 +2423,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	* __selectRow()
 	*  This function executes when clicking on a dataView row and selects that row.
 	*/
-	this.__selectRow = function (e, rowNdx) {
+	__selectRow : function (e, rowNdx) {
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -2546,13 +2547,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		Scriptor.event.cancel(e);
 		return false;
-	};
+	},
 	
 	/*
 	* __markRow()
 	*  This function executes when clicking on a dataView row checkmox in multiselect and selects that row.
 	*/
-	this.__markRow = function(e, rowNdx) {
+	__markRow : function(e, rowNdx) {
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -2609,7 +2610,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		return true;
-	};
+	},
 	
 	/*
 	*  dataView.updateOptionsMenu()
@@ -2618,7 +2619,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*   resources on the dataView frame rendering. This is usefull when changing the property
 	*   dataView.optionsMenuWidth to apply these changes.
 	*/
-	this.updateOptionsMenu = function() {
+	updateOptionsMenu : function() {
 		if (!this.visible) {
 			Scriptor.error.report( "Can't update optiosn menu on non visible dataView object.");
 			return;
@@ -2627,7 +2628,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		var targetDiv = document.getElementById(this.div + '_optionsMenu');
 		targetDiv.style.width = this.optionsMenuWidth - this.style.optionsMenuHorizontalPadding + 'px';
 		
-		var oTemplate = '<ul><li><a href="#"" id="'+this.div+'_optionsMenuRefresh">' + this.langObj[this.Lang]['refresh'] + '</a></li>';
+		var oTemplate = '<ul><li><a href="#"" id="'+this.div+'_optionsMenuRefresh">' + this.lang.refresh + '</a></li>';
 		oTemplate += '<li class="dataViewMenuSep"></li>';
 		
 		this.optionsMenuHeight = this.style.optionsMenuHeight + this.style.optionsMenuVerticalPadding + this.style.optionsMenuSepHeight;
@@ -2650,13 +2651,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 		Scriptor.event.attach(document.getElementById(this.div+"_optionsMenuRefresh"), 'click', Scriptor.bindAsEventListener(this.Refresh, this));
 		for (var n=0; n < this.columns.length; n++)
 			Scriptor.event.attach(document.getElementById(+this.div+'_optionsMenuItem_'+n), 'click', Scriptor.bindAsEventListener(this.toggleColumn, this, n));
-	};
+	},
 
 	/* showOptionsMenu
 	*  This function shows the option menu of a dataView object. For internal use only
 	*/
 	// TODO: We need to refactor this with a ContextMenu Component
-	this.showOptionsMenu = function(e) {
+	showOptionsMenu : function(e) {
 		/*if (!e)	e = window.event;
 		
 		if (!this.enabled) {
@@ -2696,13 +2697,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		Scriptor.event.cancel(e);
 		return false;
-	};
+	},
 	
 	/* checkOptionsMenu
 	*  for internal use only
 	*/
 	// TODO: take this out into ContextMenu component
-	this.checkOptionsMenu = function(e) {
+	checkOptionsMenu : function(e) {
 		/*if (!e)	e = window.event;
 		
 		// calculate x, y
@@ -2760,25 +2761,25 @@ dataView = Scriptor.dataView = function(div, opts) {
 			}
 		}
 		*/
-	};
+	},
 	
 	/* hideOptionsMenu
 	*  Hides the options menu panel. For internal use only
 	*/
 	// TODO: Take this out into ContextMenu component
-	this.hideOptionsMenu = function(div) {
+	hideOptionsMenu : function(div) {
 		/*
 		var objDiv = document.getElementById(this.div+'_optionsMenu');
 		objDiv.style.display = 'none';
 		*/
-	};
+	},
 	
 	/*
 	* toggleColumn
 	*   Toggles a column on or off. OptionsMenu feature. Use dataColumn.show property along with
 	*   dataView.Show(false) instead to change column configuration manually.
 	*/
-	this.toggleColumn = function(e, colNdx) {
+	toggleColumn : function(e, colNdx) {
 		
 		this.hideOptionsMenu();
 		
@@ -2790,7 +2791,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		this.Show(false);
-	};
+	},
 	
 	/*
 	* dataView.forceWidth()
@@ -2798,7 +2799,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	*  the specified value and proportionally adjust the columns if needed to fill the horizontal area
 	*  Use dataView.Show function instead, to force a width change
 	*/
-	this.forceWidth = function(w) {
+	forceWidth : function(w) {
 		if (isNaN(Number(w)))
 			return;
 		
@@ -2831,14 +2832,13 @@ dataView = Scriptor.dataView = function(div, opts) {
 				}
 			}
 		}
-	};
+	},
 	
 	/*
 	* dataView.getTotalPages()
 	*  When paginating, this tells the total number of pages in the object
 	*/
-	
-	this.getTotalPages = function() {
+	getTotalPages : function() {
 		var totalPages = 0;
 		var rowLength = this.totalRows ? this.totalRows : this.rows.length;
 			
@@ -2849,14 +2849,14 @@ dataView = Scriptor.dataView = function(div, opts) {
 		}
 		
 		return totalPages;
-	};
+	},
 	
 	/*
 	* dataView.__sort()
 	*  This function performs sorting of rows depending on the sortBy and sortWay properties
 	*  For internal use only. Use global function __setOrder instead.
 	*/
-	this.__sort = function(start) {
+	__sort : function(start) {
 		var n, tempRow, swap;	
 		
 		if (!this.orderBy)
@@ -2904,36 +2904,36 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		if (start < this.rows.length -2)
 			this.__sort( start +1 );
-	};
+	},
 	
 	/*
 	*  dataView.colum_exists()
 	*   Internal function that returns true if a column with its Name property equals to str exists
 	*/
-	this.colum_exists = function(str) {
+	colum_exists : function(str) {
 		for (var n=0; n < this.columns.length; n++) {
 			if (this.columns[n].Name == str)
 				return true;
 		}
 		return false;
-	};
+	},
 	
 	/*
 	* dataView.__getColumnSqlName(colName)
 	*  Internal function that returns the column sqlName upon its Name property (colName).
 	*/
-	this.__getColumnSqlName = function(colName) {
+	__getColumnSqlName : function(colName) {
 		for (var n=0; n < this.columns.length; n++) {
 			if (this.columns[n].Name == colName) 
 				return this.columns[n].sqlName;
 		}
 		return false;
-	};
+	},
 	
 	/* activateResizing
 	*  This function will search for a valid dataView id and mark it for column resizing
 	*/
-	this.activateResizing = function(e, colNdx) {
+	activateResizing : function(e, colNdx) {
 		if (!this.enabled) {
 			Scriptor.event.cancel(e);
 			return false;
@@ -2966,24 +2966,24 @@ dataView = Scriptor.dataView = function(div, opts) {
 		
 		Scriptor.event.cancel(e);
 		return false;
-	};
+	},
 	
 	/* performResizing
 	* This function deactivates resizing status and performs complete redrawing
 	*/
-	this.deactivateResizing = function(e) {
+	deactivateResizing : function(e) {
 		Scriptor.event.detach(document, 'mousemove', this._mouseMoveBind);
 		Scriptor.event.detach(document, 'mouseup', this._mouseUpBind);
 		
 		this.resColumnId = null;
 		//this.Show(false);
 		this.resizingXCache = 0;
-	};
+	},
 	
 	/* doResizing
 	*  This function calculates the resizing upon mouse movement
 	*/
-	this.doResizing = function(e) {
+	doResizing : function(e) {
 		// get delta x
 		var x;
 	
@@ -3122,13 +3122,12 @@ dataView = Scriptor.dataView = function(div, opts) {
 				cols[offset+(colNdx)].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - 2) + 'px';
 			}
 		}
-	};
-
+	}
 };
 
 /*
-* dataViewApi
-* 	Api object that will connect a dataView with an api call, so every time
+* dataViewConnector
+* 	Connector object that will connect a dataView with an api call, so every time
 * 	you call dataView.Refresh() it will call its api to truly refresh
 * 	the object in real time
 *
@@ -3159,7 +3158,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 *    ]}
 *
 */
-dataViewApi = Scriptor.dataViewApi = function(opts) {
+dataViewConnector = Scriptor.dataViewConnector = function(opts) {
 	var localOpts = {
 		dataView : null,
 		api : null,
@@ -3172,7 +3171,7 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	
 	if (!localOpts.dataView)
 	{
-		Scriptor.error.report('Must provide dataView reference to dataViewApi object.');
+		Scriptor.error.report('Must provide dataView reference to dataViewConnector object.');
 		return;
 	}
 	
@@ -3184,8 +3183,9 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	
 	this.api = localOpts.api;
 	this.dataView = localOpts.dataView;
-	this.type = 'json';
 	this.parameters = localOpts.parameters;
+	
+	this.type = 'json';
 	if (localOpts.type)
 		switch (localOpts.type.toLowerCase())
 		{
@@ -3202,7 +3202,20 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 	if (typeof(localOpts.method) == 'string')
 		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
 		
-	this._onRefresh = function(e) {
+	// event attaching and httpRequest setup
+	Scriptor.event.attach(this.dataView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
+	
+	this.httpRequest = new Scriptor.httpRequest({
+		ApiCall : this.api,
+		method : this.method,
+		Type : this.type,
+		onError : Scriptor.bind(this._onError, this),
+		onLoad : Scriptor.bind(this._onLoad, this)
+	});
+};
+
+dataViewConnector.prototype = {
+	_onRefresh : function(e) {
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
 		
@@ -3216,9 +3229,9 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 		this.httpRequest.send(params);
 		
 		Scriptor.event.cancel(e);
-	};
+	},
 	
-	this._onLoad = function(data) {
+	_onLoad : function(data) {
 		this.dataView.setLoading(false);
 		
 		if (this.type == 'xml')	// xml parsing
@@ -3232,7 +3245,8 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 			this.dataView.visible = false;
 			this.dataView.rows.length = 0;
 			
-			if (root.getAttribute('success') == '1') {
+			if (root.getAttribute('success') == '1')
+			{
 				var totRows = Number(root.getAttribute('totalrows'));
 				if (!isNaN(totRows))
 				{
@@ -3241,11 +3255,13 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 				}
 				var rows = root.getElementsByTagName('row');
 		
-				for (var n=0; n < rows.length; n++) {
+				for (var n=0; n < rows.length; n++)
+				{
 					var tempR = {};
 					var cols = rows[n].getElementsByTagName('column');
 					
-					for (var a=0; a < cols.length; a++) {
+					for (var a=0; a < cols.length; a++)
+					{
 						var colName = cols[a].getAttribute('name');
 						if (colName && cols[a].firstChild)
 						{
@@ -3259,7 +3275,8 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 					this.dataView.addRow(this.dataView.createRow(tempR));
 				}
 			}
-			else {
+			else
+			{
 				// TODO: show an error message in the dataView component
 			}
 			
@@ -3273,22 +3290,12 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 		{
 			
 		}
-	};
+	},
 	
-	this._onError = function(status) {
+	_onError : function(status)
+	{
 		this.dataView.setLoading(false);
-	};
-	
-	// event attaching and httpRequest setup
-	Scriptor.event.attach(this.dataView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
-	
-	this.httpRequest = new Scriptor.httpRequest({
-			ApiCall : this.api,
-			method : this.method,
-			Type : this.type,
-			onError : Scriptor.bind(this._onError, this),
-			onLoad : Scriptor.bind(this._onLoad, this)
-		});
+	}
 };// JavaScript Document
 /*
 * dataLangs
@@ -3297,10 +3304,20 @@ dataViewApi = Scriptor.dataViewApi = function(opts) {
 *  (does not include error messages which are in English)
 */
 
-dataView.prototype.langObj = { 
-  'es': { 'noRows' : 'No hay filas para mostrar.', 'rows' : 'filas.', 'row' : 'fila.', 'pageStart' : 'Página ', 'pageMiddle' : ' de ', 'pageEnd' : ' Ir a página: ', 'pageGo' : 'Ir', 'pagePrev' : '<< Anterior', 'pageNext' : 'Siguiente >>', 'refresh' : 'Actualizar', 'of' : 'de' } };
+dataView.prototype.lang = { 
+  'noRows' : 'No hay filas para mostrar.',
+  'rows' : 'filas.',
+  'row' : 'fila.',
+  'pageStart' : 'Página ',
+  'pageMiddle' : ' de ',
+  'pageEnd' : ' Ir a página: ',
+  'pageGo' : 'Ir',
+  'pagePrev' : '<< Anterior',
+  'pageNext' : 'Siguiente >>',
+  'refresh' : 'Actualizar',
+  'of' : 'de' };
 				  
-dataView.prototype.Lang = 'es';// JavaScript Document
+// JavaScript Document
 /*
 *
 *  galleryView Version 1.1b
@@ -3779,11 +3796,16 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	this.inRequest = false;
 	this.http_request = null;
 	
+	// create the http_request object we're going to use
+	this.createRequest();
+};
+
+httpRequest.prototype = {
 	/* httpRequest.createRequest 
 	*
 	*  Creates the http_request internal object. For internal use only
 	*/
-	this.createRequest = function() {
+	createRequest : function() {
 		if (!this.http_request)
 		{
 			if (window.XMLHttpRequest) {
@@ -3803,10 +3825,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 				}
 			}
 		}
-	};
-	
-	// create the http_request object we're going to use
-	this.createRequest();
+	},
 	
 	/*
 	* httpRequest.send
@@ -3814,7 +3833,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	* Send the request to the specified api
 	* Params: String with optional query string parameters 
 	*/
-	this.send = function(params) {
+	send : function(params) {
 		if (this.inRequest)
 		{
 			this.http_request.abort();
@@ -3838,12 +3857,12 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 		this.http_request.send(params);
 		
 		this.inRequest = true;
-	};
+	},
 	
 	/* handleRequest 
 	*
 	*/
-	this.handleRequest = function() {
+	handleRequest : function() {
 		if (this.inRequest && this.http_request.readyState == 4)
 		{		
 			this.inRequest = false;
@@ -3873,8 +3892,9 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 					this.onError(this.http_request.satus);
 			}	
 		}
-	};
-};// JavaScript Document
+	}
+};
+// JavaScript Document
 /*
 * httpRequest language pack Spanish
 */
@@ -3958,7 +3978,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	
 	this.visible = false;
-	
+};
+
+tabView.prototype = {
 	/*
 	* tabView.selectTab(tabNdx)
 	*
@@ -3967,7 +3989,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	* when a user clicks on a tab
 	*
 	*/
-	this.selectTab = function(e, tabNdx) {
+	selectTab : function(e, tabNdx) {
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);
@@ -4006,16 +4028,16 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		
 		Scriptor.event.cancel(e, true);
 		return false;
-	};
+	},
 	
 	/*
-	* tabView.show()
+	* tabView.Show()
 	*
 	* Use this function nmediately after successfully defining the tabView object in order
 	* to create the tab list inside the empty UL element (shoud and will be emptied).
 	*
 	*/
-	this.Show = function() {
+	Show : function() {
 		var e = Scriptor.event.fire(this, 'onshow');
 		if (!e.returnValue)
 			return;
@@ -4098,9 +4120,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		
 		this.visible = true;
 		this.Refresh();
-	};
+	},
 	
-	this.Refresh = function() {
+	Refresh : function() {
 		if (!this.visible)
 			return;
 		
@@ -4125,9 +4147,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			else
 				this.tabs[n].divElem.style.display = 'block';
 		}
-	};
+	},
 	
-	this.Hide = function() {
+	Hide : function() {
 		var e = Scriptor.event.fire(this, 'onhide');
 		if (!e.returnValue)
 			return;
@@ -4138,9 +4160,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			this.tabsElem.style.display = 'none';
 			
 		this.visible = false;
-	};
+	},
 	
-	this.addTab = function(tab, insertNdx) {
+	addTab : function(tab, insertNdx) {
 		if (typeof(tab.label) != 'string' || (typeof(tab.elem) != 'string' && !Scriptor.isHtmlElement(tab.elem))) {
 			Scriptor.error.report('Error: Invalid tab object.');
 			return;
@@ -4191,9 +4213,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			
 			this.Refresh();
 		}
-	};
+	},
 	
-	this.deleteTab = function(tabNdx) {
+	deleteTab : function(tabNdx) {
 		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
 		{
 			var curTab = this.tabs[tabNdx];
@@ -4211,9 +4233,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			if (this.visible)
 				this.Refresh();
 		}
-	};
+	},
 	
-	this.setTabLabel = function(tabNdx, label) {
+	setTabLabel : function(tabNdx, label) {
 		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
 		{
 			this.tabs[tabNdx].label = label;
@@ -4225,7 +4247,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			}
 		}
 		
-	};
+	}
 };
 // JavaScript Document
 /*

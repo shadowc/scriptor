@@ -6,7 +6,16 @@
 *  (does not include error messages which are in English)
 */
 
-dataView.prototype.langObj = { 
-  'es': { 'noRows' : 'No hay filas para mostrar.', 'rows' : 'filas.', 'row' : 'fila.', 'pageStart' : 'Página ', 'pageMiddle' : ' de ', 'pageEnd' : ' Ir a página: ', 'pageGo' : 'Ir', 'pagePrev' : '<< Anterior', 'pageNext' : 'Siguiente >>', 'refresh' : 'Actualizar', 'of' : 'de' } };
+dataView.prototype.lang = { 
+  'noRows' : 'No hay filas para mostrar.',
+  'rows' : 'filas.',
+  'row' : 'fila.',
+  'pageStart' : 'Página ',
+  'pageMiddle' : ' de ',
+  'pageEnd' : ' Ir a página: ',
+  'pageGo' : 'Ir',
+  'pagePrev' : '<< Anterior',
+  'pageNext' : 'Siguiente >>',
+  'refresh' : 'Actualizar',
+  'of' : 'de' };
 				  
-dataView.prototype.Lang = 'es';

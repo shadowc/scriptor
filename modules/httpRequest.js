@@ -81,11 +81,16 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	this.inRequest = false;
 	this.http_request = null;
 	
+	// create the http_request object we're going to use
+	this.createRequest();
+};
+
+httpRequest.prototype = {
 	/* httpRequest.createRequest 
 	*
 	*  Creates the http_request internal object. For internal use only
 	*/
-	this.createRequest = function() {
+	createRequest : function() {
 		if (!this.http_request)
 		{
 			if (window.XMLHttpRequest) {
@@ -105,10 +110,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 				}
 			}
 		}
-	};
-	
-	// create the http_request object we're going to use
-	this.createRequest();
+	},
 	
 	/*
 	* httpRequest.send
@@ -116,7 +118,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	* Send the request to the specified api
 	* Params: String with optional query string parameters 
 	*/
-	this.send = function(params) {
+	send : function(params) {
 		if (this.inRequest)
 		{
 			this.http_request.abort();
@@ -140,12 +142,12 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 		this.http_request.send(params);
 		
 		this.inRequest = true;
-	};
+	},
 	
 	/* handleRequest 
 	*
 	*/
-	this.handleRequest = function() {
+	handleRequest : function() {
 		if (this.inRequest && this.http_request.readyState == 4)
 		{		
 			this.inRequest = false;
@@ -175,5 +177,5 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 					this.onError(this.http_request.satus);
 			}	
 		}
-	};
+	}
 };

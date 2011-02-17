@@ -74,7 +74,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	
 	this.visible = false;
-	
+};
+
+tabView.prototype = {
 	/*
 	* tabView.selectTab(tabNdx)
 	*
@@ -83,7 +85,7 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 	* when a user clicks on a tab
 	*
 	*/
-	this.selectTab = function(e, tabNdx) {
+	selectTab : function(e, tabNdx) {
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);
@@ -122,16 +124,16 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		
 		Scriptor.event.cancel(e, true);
 		return false;
-	};
+	},
 	
 	/*
-	* tabView.show()
+	* tabView.Show()
 	*
 	* Use this function nmediately after successfully defining the tabView object in order
 	* to create the tab list inside the empty UL element (shoud and will be emptied).
 	*
 	*/
-	this.Show = function() {
+	Show : function() {
 		var e = Scriptor.event.fire(this, 'onshow');
 		if (!e.returnValue)
 			return;
@@ -214,9 +216,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 		
 		this.visible = true;
 		this.Refresh();
-	};
+	},
 	
-	this.Refresh = function() {
+	Refresh : function() {
 		if (!this.visible)
 			return;
 		
@@ -241,9 +243,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			else
 				this.tabs[n].divElem.style.display = 'block';
 		}
-	};
+	},
 	
-	this.Hide = function() {
+	Hide : function() {
 		var e = Scriptor.event.fire(this, 'onhide');
 		if (!e.returnValue)
 			return;
@@ -254,9 +256,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			this.tabsElem.style.display = 'none';
 			
 		this.visible = false;
-	};
+	},
 	
-	this.addTab = function(tab, insertNdx) {
+	addTab : function(tab, insertNdx) {
 		if (typeof(tab.label) != 'string' || (typeof(tab.elem) != 'string' && !Scriptor.isHtmlElement(tab.elem))) {
 			Scriptor.error.report('Error: Invalid tab object.');
 			return;
@@ -307,9 +309,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			
 			this.Refresh();
 		}
-	};
+	},
 	
-	this.deleteTab = function(tabNdx) {
+	deleteTab : function(tabNdx) {
 		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
 		{
 			var curTab = this.tabs[tabNdx];
@@ -327,9 +329,9 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			if (this.visible)
 				this.Refresh();
 		}
-	};
+	},
 	
-	this.setTabLabel = function(tabNdx, label) {
+	setTabLabel : function(tabNdx, label) {
 		if (tabNdx >= 0 && tabNdx <= this.tabs.length-1)
 		{
 			this.tabs[tabNdx].label = label;
@@ -341,5 +343,5 @@ tabView = Scriptor.tabView = function(ulDiv, tabsDiv, tabs) {
 			}
 		}
 		
-	};
+	}
 };
