@@ -1433,10 +1433,16 @@ var dataRow = function(columnCollection, initialData) {
 var dataTypes = {
 	'num' : Number,
 	'alpha' : String,
-	'date' : function (str) {
+	'date' : function (str) {		// constructor for date objects from MySQL date strings
+		if (!str)
+			return '';
+		
+		if (str instanceof Date)
+			return str;
+		
 		var ret = new Date();
 		
-		if (str) {
+		if (typeof(str) == 'string') {
 			var dateParts = str.split(' ');
 			
 			if (dateParts[0] == '0000-00-00') {	//empty sql date field

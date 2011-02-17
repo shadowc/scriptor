@@ -36,18 +36,69 @@ switch ($contentOption)
 		else if ($contentType == 'xml')
 		{
 			echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
-			?><root success="1" totalrows="1">
-				<row>
-					<column name="id">1</column>
-					<column name="parentId">4</column>
-					<column name="Title"><![CDATA[Un titulo]]></column>
-				</row>
+			?><root success="1" totalrows="8">
+	<row>
+		<column name="Id">15</column>
+		<column name="parentId">0</column>
+		<column name="Title">Introducción</column>
+		<column name="Link">Introduccion</column>
+		<column name="DateCreated">2007-09-25</column>
+	</row>
+		<row>
+		<column name="Id">16</column>
+		<column name="parentId">0</column>
+		<column name="Title">Ingresar al Panel de Control</column>
+		<column name="Link">Ingresar_al_Panel_de_Control</column>
+		<column name="DateCreated">2007-10-01</column>
+	</row>
+		<row>
+		<column name="Id">17</column>
+		<column name="parentId">0</column>
+		<column name="Title">El Panel de Propiedades</column>
+		<column name="Link">El_Panel_de_Propiedades</column>
+		<column name="DateCreated">2007-10-01</column>
+	</row>
+		<row>
+		<column name="Id">18</column>
+		<column name="parentId">17</column>
+		<column name="Title">Crear una Propiedad</column>
+		<column name="Link">Crear_una_Propiedad</column>
+		<column name="DateCreated">2007-10-01</column>
+	</row>
+		<row>
+		<column name="Id">19</column>
+		<column name="parentId">17</column>
+		<column name="Title">Editar una Propiedad</column>
+		<column name="Link">Editar_una_Propiedad</column>
+		<column name="DateCreated">2007-10-01</column>
+	</row>
+		<row>
+		<column name="Id">20</column>
+		<column name="parentId">0</column>
+		<column name="Title">Subir Imágenes</column>
+		<column name="Link">Subir_Imagenes</column>
+		<column name="DateCreated">2007-10-02</column>
+	</row>
+		<row>
+		<column name="Id">21</column>
+		<column name="parentId">0</column>
+		<column name="Title">Introducción</column>
+		<column name="Link">Introduccion</column>
+		<column name="DateCreated">2008-10-07</column>
+	</row>
 			</root>
 			<?php
 		}
 		else	// json
 		{
-			?>{ "todo" : "Add some rows here" }
+			?>{ "success" : 1, "totalrows" : 8, "rows" :
+				[ "Id" : 15, "parentId" : 0, "Title" : "Introduccion", "Link" : "Introduccion", "DateCreated" : "2007-09-25" ],
+				[ "Id" : 16, "parentId" : 0, "Title" : "Ingresar al Panel de Control", "Link" : "Ingresar_al_Panel_de_Control", "DateCreated" : "2007-10-01" ],
+				[ "Id" : 17, "parentId" : 0, "Title" : "El Panel de Propiedades", "Link" : "El_Panel_de_Propiedades", "DateCreated" : "2007-10-01" ],
+				[ "Id" : 18, "parentId" : 17, "Title" : "Crear una Propiedad", "Link" : "Crear_una_propiedad", "DateCreated" : "2007-10-01" ],
+				[ "Id" : 19, "parentId" : 17, "Title" : "Editar una Propiedad", "Link" : "Editar_una_propiedad", "DateCreated" : "2007-10-01" ],
+				[ "Id" : 20, "parentId" : 0, "Title" : "Subir Imagenes", "Link" : "Subir_Imagenes", "DateCreated" : "2007-10-02" ],
+				[ "Id" : 21, "parentId" : 0, "Title" : "Introduccion", "Link" : "introduccion", "DateCreated" : "2008-10-07" ] }
 			<?php 
 		}
 		break;
