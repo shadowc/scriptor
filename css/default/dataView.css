@@ -12,7 +12,7 @@
 .dataViewPaginationHeader ul li a.dataViewNextBtn { background: URL('images/next-button.jpg') no-repeat center; border-right: 1px solid #09404c; }
 .dataViewPaginationHeader ul li label.dataViewPaginationGotoPage { float: left; height: 21px; padding: 4px 7px 0 10px; }
 .dataViewPaginationHeader ul li input.dataViewPaginationInput { height: 15px; padding: 1px; border: 1px solid #727272; width: 30px; float: left; margin: 3px 0 0 0; padding: 0 4px 0 0; font-size: 10px; }
-.dataViewPaginationHeader ul li input.dataViewPageButton { height: 17px; padding: 1px; width: auto; float: left; margin: 3px 0 0 5px; display: inline; }
+.dataViewPaginationHeader ul li input.dataViewPageButton { height: 17px; padding: 0 1px; width: auto; float: left; margin: 3px 0 0 5px; display: inline; font-size: 9px; }
 
 .dataViewHeader { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #072026; height: 25px; overflow: hidden; background: URL('images/fields-middle.jpg') repeat-x; }
 .dataViewHeader ul { list-style-type: none; height: 25px; overflow: hidden; background: URL('images/fields-left.jpg') no-repeat top left; }
