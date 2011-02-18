@@ -2415,6 +2415,7 @@ dataView.prototype = {
 				
 				if (this.visible) {
 					this.Show(false);
+					this.updateRows();
 				}
 			}
 			else {
@@ -2870,7 +2871,7 @@ dataView.prototype = {
 			
 		for (n = start+1; n < this.rows.length; n++) {
 			var swap = false;
-			var	func = this.columns[this.orderBy].Comparator;
+			var	func = this.columns[this.__findColumn(this.orderBy)].Comparator;
 			
 			if (this.orderWay == 'ASC') {
 				
@@ -3256,8 +3257,9 @@ dataViewConnector.prototype = {
 				var totRows = Number(root.getAttribute('totalrows'));
 				if (!isNaN(totRows))
 				{
-					this.dataView.totalRows = root.getAttribute('totalrows');
-					document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+					this.dataView.totalRows = totRows;
+					if (this.dataView.paginating)
+						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
 				}
 				var rows = root.getElementsByTagName('row');
 		
@@ -3294,13 +3296,55 @@ dataViewConnector.prototype = {
 		}
 		else	// json
 		{
+			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
+			//   upgrade addRow, deleteRow to avoid using updateRows
+			// fake visible = false so we call updateRows only once
+			var oldVisible = this.dataView.visible;
+			this.dataView.visible = false;
+			this.dataView.rows.length = 0;
 			
+			if (data.success)
+			{
+				var totRows = Number(data.totalrows);
+				if (!isNaN(totRows))
+				{
+					this.dataView.totalRows = totRows;
+					if (this.dataView.paginating)
+						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+				}
+				
+				for (var n=0; n < data.rows.length; n++)
+				{
+					var tempR = {};
+					
+					for (var colName in data.rows[n])
+					{
+						var cType = this.dataView.__findColumn(colName) != -1 ?
+							this.dataView.columns[this.dataView.__findColumn(colName)].Type :
+							'alpha';
+						tempR[colName] = dataTypes[cType](data.rows[n][colName]);	
+					}
+					
+					this.dataView.addRow(this.dataView.createRow(tempR));
+				}
+			}
+			else
+			{
+				// TODO: show an error message in the dataView component
+			}
+			
+			if (oldVisible)
+			{
+				this.dataView.visible = oldVisible;
+				this.dataView.updateRows();
+			}
 		}
 	},
 	
 	_onError : function(status)
 	{
 		this.dataView.setLoading(false);
+		// TODO: show an error message in the dataView component
 	}
 };// JavaScript Document
 /*

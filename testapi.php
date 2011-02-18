@@ -92,13 +92,24 @@ switch ($contentOption)
 		else	// json
 		{
 			?>{ "success" : 1, "totalrows" : 8, "rows" :
-				[ "Id" : 15, "parentId" : 0, "Title" : "Introduccion", "Link" : "Introduccion", "DateCreated" : "2007-09-25" ],
-				[ "Id" : 16, "parentId" : 0, "Title" : "Ingresar al Panel de Control", "Link" : "Ingresar_al_Panel_de_Control", "DateCreated" : "2007-10-01" ],
-				[ "Id" : 17, "parentId" : 0, "Title" : "El Panel de Propiedades", "Link" : "El_Panel_de_Propiedades", "DateCreated" : "2007-10-01" ],
-				[ "Id" : 18, "parentId" : 17, "Title" : "Crear una Propiedad", "Link" : "Crear_una_propiedad", "DateCreated" : "2007-10-01" ],
-				[ "Id" : 19, "parentId" : 17, "Title" : "Editar una Propiedad", "Link" : "Editar_una_propiedad", "DateCreated" : "2007-10-01" ],
-				[ "Id" : 20, "parentId" : 0, "Title" : "Subir Imagenes", "Link" : "Subir_Imagenes", "DateCreated" : "2007-10-02" ],
-				[ "Id" : 21, "parentId" : 0, "Title" : "Introduccion", "Link" : "introduccion", "DateCreated" : "2008-10-07" ] }
+				[ { "Id" : 15, "parentId" : 0, "Title" : "Introduccion", "Link" : "Introduccion", "DateCreated" : "2007-09-25" },
+				{ "Id" : 16, "parentId" : 0, "Title" : "Ingresar al Panel de Control", "Link" : "Ingresar_al_Panel_de_Control", "DateCreated" : "2007-10-01" },
+				{ "Id" : 17, "parentId" : 0, "Title" : "El Panel de Propiedades", "Link" : "El_Panel_de_Propiedades", "DateCreated" : "2007-10-01" },
+				{ "Id" : 18, "parentId" : 17, "Title" : "Crear una Propiedad", "Link" : "Crear_una_propiedad", "DateCreated" : "2007-10-01" },
+				{ "Id" : 19, "parentId" : 17, "Title" : "Editar una Propiedad", "Link" : "Editar_una_propiedad", "DateCreated" : "2007-10-01" },
+				{ "Id" : 20, "parentId" : 0, "Title" : "Subir Imagenes", "Link" : "Subir_Imagenes", "DateCreated" : "2007-10-02" },
+				{ "Id" : 21, "parentId" : 0, "Title" : "Introduccion", "Link" : "introduccion", "DateCreated" : "2008-10-07" } ]
+			}
+			<?php 
+		}
+		break;
+	
+	case (2):
+		if ($contentType == 'json') {
+			?>{ "success" : 1, "totalrows" : 2, "rows" :
+				[ { "id" : 8, "User" : "demo", "Pass" : "8e4f82381229e495e7941cf9e40e6980d14a16bf023ccd4c9134e157dfe8f113", "FirstName" : "Demo", "LastName" : "User" },
+				 { "id" : 2, "User" : "shadowc", "Pass" : "aa81c8763a7acba868392ad1c96137d3db74a93d7e9e03a15f7438fd8f0ff034", "FirstName" : "Matias", "LastName" : "Jose" } ]
+			}
 			<?php 
 		}
 		break;
