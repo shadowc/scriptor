@@ -1469,11 +1469,11 @@ var dataTypes = {
 * for the space calculations.
 */
 var dataViewStyle = {
-	'objectVerticalPadding' : 4,
-	'objectHorizontalPadding' : 6,
+	'objectVerticalPadding' : 8,
+	'objectHorizontalPadding' : 8,
 	'paginationHeaderHeight' : 25, 
 	'headerHeight' : 24, 
-	'footerHeight' : 24,
+	'footerHeight' : 25,
 	'rowHeight' : 17, 
 	'cellVerticalPadding' : 0, 
 	'cellHorizontalPadding' : 10, 
@@ -1940,20 +1940,18 @@ dataView.prototype = {
 		
 		var dvTemplate = '';
 		
+		// ensure minimum width for dataView to work
+		if (this.Width < this.__calculateMinWidth())
+			this.Width = this.__calculateMinWidth();
+			
 		// adjust column widths to the total width of the object
 		this.forceWidth(this.Width);
 		
 		// calculate total width of columns in table
-		var totalWidth = 0;
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show) 
-				totalWidth += this.columns[n].Width;
-		}
-		if (this.multiselect) 
-			totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+		var totalWidth = this.__calculateTotalWidth();
 		
-		target.style.width = this.Width + 'px';
-		target.style.height = this.Height + 'px';
+		target.style.width = (this.Width - this.style.objectHorizontalPadding) + 'px';
+		target.style.height = (this.Height - this.style.objectVerticalPadding) + 'px';
 		target.style.display = 'block';
 		target.style.overflow = 'hidden';
 		
@@ -1973,7 +1971,7 @@ dataView.prototype = {
 		}
 		
 		// Create table header
-		dvTemplate += '<div class="dataViewHeader" style="width: ' + this.Width + 'px; height: ' + this.style.headerHeight + 'px;" id="'+this.div+'_columnsHeader">';
+		dvTemplate += '<div class="dataViewHeader" style="width: ' + (this.Width - this.style.objectHorizontalPadding) + 'px; height: ' + this.style.headerHeight + 'px;" id="'+this.div+'_columnsHeader">';
 		dvTemplate += '<ul style="height: ' + this.style.headerHeight + 'px;">';
 		
 		if (this.multiselect) {
@@ -1992,7 +1990,6 @@ dataView.prototype = {
 				dvTemplate += '<li style="width: ' + colWidth + 'px;">';
 				
 				var aWidth = 0;
-				tmpA = document.createElement('a');		
 				if ((this.columns[n].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) > 0) 
 					aWidth = (this.columns[n].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth);
 				
@@ -2020,9 +2017,9 @@ dataView.prototype = {
 		// Create body
 		var bodyHeight = 0;
 		if (this.paginating) 
-			bodyHeight = (this.Height - this.style.paginationHeaderHeight - this.style.headerHeight - this.style.footerHeight - this.style.objectVerticalPadding);
+			bodyHeight = (this.Height - this.style.paginationHeaderHeight - this.style.headerHeight - this.style.footerHeight - this.style.objectVerticalPadding -2);
 		else
-			bodyHeight = (this.Height - this.style.headerHeight - this.style.footerHeight - this.style.objectVerticalPadding);
+			bodyHeight = (this.Height - this.style.headerHeight - this.style.footerHeight - this.style.objectVerticalPadding -2);
 			
 		dvTemplate += '<div style="height: ' + bodyHeight + 'px; overflow: auto;" class="dataViewOuterBody">';
 		dvTemplate += '<div style="width: ' + totalWidth + 'px" class="dataViewBody" id="' + this.div + '_body"></div>';
@@ -2843,35 +2840,54 @@ dataView.prototype = {
 		if (isNaN(Number(w)))
 			return;
 		
-		var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show)
-				minWidth += this.style.cellHorizontalPadding + this.style.sepWidth;
-		}
-		
+		var minWidth = this.__calculateMinWidth();
 		if (w < minWidth)
-			return;
+			w = minWidth;
 		
 		this.Width = w;
-		var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
-		if (this.multiselect)
-			totalWidth += this.style.multiSelectColumnWidth + this.sepWidth;
+		var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth + this.__calculateTotalWidth();
 		
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show)
-				totalWidth += this.columns[n].Width;
-		}
-		
-		if (totalWidth > this.Width) {
-			while (totalWidth > this.Width) {
-				for (var n=0; n < this.columns.length; n++) {
-					if (this.columns[n].show) {
-						totalWidth -= 1;
-						this.columns[n].Width -= 1;
-					}
+		while (totalWidth > this.Width) {
+			for (var n=0; n < this.columns.length; n++) {
+				if (this.columns[n].show) {
+					totalWidth -= 1;
+					this.columns[n].Width -= 1;
 				}
 			}
 		}
+	},
+	
+	/*
+	* Internal use only
+	*/
+	__calculateMinWidth : function()
+	{
+		var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
+		for (var n=0; n < this.columns.length; n++) {
+			minWidth += this.style.cellHorizontalPadding + this.style.sepWidth;
+		}
+		if (this.multiselect)
+			minWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+		
+		return minWidth;
+	},
+	
+	/*
+	* Internal use only
+	*/
+	__calculateTotalWidth : function()
+	{
+		var totalWidth = 0;
+		
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n].show) 
+				totalWidth += this.columns[n].Width;
+		}
+		
+		if (this.multiselect) 
+			totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+		
+		return totalWidth ;
 	},
 	
 	/*
@@ -3045,19 +3061,14 @@ dataView.prototype = {
 		this.resizingXCache = x;
 		// get the minimum width for a column;
 		var minWidth = this.style.cellHorizontalPadding + this.style.sepWidth;
-		var colNdx = this.resColumnId;
-		var actualColNdx = 0;
+		var colNdx = 0;
+		var actualColNdx = this.resColumnId;
 		
-		// calculate actual col beign changed
-		var n, a;
-		for (n=0, a=0; n < this.columns.length; n++) {
-			if (this.columns[n].show) {
-				if (a == colNdx) {
-					actualColNdx = n;
-					break;
-				}
-				a++;
-			}
+		// calculate colNdx (the HTML element in the ul index)
+		for (var n=0; n < actualColNdx; n++)
+		{
+			if (this.columns[n].show)
+				colNdx++;
 		}
 		
 		// get the next column in case resizing is needed
@@ -3082,14 +3093,7 @@ dataView.prototype = {
 		}
 		else {
 			// see if there is space for col to grow
-			var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
-			if (this.multiselect)
-				totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding;
-				
-			for (n=0; n < this.columns.length; n++) {
-				if (this.columns[n].show) 
-					totalWidth += this.columns[n].Width;
-			}
+			var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth + this.__calculateTotalWidth();
 			
 			if ((totalWidth + deltaX) < this.Width) {	// there is space to grow
 				this.columns[actualColNdx].Width += deltaX;
@@ -3114,39 +3118,30 @@ dataView.prototype = {
 			var offset = 0;
 			if (this.multiselect)
 				offset = 2;
-				
-			cols[offset+(colNdx*2)].style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px'; 
+			var ndx = offset + (colNdx*2);
+			
+			cols[ndx].style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px'; 
 			if ((this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) > 0) 
-				cols[offset+(colNdx*2)].firstChild.style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
+				cols[ndx].firstChild.style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
 			else 
-				cols[offset+(colNdx*2)].firstChild.style.width = '0px';
+				cols[ndx].firstChild.style.width = '0px';
 			
 			if (changedNextColSize) {
-				colNdx++;
-				cols[offset+(colNdx*2)].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px';
+				ndx += 2;
+				
+				cols[ndx].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px';
 				if ((this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) > 0) 
-					cols[offset+(colNdx*2)].firstChild.style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
+					cols[ndx].firstChild.style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
 				else 
-					cols[offset+(colNdx*2)].firstChild.style.width = '0px';
+					cols[ndx].firstChild.style.width = '0px';
 			}
 		}
-		
-		// restore colNdx for next iteration
-		if (changedNextColSize)
-			colNdx--;
 			
 		// update row cells
 		var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
 		
 		// calculate total width of columns in table
-		var totalWidth = 0;
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show) 
-				totalWidth += this.columns[n].Width;
-		}
-		if (this.multiselect) 
-			totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
-		document.getElementById(this.div+'_body').style.width = totalWidth+'px';	
+		document.getElementById(this.div+'_body').style.width = this.__calculateTotalWidth()+'px';	
 		
 		for (var n=0; n < rows.length; n++)
 		{
@@ -3154,12 +3149,19 @@ dataView.prototype = {
 			var offset = 0;
 			if (this.multiselect)
 				offset = 1;
-				
-			cols[offset+(colNdx)].style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - 2) + 'px'; 			
+			
+			var colWidth = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - 2);
+			if (colNdx == 0 && !this.multiselect) {
+				colWidth -= 1;
+			}
+			else {
+				colWidth += 1;
+			}
+			
+			cols[offset+(colNdx)].style.width = colWidth + 'px';
 			
 			if (changedNextColSize) {
-				colNdx++;
-				cols[offset+(colNdx)].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - 2) + 'px';
+				cols[offset+(colNdx)+1].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding -1) + 'px';
 			}
 		}
 	}
