@@ -132,6 +132,10 @@ var Scriptor = {
 		
 		attach : function(htmlElement, evt, funcObj) {
 			if (Scriptor.isHtmlElement(htmlElement) || htmlElement === document || htmlElement === window)
+			{
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
+				
 				if (htmlElement.addEventListener) {
 					htmlElement.addEventListener(evt, funcObj, false);
 				}
@@ -140,17 +144,23 @@ var Scriptor = {
 						htmlElement.attachEvent('on' + evt, funcObj);
 					}
 				}
+			}
 			else if (htmlElement._customEventStacks)
+			{
 				if (htmlElement._customEventStacks[evt]) {
 					// first, detach event if already attached, it will move to the end of
 					// the stack
 					Scriptor.event.detach(htmlElement, evt, funcObj);
 					htmlElement._customEventStacks[evt].stack.push(funcObj);
 				}
+			}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
 			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
+			{
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
 				if (htmlElement.removeEventListener) {
 					htmlElement.removeEventListener(evt, funcObj, false);
 				}
@@ -159,7 +169,9 @@ var Scriptor = {
 						htmlElement.detachEvent('on' + evt, funcObj);
 					}
 				}
+			}
 			else if (htmlElement._customEventStacks)
+			{
 				if (htmlElement._customEventStacks[evt]) {
 					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
 						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
@@ -168,6 +180,7 @@ var Scriptor = {
 						}
 					}
 				}
+			}
 		},
 	
 		// this will execute in the context of _customEvents object
@@ -1887,7 +1900,7 @@ dataView.prototype = {
 	/*
 	* dataView.Refresh();
 	*  This function will call updateRows to refresh dataView rows if visible
-	*  You can use a dataSet object to connect an XML or JSON service to dataView
+	*  You can use a dataViewConnector object to connect an XML or JSON service to dataView
 	*  and this will automatically retrieve information assync every time
 	*  you call refresh() method.
 	*/
@@ -4349,17 +4362,29 @@ tabView.prototype = {
 *
 * js class for every category (node) on the treeView
 */
-treeNode = function(id, pid, Name, parent, tv) {
-	this.internalId = tv.getNextInternalId();
-	this.id = isNaN(Number(id)) ? 0 : id;
-	this.parentId = isNaN(Number(pid)) ? 0 : pid;
-	this.Name = String(Name);
-	this.expanded = false;
-	this.childNodes = Array();
-	this.parentNode = parent;
-	this.treeView = tv;
+var treeNode = function(opts) /*id, pid, Name, parent, tv)*/ {
+	var localOpts = {
+		id : null,
+		parentId : 0,
+		parent : null,
+		Name : ""
+	};
 	
-	this.getChildNodes = function(parentNode, tv) {
+	Scriptor.mixin(localOpts, opts);
+	this.treeView = localOpts.treeView;
+	
+	this.id = localOpts.id !== null ? localOpts.id : this.treeView.getNextNodeId();
+	this.parentId = localOpts.parentId
+	this.Name = String(localOpts.Name);
+	this.expanded = false;
+	this.childNodes = [];
+	this.parentNode = localOpts.parent;
+};
+
+treeNode.prototype = {
+	// TODO: Remove this function and set it on treeNodeConnector, XML
+	getChildNodes : function(parentNode, tv)
+	{
 		for (var n=0; n<parentNode.childNodes.length; n++) {
 			if (parentNode.childNodes[n].nodeName == 'category') {
 				var ndx = this.childNodes.length;
@@ -4374,415 +4399,319 @@ treeNode = function(id, pid, Name, parent, tv) {
 				}
 			}
 		}
-	}
+	},
 	
-	this.searchNode = function(ndx) {
+	searchNode : function(id)
+	{
 		var n;
-		var srch = false;
+		var srch = null;
 		var srchNdx = 0;		
 		for (n=0; n < this.childNodes.length; n++) {
-			if (this.childNodes[n].internalId == ndx) {
+			if (this.childNodes[n].id == id) {
 				srch = this.childNodes[n];
 				break;
 			}			
 		}
 		while (!srch && srchNdx < this.childNodes.length) {
-			srch = this.childNodes[srchNdx].searchNode(ndx);
+			srch = this.childNodes[srchNdx].searchNode(id);
 			srchNdx++;
 		}
 		
 		return srch;
-	} 
+	},
 	
-	this.toString = function() {
-		return "[Category Name: " + this.Name + ", ParentId: " + this.parentId + 
-				 ", Children: " + this.subCategories.length + "]";
+	/* assumes an empty ul element and fills it with al its children and subchildren
+	*/
+	updateChildrenNodes : function()
+	{
+		var parentNode = document.getElementById(this.treeView.div + '_' + this.id + '_branch');
+		
+		for (var i=0; i < this.childNodes.length; i++) { 
+			var node = document.createElement('li');
+			node.id = this.treeView.div + '_' + this.childNodes[i].id;
+			parentNode.appendChild(node);
+			
+			var nodeTemplate = '';
+			var hasChildren = this.childNodes[i].childNodes.length;
+			
+			if (hasChildren) {
+				// Create link to expand node
+				nodeTemplate += '<a id="'+this.treeView.div + '_' + this.childNodes[i].id + '_expandable" href="#" class="';
+				nodeTemplate += (this.childNodes[i].expanded ? 'treeViewCollapsableNode' : 'treeViewExpandableNode') + '"></a>';
+			}
+			
+			// Create link to select node
+			nodeTemplate += '<a id="'+this.treeView.div+'_'+this.childNodes[i].id+'_selectNode" ';
+			if (!hasChildren)
+				nodeTemplate += 'class="treeViewSingleNode" ';
+			nodeTemplate += 'href="#">'+this.childNodes[i].Name+'</a>';
+			
+			if (hasChildren)
+			{
+				// Create subcategory list
+				nodeTemplate += '<ul id="' + this.treeView.div + '_' + this.childNodes[i].id + '_branch"></ul>';
+			}
+			
+			node.innerHTML = nodeTemplate;
+			
+			if (hasChildren)	
+				Scriptor.event.attach(document.getElementById(this.treeView.div + '_' + this.childNodes[i].id + '_expandable'),
+									  'click',
+									  Scriptor.bind(this.treeView._expandNode, this.treeView, this.childNodes[i].id));
+				
+			Scriptor.event.attach(document.getElementById(this.treeView.div + '_' + this.childNodes[i].id + '_selectNode'),
+									  'click',
+									  Scriptor.bind(this.treeView._selectNode, this.treeView, this.childNodes[i].id));
+			
+			if (hasChildren)
+				this.childNodes[i].updateChildrenNodes();
+			
+		}
+	},
+	
+	toString : function() {
+		return "[Name: " + this.Name + ", ParentId: " + this.parentId + 
+				 ", Children: " + this.childNodes.length + "]";
 	}
 };
 
 /*
 * the treeView class
 */
-treeView = function (div, sqlService) {
+treeView = Scriptor.treeView = function (div) {
 	this.selectedNode = null;
 	this.enabled = true;
 	
-	this.onbeforeselect = false;
-	this.onselect = false;
-	this.onbeforeshow = false;
-	this.onshow = false;
-	this.onbeforerefresh = false;
-	this.onrefresh = false;
-
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onrefresh');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	
 	this.visible = false;
-	this.sqlService = sqlService;
-	this.optParams = '';
 	
-	this.div = div;
-	this.http_request = false;
-
-	TrVE.dataRegisters[TrVE.dataRegisters.length] = {'dobj' : this, 'ddiv' : this.div };
+	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
+	this.div = typeof(div) == 'string' ? div : this.divElem.id;
 	
-	this.childNodes = Array();
-	this.nextNodeId = 0;
-}
-
-/*
-*  getNextInternalId
-*
-*  Interface: return a unique id for a treeNode
-*/
-treeView.prototype.getNextInternalId = function() {
-	this.nextNodeId++;
-	return new Number(this.nextNodeId);
+	this.masterNode = new treeNode({id : 0, parentId : 0, parent : null, Name : "root", treeView : this });
+	this.nextNodeId = 1;
 };
 
-treeView.prototype.searchNode = function(ndx) {
-	var n;
-	var srch = false;
-	var srchNdx = 0;		
-	for (n=0; n < this.childNodes.length; n++) {
-		if (this.childNodes[n].internalId == ndx) {
-			srch = this.childNodes[n];
-			break;
-		}			
-	}
-	while (!srch && srchNdx < this.childNodes.length) {
-		srch = this.childNodes[srchNdx].searchNode(ndx);
-		srchNdx++;
-	}
-	
-	return srch;
-};
-
-treeView.prototype.Show = function(withRefresh) {
-	if (withRefresh)
-		this.Refresh();
-	
-	if (!this.div || !document.getElementById(this.div)) {
-		alert( 'No HTML Object assigned to treeView.' );
-		return;
-	}
-	
-	if (this.onbeforeshow) {
-		if (!this.onbeforeshow(this)) {
-			return;
+treeView.prototype = {
+	/*
+	*  getNextInternalId
+	*
+	*  Interface: return a unique id for a treeNode
+	*/
+	getNextNodeId : function() {
+		var found = true;
+		while (found)
+		{
+			if (this.masterNode.searchNode(this.nextNodeId) === null)
+				found = false;
+			else
+				this.nextNodeId++;
 		}
-	}
-			
-	var target = document.getElementById(this.div);
+		
+		return this.nextNodeId;
+	},
 	
-	while (target.firstChild)
-		target.removeChild(target.firstChild);
+	searchNode : function(id) {
+		return this.masterNode.searchNode(id);
+	},
 	
-	/* Check if element exists */
-	var tree = document.createElement('ul');
-	tree.id = 'mainNode_' + this.div;
-	tree.className = 'treeViewContainer';
-	target.appendChild(tree);
+	/*
+	* treeView.Refresh();
+	*  This function will call updateNodes to refresh treeView nodes if visible
+	*  You can use a treeViewConnector object to connect an XML or JSON service to treeView
+	*  and this will automatically retrieve information assync every time
+	*  you call Refresh() method.
+	*/
+	Refresh : function() {
+		var e = Scriptor.event.fire(this, 'onrefresh');
+		if (!e.returnValue)
+			return;
+		
+		if (this.visible)
+			this.updateNodes();
+	},
 	
-	if (withRefresh) {
-		this.visible = false;
-		// display loading div
-		target.className = target.className + ' treeViewLoading';
-	}
-	else {
-		var classes = target.className.split(' ');
-		if (classes.length > 1 && classes[classes.length-1] == 'treeViewLoading') {
-			target.className = '';
-			for (var n=0; n < classes.length-1; n++) {
-				target.className += classes[n];
-				if (n < classes.length -2)
-					target.className += ' ';
+	Show : function(withRefresh) {
+		var e = Scriptor.event.fire(this, 'onshow');
+		if (!e.returnValue)
+			return;
+		
+		if (!this.divElem)
+		{
+			this.divElem = document.getElementById(this.div);
+		}
+		else
+		{
+			if (!this.divElem.id)
+			{
+				if (!this.div)
+					this.div = __getNextHtmlId();
+					
+				this.divElem.id = this.div;
 			}
 		}
+		
+		if (!this.divElem) {
+			Scriptor.error.report('Error: treeView DIV does not exist.');
+			return;
+		}
+		
+		var target = this.divElem;
+		target.className = 'treeView';
+		target.innerHTML = '<ul id="'+this.div+'_0_branch" class="treeViewContainer"></ul>';
 		
 		this.visible = true;
-		this.appendChildNodes('mainNode_' + this.div, this);
-		if (this.onshow) 
-			this.onshow(this);
-	}
-};
-
-treeView.prototype.Refresh = function() {
-	if (this.onbeforerefresh) {
-		if (!this.onbeforerefresh(this)) {
+		if (withRefresh) 
+			this.Refresh();
+	},
+	
+	updateNodes : function()
+	{
+		if (this.visible)
+		{
+			document.getElementById(this.div+"_0_branch").innerHTML = '';
+			this.masterNode.updateChildrenNodes();
+		}
+	},
+	
+	setLoading : function(val)
+	{
+		this.divElem.className = "treeViewMain" + (val ? " treeViewLoading" : "");
+	},
+	
+	setMessage : function(str)
+	{
+		
+	},
+	
+	/* treeView.loadXmlData
+	*  for internal use only
+	*/
+	// TODO: Move to treeView connector
+	/*treeView.prototype.loadXmlData = function(xmlData, tv) {
+		var root = xmlData.getElementsByTagName('root').item(0);
+		if (root.getAttribute('success') == '1') {
+			tv.childNodes.length = 0;
+			
+			var categories = root.getElementsByTagName('categories').item(0);
+			for (var i=0; i<categories.childNodes.length; i++) {
+				if (categories.childNodes[i].nodeName == 'category') {
+					nodeId = categories.childNodes[i].getAttribute('id');
+					nodeParentId = categories.childNodes[i].getAttribute('parentid');
+					nodeName = categories.childNodes[i].getAttribute('name');
+	
+					ndx = tv.childNodes.length;
+					tv.childNodes[ndx] = new treeNode(nodeId, nodeParentId, nodeName, categories.childNodes[i], tv);
+					tv.childNodes[ndx].getChildNodes(categories.childNodes[i], tv);
+				}
+			}
+			
+			if (tv.onrefresh)
+				tv.onrefresh(tv);
+					
+			tv.Show(false);
+	
+		} else {
+			alert( 'Unsuccessful XML call.\nMessage: '+ root.getAttribute('error'));
+			tv.Show(false);
 			return;
 		}
-	}
+		
+	};*/
 	
-	if (typeof(httpRequest) == 'undefined') {
-		alert('Error: Failed to load httpRequest scriptor module.');
-		return;
-	}
-	
-	if (!this.http_request) {
-		this.http_request = new httpRequest(this.sqlService, 'POST', this.loadXmlData, this.loadError, this);
-	}
-	
-	if (!this.sqlService) {
-		alert( 'Invalid sql XmlService.');
-		return;
-	}
-	
-	var request;
-	if (this.optParams) 
-		request = this.optParams;
-	else
-		request = '';
-
-	this.http_request.send( request );	
-	
-};
-
-/* treeView.loadXmlData
-*  for internal use only
-*/
-treeView.prototype.loadXmlData = function(xmlData, tv) {
-	var root = xmlData.getElementsByTagName('root').item(0);
-	if (root.getAttribute('success') == '1') {
+	/* treeView.loadError
+	*  for internal use only
+	*/
+	// TODO: move to treeViewConnector
+	/*treeView.prototype.loadError = function(status, tv) {
 		tv.childNodes.length = 0;
 		
-		var categories = root.getElementsByTagName('categories').item(0);
-		for (var i=0; i<categories.childNodes.length; i++) {
-			if (categories.childNodes[i].nodeName == 'category') {
-				nodeId = categories.childNodes[i].getAttribute('id');
-				nodeParentId = categories.childNodes[i].getAttribute('parentid');
-				nodeName = categories.childNodes[i].getAttribute('name');
-
-				ndx = tv.childNodes.length;
-				tv.childNodes[ndx] = new treeNode(nodeId, nodeParentId, nodeName, categories.childNodes[i], tv);
-				tv.childNodes[ndx].getChildNodes(categories.childNodes[i], tv);
-			}
+		if (tv.visible) {
+			tv.updateRows()
 		}
-		
-		if (tv.onrefresh)
-			tv.onrefresh(tv);
-				
-		tv.Show(false);
-
-	} else {
-		alert( 'Unsuccessful XML call.\nMessage: '+ root.getAttribute('error'));
-		tv.Show(false);
-		return;
-	}
-	
-};
-
-/* treeView.loadError
-*  for internal use only
-*/
-treeView.prototype.loadError = function(status, tv) {
-	tv.childNodes.length = 0;
-	
-	if (tv.visible) {
-		tv.updateRows()
-	}
-	else {
-		tv.Show(false);
-	}
-};
-
-treeView.prototype.appendChildNodes = function(elementId, nodes) {
-	if (!this.visible) {
-		alert('treeView Error: Cannot append childnode on non visible object.');
-		return;
-	}
-	
-	var parentNode = document.getElementById(elementId);
-	if (!parentNode) {
-		alert('treeView Error: treeView object not found.');
-		return;
-	}
-	
-	for (var i=0; i < nodes.childNodes.length; i++) { 
-		var node = document.createElement('li');
-		node.id = 'tree_' + this.div + '_' + nodes.childNodes[i].internalId;
-
-		if (nodes.childNodes[i].childNodes.length > 0) {
-			/* Create link to expand node */
-			var link = document.createElement('a');
-			link.id = 'expandNode_' + this.div + '_' + nodes.childNodes[i].internalId;
-			link.href = '#';
-			link.onclick = TrVE.expandChildNode;
-			link.className = 'treeViewExpandableNode';
-			/*img = document.createElement('img');
-			img.src = 'images/plus.gif';
-			link.appendChild(img);*/
-			node.appendChild(link);
-			
-			/* Create link to select node */
-			link = document.createElement('a');
-			link.id = 'selectNode_' + this.div + '_' + nodes.childNodes[i].internalId;
-			link.href = '#';
-			link.onclick = TrVE.selectNode;
-			text = document.createTextNode(nodes.childNodes[i].Name);
-			link.appendChild(text);
-			node.appendChild(link);
-			
-			/* Create subcategory list */
-			list = document.createElement('ul');
-			list.id = 'branch_' + this.div + '_' + nodes.childNodes[i].internalId;
-			node.appendChild(list);
-
-			parentNode.appendChild(node);
-			
-			this.appendChildNodes('branch_' + this.div + '_' + nodes.childNodes[i].internalId, nodes.childNodes[i]);
-		} else {
-			/* Create link to select node */
-			link = document.createElement('a');
-			link.id = 'selectNode_' + this.div + '_' + nodes.childNodes[i].internalId;
-			link.href = '#';
-			link.className = 'treeViewSingleNode';
-			link.onclick = TrVE.selectNode;
-			text = document.createTextNode(nodes.childNodes[i].Name);
-			link.appendChild(text);
-			node.appendChild(link);
-			
-			parentNode.appendChild(node);
+		else {
+			tv.Show(false);
 		}
-	}
-};
-
-treeView_engine = function() {
-	this.dataRegisters = Array();
-};
-
-treeView_engine.prototype = {
-__findTreeView : function(str) {
-	for (var n=0; n < TrVE.dataRegisters.length; n++) 
-		if (TrVE.dataRegisters[n].ddiv == str) 
-			return TrVE.dataRegisters[n].dobj;
+	};*/
 	
-	return false;
-},
-
-expandChildNode : function(e) {
-	if (!e)
-		e = window.event;
-		
-	var elem = (e.target) ? e.target : e.srcElement;
-	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	var divComponents = elem.id.split('_');
-	
-	var tree = TrVE.__findTreeView(divComponents[1]);
-	if (!tree) {
-		alert('Error: treeView not found.');
-	}
-	
-	/* Modify Link */
-	elem.onclick = TrVE.collapseChildNode;
-	elem.className = 'treeViewCollapsableNode';
-	
-	/* Expand Branch */
-	var branchId = 'branch_' + divComponents[1] + '_' + divComponents[2];
-	document.getElementById(branchId).style.display = 'block';
-	
-	return false;
-},
-
-collapseChildNode : function(e) {
-	if (!e)
-		e = window.event;
-		
-	var elem = (e.target) ? e.target : e.srcElement;
-	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	var divComponents = elem.id.split('_');
-	
-	var tree = TrVE.__findTreeView(divComponents[1]);
-	if (!tree) {
-		alert('Error: treeView not found.');
-	}
-	
-	/* Modify Link */
-	elem.onclick = TrVE.expandChildNode;
-	elem.className = 'treeViewExpandableNode';
-	
-	/* Expand Branch */
-	var branchId = 'branch_' + divComponents[1] + '_' + divComponents[2];
-	document.getElementById(branchId).style.display = 'none';	
-	
-	return false;
-},
-
-selectNode : function(e) {
-	if (!e)
-		e = window.event;
-		
-	var elem = (e.target) ? e.target : e.srcElement;
-	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	var divComponents = elem.id.split('_');
-	
-	var tree = TrVE.__findTreeView(divComponents[1]);
-	if (!tree) {
-		alert('Error: treeView not found.');
-	}
-	
-	node = divComponents[2];
-
-	if (tree.selectedNode != null) {
-		var selNode = document.getElementById('selectNode_' + tree.div + '_' + tree.selectedNode);
-		selNode.onclick = TrVE.selectNode;
-		
-		var classes = selNode.className.split(' ');
-		if (classes.length > 1) 
-			selNode.className = 'treeViewSingleNode';
+	_expandNode : function(e, nodeId) {
+		var node = this.searchNode(nodeId);
+		if (node.expanded)
+		{
+			node.expanded = false;
+			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'block';
+		}
 		else
-			selNode.className = '';
-	}
-	tree.selectedNode = node;
-	
-	/* Modify Link */
-	elem.onclick = TrVE.unselectNode;
-	if (elem.className) 
-		elem.className += ' treeViewSelectedNode';
-	else
-		elem.className = 'treeViewSelectedNode';
-	//elem.style.backgroundColor = '#E6F0F6';
-},
-
-unselectNode : function(e) {
-	if (!e)
-		e = window.event;
+		{
+			node.expanded = true;
+			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'none';
+		}
 		
-	var elem = (e.target) ? e.target : e.srcElement;
+		Scriptor.event.cancel(e);
+		return false;
+	},
 	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	var divComponents = elem.id.split('_');
-	
-	var tree = TrVE.__findTreeView(divComponents[1]);
-	if (!tree) {
-		alert('Error: treeView not found.');
-	}
-	
-	node = divComponents[2];
-	
-	tree.selectedNode = null;
-	
-	elem.onclick = TrVE.selectNode;
-	//var selObj = tree.searchNode(divComponents[2]);
+	_selectNode : function(e, nodeNdx)
+	{
+		if (this.selectedNode !== null) {
+			var selNode = this.searchNode(this.selectedNode);
+			
+			if (selNode.childNodes.length)
+				document.getElementById(this.div + '_' + selNode.id + '_selectNode').className = '';
+			else
+				document.getElementById(this.div + '_' + selNode.id + '_selectNode').className = 'treeViewSingleNode';
+		}
 		
-	var classes = elem.className.split(' ');
-	if (classes.length > 1) 
-		elem.className = 'treeViewSingleNode';
-	else
-		elem.className = '';
+		if (this.selectedNode != nodeNdx)
+		{
+			var selNode = this.searchNode(nodeNdx);
+			if (selNode.childNodes.length) 
+				document.getElementById(this.div + '_' + selNode.id + '_selectNode').className = 'treeViewSelectedNode';
+			else
+				document.getElementById(this.div + '_' + selNode.id + '_selectNode').className = 'treeViewSingleNode treeViewSelectedNode';
+		}
+				
+		this.selectedNode = (this.selectedNode == nodeNdx) ? null : nodeNdx;
+	},
 	
-	//elem.style.backgroundColor = 'transparent';
-} };
+	/*
+	* treeView.addNode
+	* 	Adds a node with opts properties under parent id, optionally pass ndx to
+	* 	insert it between 2 children
+	*
+	*  ops:
+	*  	id : node Id, optional, MUST BE UNIQUE and not 0
+	*  	Name : Node label, must be string
+	*/
+	addNode : function(opts, parent, ndx) {
+		var parentNode = (parent == 0) ? this.masterNode : this.searchNode(parent);
+		
+		if (parentNode)
+		{
+			localOpts = {
+				treeView : this,
+				parentId : parent,
+				parent : parentNode,
+				Name : ''
+			};
+			Scriptor.mixin(localOpts, opts);
+			
+			if (ndx >= 0 && ndx < parentNode.childNodes.length)
+				parentNode.childNodes.splice(ndx, 0, new treeNode(localOpts));
+			else
+				parentNode.childNodes.push(new treeNode(localOpts));
+				
+			if (this.visible)
+				this.updateNodes();
+		}
+	}
+};
 
-TrVE = new treeView_engine();
 	return Scriptor;
 })(window, document);
 

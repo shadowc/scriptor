@@ -116,7 +116,10 @@
 		
 		myGalleryView = new galleryView('galleryView', 'xml/getData3.php', 150, 180);
 			
-		myTreeView = new treeView('treeView', 'xml/getData4.php');
+		myTreeView = new treeView('treeView');
+		myTreeView.addNode({Name : 'test node'}, 0);
+		myTreeView.addNode({Name : 'test node 2'}, 0);
+		myTreeView.addNode({Name : 'other node'}, 1);
 		
 		function dateFormat(date) {
 			return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
@@ -129,7 +132,7 @@
 			myDataView2.Show(true);
 			myCalendarView.Show();
 			myGalleryView.Show(false);
-			myTreeView.Show(false);
+			myTreeView.Show(true);
 		}
 		
 		Scriptor.addOnLoad(loadView);

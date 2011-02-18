@@ -118,6 +118,10 @@ var Scriptor = {
 		
 		attach : function(htmlElement, evt, funcObj) {
 			if (Scriptor.isHtmlElement(htmlElement) || htmlElement === document || htmlElement === window)
+			{
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
+				
 				if (htmlElement.addEventListener) {
 					htmlElement.addEventListener(evt, funcObj, false);
 				}
@@ -126,17 +130,23 @@ var Scriptor = {
 						htmlElement.attachEvent('on' + evt, funcObj);
 					}
 				}
+			}
 			else if (htmlElement._customEventStacks)
+			{
 				if (htmlElement._customEventStacks[evt]) {
 					// first, detach event if already attached, it will move to the end of
 					// the stack
 					Scriptor.event.detach(htmlElement, evt, funcObj);
 					htmlElement._customEventStacks[evt].stack.push(funcObj);
 				}
+			}
 		},
 		
 		detach : function(htmlElement, evt, funcObj) {
 			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
+			{
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
 				if (htmlElement.removeEventListener) {
 					htmlElement.removeEventListener(evt, funcObj, false);
 				}
@@ -145,7 +155,9 @@ var Scriptor = {
 						htmlElement.detachEvent('on' + evt, funcObj);
 					}
 				}
+			}
 			else if (htmlElement._customEventStacks)
+			{
 				if (htmlElement._customEventStacks[evt]) {
 					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
 						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
@@ -154,6 +166,7 @@ var Scriptor = {
 						}
 					}
 				}
+			}
 		},
 	
 		// this will execute in the context of _customEvents object

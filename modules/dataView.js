@@ -560,7 +560,7 @@ dataView.prototype = {
 	/*
 	* dataView.Refresh();
 	*  This function will call updateRows to refresh dataView rows if visible
-	*  You can use a dataSet object to connect an XML or JSON service to dataView
+	*  You can use a dataViewConnector object to connect an XML or JSON service to dataView
 	*  and this will automatically retrieve information assync every time
 	*  you call refresh() method.
 	*/
