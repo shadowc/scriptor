@@ -30,6 +30,8 @@
 .dataViewBody .dataViewCheckBox { margin: 0; }
 
 .dataViewOuterBody { border: 1px solid #57a4b5; background: #FFFFFF; }
+.dataViewOuterBody div.dataViewMessageDiv { font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
+
 .dataViewBody { background: #FFFFFF; }
 .dataViewBody ul { list-style-type: none; height: 19px; overflow: hidden; border-bottom: 1px solid #AAAAAA; border-right: 1px solid #AAAAAA; }
 .dataViewBody ul li { height: 17px; float: left;  cursor: default; border-right: 1px solid #AAAAAA;  

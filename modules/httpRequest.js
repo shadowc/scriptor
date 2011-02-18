@@ -174,7 +174,7 @@ httpRequest.prototype = {
 			}
 			else {
 				if (this.onError)
-					this.onError(this.http_request.satus);
+					this.onError(this.http_request.status);
 			}	
 		}
 	}

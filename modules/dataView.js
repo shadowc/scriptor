@@ -142,7 +142,7 @@ var dataTypes = {
 * for the space calculations.
 */
 var dataViewStyle = {
-	'objectVerticalPadding' : 6,
+	'objectVerticalPadding' : 4,
 	'objectHorizontalPadding' : 6,
 	'paginationHeaderHeight' : 25, 
 	'headerHeight' : 24, 
@@ -747,6 +747,39 @@ dataView.prototype = {
 		body.style.display = val ? 'none' : '';
 		body.parentNode.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
 		
+	},
+	
+	/*
+	* dataView.setMessage(msg)
+	*	Set a message (usefull for error messages) and hide all rows in a dataView
+	* 	If msg is set to false or not present, it will restore dataView to normal
+	*/
+	setMessage : function(msg) {
+		// false, null, or msg not present resets dataView to normal
+		if (msg === false || msg === null || typeof(msg) != "string")
+		{
+			if (document.getElementById(this.div + '_message'))
+				document.getElementById(this.div + '_message').parentNode.removeChild(document.getElementById(this.div + '_message'));
+				
+			document.getElementById(this.div + '_body').style.display = '';
+		}
+		else	// if string passed, we show a message
+		{
+			document.getElementById(this.div + '_body').style.display = 'none';
+			var msgDiv;
+			if (!document.getElementById(this.div + '_message'))
+			{
+				msgDiv = document.createElement('div');
+				msgDiv.id = this.div + '_message';
+				msgDiv.className = 'dataViewMessageDiv';
+				document.getElementById(this.div + '_body').parentNode.appendChild(msgDiv);
+			}
+			else
+			{
+				msgDiv = document.getElementById(this.div + '_message');
+			}
+			msgDiv.innerHTML = msg;
+		}
 	},
 	
 	/*
@@ -1958,7 +1991,7 @@ dataViewConnector.prototype = {
 			}
 			else
 			{
-				// TODO: show an error message in the dataView component
+				this.dataView.setMessage(root.getAttribute('errormessage'));
 			}
 			
 			if (oldVisible)
@@ -2003,7 +2036,7 @@ dataViewConnector.prototype = {
 			}
 			else
 			{
-				// TODO: show an error message in the dataView component
+				this.dataView.setMessage(data.errormessage);
 			}
 			
 			if (oldVisible)
@@ -2017,6 +2050,6 @@ dataViewConnector.prototype = {
 	_onError : function(status)
 	{
 		this.dataView.setLoading(false);
-		// TODO: show an error message in the dataView component
+		this.dataView.setMessage('Error: Unable to load dataView object (HTTP status: ' + status + ')');
 	}
 };
