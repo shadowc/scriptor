@@ -5,8 +5,8 @@
 		<link rel="stylesheet" type="text/css" href="default.css" />
 
 		<script language="javascript" type="text/javascript">
-		var myDataView;
 		var myTabView;
+		var myDataView;
 		var myDataView2;
 		var myGalleryView;
 		var myTreeView;
@@ -17,8 +17,6 @@
 												{label: 'galleryView', elem: 'tab5'},
 												{label: 'calendarView', elem: 'tab3'}
 												 ] );
-		
-		
 		
 		myDataView = new dataView('somediv', { width : 720, height : 200,
 			paginating : true,
@@ -120,7 +118,6 @@
 			
 		myTreeView = new treeView('treeView', 'xml/getData4.php');
 		
-		
 		function dateFormat(date) {
 			return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
 		}
@@ -133,20 +130,6 @@
 			myCalendarView.Show();
 			myGalleryView.Show(false);
 			myTreeView.Show(false);
-			
-			/* tabView beta testing */
-			/*var ul = document.createElement('ul');
-			document.body.appendChild(ul);
-			var cont = document.createElement('div');
-			document.body.appendChild(cont);
-			var tabs = [document.createElement('div'), document.createElement('div')];
-			cont.appendChild(tabs[0]);
-			cont.appendChild(tabs[1]);
-			tabs[0].innerHTML = 'content frst';
-			tabs[1].innerHTML = 'content second';
-			
-			myOtherTabs = new tabView(ul, cont, [{ label: "First", elem : tabs[0]}, {label : "Second", elem : tabs[1]}]);
-			myOtherTabs.Show();*/
 		}
 		
 		Scriptor.addOnLoad(loadView);
