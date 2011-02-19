@@ -733,6 +733,18 @@ dataView.prototype = {
 			this.__refreshFooter();
 	},
 	
+	Hide : function()
+	{
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
+		if (this.divElem)
+			this.divElem.style.display = 'none';
+			
+		this.visible = false;
+	},
+	
 	/*
 	* dataView.setLoading(val)
 	*   If val is true, show loading spinner, else show the actual rows,

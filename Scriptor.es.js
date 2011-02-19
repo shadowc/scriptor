@@ -2073,6 +2073,18 @@ dataView.prototype = {
 			this.__refreshFooter();
 	},
 	
+	Hide : function()
+	{
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
+		if (this.divElem)
+			this.divElem.style.display = 'none';
+			
+		this.visible = false;
+	},
+	
 	/*
 	* dataView.setLoading(val)
 	*   If val is true, show loading spinner, else show the actual rows,
@@ -4562,12 +4574,25 @@ treeView.prototype = {
 		}
 		
 		var target = this.divElem;
+		target.style.display = '';
 		target.className = 'treeView';
 		target.innerHTML = '<ul id="'+this.div+'_0_branch" class="treeViewContainer"></ul>';
 		
 		this.visible = true;
 		if (withRefresh) 
 			this.Refresh();
+	},
+	
+	Hide : function()
+	{
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
+		if (this.divElem)
+			this.divElem.style.display = 'none';
+			
+		this.visible = false;
 	},
 	
 	updateNodes : function()
