@@ -235,9 +235,37 @@ treeView.prototype = {
 		this.divElem.className = "treeViewMain" + (val ? " treeViewLoading" : "");
 	},
 	
-	setMessage : function(str)
-	{
-		
+	/*
+	* treeView.setMessage(msg)
+	*	Set a message (usefull for error messages) and hide all info in a treeView
+	* 	If msg is set to false or not present, it will restore treeView to normal
+	*/
+	setMessage : function(msg) {
+		// false, null, or msg not present resets dataView to normal
+		if (msg === false || msg === null || typeof(msg) != "string")
+		{
+			if (document.getElementById(this.div + '_message'))
+				document.getElementById(this.div + '_message').parentNode.removeChild(document.getElementById(this.div + '_message'));
+				
+			document.getElementById(this.div + '_0_branch').style.display = '';
+		}
+		else	// if string passed, we show a message
+		{
+			document.getElementById(this.div + '_0_branch').style.display = 'none';
+			var msgDiv;
+			if (!document.getElementById(this.div + '_message'))
+			{
+				msgDiv = document.createElement('div');
+				msgDiv.id = this.div + '_message';
+				msgDiv.className = 'treeViewMessageDiv';
+				document.getElementById(this.div).appendChild(msgDiv);
+			}
+			else
+			{
+				msgDiv = document.getElementById(this.div + '_message');
+			}
+			msgDiv.innerHTML = msg;
+		}
 	},
 	
 	/* treeView.loadXmlData
