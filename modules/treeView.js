@@ -245,7 +245,7 @@ treeView.prototype = {
 	
 	setLoading : function(val)
 	{
-		this.divElem.className = "treeViewMain" + (val ? " treeViewLoading" : "");
+		this.divElem.className = "treeView" + (val ? " treeViewLoading" : "");
 	},
 	
 	/*
@@ -280,56 +280,6 @@ treeView.prototype = {
 			msgDiv.innerHTML = msg;
 		}
 	},
-	
-	/* treeView.loadXmlData
-	*  for internal use only
-	*/
-	// TODO: Move to treeView connector
-	/*treeView.prototype.loadXmlData = function(xmlData, tv) {
-		var root = xmlData.getElementsByTagName('root').item(0);
-		if (root.getAttribute('success') == '1') {
-			tv.childNodes.length = 0;
-			
-			var categories = root.getElementsByTagName('categories').item(0);
-			for (var i=0; i<categories.childNodes.length; i++) {
-				if (categories.childNodes[i].nodeName == 'category') {
-					nodeId = categories.childNodes[i].getAttribute('id');
-					nodeParentId = categories.childNodes[i].getAttribute('parentid');
-					nodeName = categories.childNodes[i].getAttribute('name');
-	
-					ndx = tv.childNodes.length;
-					tv.childNodes[ndx] = new treeNode(nodeId, nodeParentId, nodeName, categories.childNodes[i], tv);
-					tv.childNodes[ndx].getChildNodes(categories.childNodes[i], tv);
-				}
-			}
-			
-			if (tv.onrefresh)
-				tv.onrefresh(tv);
-					
-			tv.Show(false);
-	
-		} else {
-			alert( 'Unsuccessful XML call.\nMessage: '+ root.getAttribute('error'));
-			tv.Show(false);
-			return;
-		}
-		
-	};*/
-	
-	/* treeView.loadError
-	*  for internal use only
-	*/
-	// TODO: move to treeViewConnector
-	/*treeView.prototype.loadError = function(status, tv) {
-		tv.childNodes.length = 0;
-		
-		if (tv.visible) {
-			tv.updateRows()
-		}
-		else {
-			tv.Show(false);
-		}
-	};*/
 	
 	_expandNode : function(e, nodeId) {
 		var node = this.searchNode(nodeId);
@@ -401,5 +351,217 @@ treeView.prototype = {
 			if (this.visible)
 				this.updateNodes();
 		}
+	}
+};
+
+/*
+* treeViewConnector
+* 	Connector object that will connect a treeView with an api call, so every time
+* 	you call treeView.Refresh() it will call its api to truly refresh
+* 	the object in real time
+*
+* 	constructor parameters:
+* 	treeView: A reference to a treeView object
+* 	api: A String containig the path to the api file
+* 	type: either json or xml, the format of the api file
+*	parameters: query string to be passed on each call to api
+*
+* 	Examples for Api files
+* 	XML:
+* 	<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
+* 	<root success="1" errormessage="">
+* 	   <node id="1"><label>Some node</label>
+*			<node id="3"><label>Inner node 1</label></node>
+*			<node id="4"><label>Inner node 2</label></node>
+*		</node>
+*		<node id="2"><label>Some other node</label></node>
+* 	</root>
+*
+* 	JSON:
+* 	{ "success" : 1, "errormessage" : "", "nodes" : [
+*		{ "id" : 1, "label" : "Some node", nodes : [
+*			{ "id" : 3, "label" : "Inner node 1" },
+*			{ "id" : 4, "label" : "Inner node 2" }
+*			] },
+*		{ "id" : 2, "label" : "Som eother node" }
+*    ]}
+*
+*/
+treeViewConnector = Scriptor.treeViewConnector = function(opts) {
+	var localOpts = {
+		treeView : null,
+		api : null,
+		method : 'POST',
+		type : 'json',
+		parameters : ''
+	};
+	
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!localOpts.treeView)
+	{
+		Scriptor.error.report('Must provide treeView reference to treeViewConnector object.');
+		return;
+	}
+	
+	if (typeof(localOpts.api) != 'string' || localOpts.api == '')
+	{
+		Scriptor.error.report('Invalid Api string.');
+		return;
+	}
+	
+	this.api = localOpts.api;
+	this.treeView = localOpts.treeView;
+	this.parameters = localOpts.parameters;
+	
+	this.type = 'json';
+	if (localOpts.type)
+		switch (localOpts.type.toLowerCase())
+		{
+			case ('xml'):
+				this.type = 'xml';
+				break;
+			case ('json'):
+			default:
+				this.type = 'json';
+				break;
+		}
+		
+	this.method = 'POST';
+	if (typeof(localOpts.method) == 'string')
+		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
+		
+	// event attaching and httpRequest setup
+	Scriptor.event.attach(this.treeView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
+	
+	this.httpRequest = new Scriptor.httpRequest({
+		ApiCall : this.api,
+		method : this.method,
+		Type : this.type,
+		onError : Scriptor.bind(this._onError, this),
+		onLoad : Scriptor.bind(this._onLoad, this)
+	});
+};
+
+treeViewConnector.prototype = {
+	_onRefresh : function(e) {
+		this.treeView.setLoading(true);
+			
+		this.httpRequest.send(this.parameters);
+		
+		Scriptor.event.cancel(e);
+	},
+	
+	_onLoad : function(data) {
+		this.treeView.setLoading(false);
+		
+		if (this.type == 'xml')	// xml parsing
+		{
+			var root = data.getElementsByTagName('root').item(0);
+	
+			// TODO: Add/Remove nodes instead of replacing the whole data structure
+			//   upgrade addNode, implement deleteNode to avoid using updateNodes
+			// fake visible = false so we call updateNodes only once
+			var oldVisible = this.treeView.visible;
+			this.treeView.visible = false;
+			// TODO: implement treeView.clear()
+			delete this.treeView.masterNode;
+			this.treeView.masterNode = new treeNode({id : 0, parentId : 0, parent : null, Name : "root", treeView : this.treeView });
+			this.treeView.nextNodeId = 1;
+			
+			if (root.getAttribute('success') == '1')
+			{
+				var nodes = this._fetchNodes(root);	// get first child nodes from xml element
+				if (nodes.length)
+					this._addNodesFromXml(nodes, 0);
+			}
+			else
+			{
+				this.treeView.setMessage(root.getAttribute('errormessage'));
+			}
+			
+			if (oldVisible)
+			{
+				this.treeView.visible = oldVisible;
+				this.treeView.updateNodes();
+			}
+		}
+		else	// json
+		{
+			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
+			//   upgrade addRow, deleteRow to avoid using updateRows
+			// fake visible = false so we call updateRows only once
+			var oldVisible = this.treeView.visible;
+			this.treeView.visible = false;
+			// TODO: implement treeView.clear()
+			delete this.treeView.masterNode;
+			this.treeView.masterNode = new treeNode({id : 0, parentId : 0, parent : null, Name : "root", treeView : this.treeView });
+			this.treeView.nextNodeId = 1;
+			
+			if (data.success)
+			{
+				if (data.nodes && data.nodes.length)
+					this._addNodesFromJson(data.nodes, 0);
+					
+			}
+			else
+			{
+				this.treeView.setMessage(data.errormessage);
+			}
+			
+			if (oldVisible)
+			{
+				this.treeView.visible = oldVisible;
+				this.treeView.updateNodes();
+			}
+		}
+	},
+	
+	_fetchNodes : function(elem)
+	{
+		var ret = [];
+		
+		for (var n=0; n < elem.childNodes.length; n++)
+			if (elem.childNodes[n].nodeName == 'node')
+				ret.push(elem.childNodes[n]);
+				
+		return ret;
+	},
+	
+	_addNodesFromXml : function(nodes, parentId)
+	{
+		for (var n=0; n < nodes.length; n++) {
+			// look for label and childnodes
+			var id = null;
+			if (nodes[n].getAttribute('id'))
+				id = nodes[n].getAttribute('id')
+			
+			var label = nodes[n].getElementsByTagName('label')[0];
+			if (label)
+				labelStr = label.firstChild.data;
+				
+			var childNodes = nodes[n].getElementsByTagName('node');
+			
+			this.treeView.addNode({ Name : labelStr, id : id }, parentId);
+			
+			if (childNodes)
+				this._addNodesFromXml(this._fetchNodes(nodes[n]), id);
+		}
+	},
+	
+	_addNodesFromJson : function(nodes, parentId)
+	{
+		for (var n=0; n < nodes.length; n++) {
+			this.treeView.addNode({Name : nodes[n].label, id : nodes[n].id }, parentId);
+			
+			if (nodes[n].nodes)
+				this._addNodesFromJson(nodes[n].nodes, nodes[n].id);
+		}
+	},
+	
+	_onError : function(status)
+	{
+		this.treeView.setLoading(false);
+		this.treeView.setMessage('Error: Unable to load treeView object (HTTP status: ' + status + ')');
 	}
 };

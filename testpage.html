@@ -109,7 +109,7 @@
 				api : 'testapi.php',
 				parameters : 'type=json&option=2',
 				method : 'POST',
-				type:  'json'
+				type :  'json'
 			});
 		
 		myCalendarView = new calendarView('calendarView');
@@ -117,9 +117,13 @@
 		myGalleryView = new galleryView('galleryView', 'xml/getData3.php', 150, 180);
 			
 		myTreeView = new treeView('treeView');
-		myTreeView.addNode({Name : 'test node'}, 0);
-		myTreeView.addNode({Name : 'test node 2'}, 0);
-		myTreeView.addNode({Name : 'other node'}, 1);
+		myTreeViewCon = new treeViewConnector({
+				treeView : myTreeView,
+				api : 'testapi.php',
+				parameters : 'type=json&option=3',
+				method : 'POST',
+				type : 'json'
+			});
 		
 		function dateFormat(date) {
 			return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();

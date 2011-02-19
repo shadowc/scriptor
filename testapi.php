@@ -3,7 +3,7 @@ $contentType = 'text';
 $contentHeader = 'text/plain';
 
 $type = $_REQUEST['type'];
-$contentOption = (int)($_REQUEST['option']) || 0;
+$contentOption = (int)($_REQUEST['option']);
 
 switch ($type)
 {
@@ -23,9 +23,47 @@ switch ($type)
 }
 
 header("Content-Type: $contentHeader");
+header("Expire: -1");
 
 switch ($contentOption)
 {
+	case (2):
+		if ($contentType == 'json') {
+			?>{ "success" : 1, "totalrows" : 2, "rows" :
+				[ { "id" : 8, "User" : "demo", "Pass" : "8e4f82381229e495e7941cf9e40e6980d14a16bf023ccd4c9134e157dfe8f113", "FirstName" : "Demo", "LastName" : "User" },
+				 { "id" : 2, "User" : "shadowc", "Pass" : "aa81c8763a7acba868392ad1c96137d3db74a93d7e9e03a15f7438fd8f0ff034", "FirstName" : "Matias", "LastName" : "Jose" } ]
+			}
+			<?php 
+		}
+		break;
+	
+	case (3):	// treeView
+		if ($contentType == 'xml') {
+			echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n";
+			?><root success="1">
+				<node id="15"><label>Introduccion</label></node>
+				<node id="16"><label>Ingresar al Panel de Control</label></node>
+				<node id="17"><label>El Panel de Propiedades</label>
+					<node id="18"><label>Crear una Propiedad</label></node>
+					<node id="19"><label>Editar una Propiedad</label></node>
+				</node>
+				<node id="20"><label>Subir Imagenes</label></node>
+			</root>
+			<?php
+		}
+		else if ($contentType == 'json') {
+			?>{ "success" : 1, "nodes" : [
+				{ "id" : 15, "label" : "Introduccion" },
+				{ "id" : 16, "label" : "Ingresar al Panel de Control" },
+				{ "id" : 17, "label" : "El Panel de Propiedades", "nodes" : [
+					{ "id" : 18, "label" : "Crear una Propiedad" },
+					{ "id" : 19, "label" : "Editar una Propiedad" } ] },
+				{ "id" : 20, "label" : "Subir Imagenes" }
+			]}
+			<?php
+		}
+		break;
+	
 	case (0):
 	default:
 		if ($contentType == 'text')
@@ -99,16 +137,6 @@ switch ($contentOption)
 				{ "Id" : 19, "parentId" : 17, "Title" : "Editar una Propiedad", "Link" : "Editar_una_propiedad", "DateCreated" : "2007-10-01" },
 				{ "Id" : 20, "parentId" : 0, "Title" : "Subir Imagenes", "Link" : "Subir_Imagenes", "DateCreated" : "2007-10-02" },
 				{ "Id" : 21, "parentId" : 0, "Title" : "Introduccion", "Link" : "introduccion", "DateCreated" : "2008-10-07" } ]
-			}
-			<?php 
-		}
-		break;
-	
-	case (2):
-		if ($contentType == 'json') {
-			?>{ "success" : 1, "totalrows" : 2, "rows" :
-				[ { "id" : 8, "User" : "demo", "Pass" : "8e4f82381229e495e7941cf9e40e6980d14a16bf023ccd4c9134e157dfe8f113", "FirstName" : "Demo", "LastName" : "User" },
-				 { "id" : 2, "User" : "shadowc", "Pass" : "aa81c8763a7acba868392ad1c96137d3db74a93d7e9e03a15f7438fd8f0ff034", "FirstName" : "Matias", "LastName" : "Jose" } ]
 			}
 			<?php 
 		}
