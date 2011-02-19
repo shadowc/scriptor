@@ -4643,12 +4643,12 @@ treeView.prototype = {
 		if (node.expanded)
 		{
 			node.expanded = false;
-			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'block';
+			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'none';
 		}
 		else
 		{
 			node.expanded = true;
-			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'none';
+			document.getElementById(this.div+'_'+nodeId+'_branch').style.display = 'block';
 		}
 		
 		Scriptor.event.cancel(e);
