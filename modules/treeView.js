@@ -335,7 +335,7 @@ treeView.prototype = {
 		
 		if (parentNode)
 		{
-			localOpts = {
+			var localOpts = {
 				treeView : this,
 				parentId : parent,
 				parent : parentNode,

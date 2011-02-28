@@ -1609,7 +1609,7 @@ dataView.prototype = {
 	*   not provided
 	*/
 	getNextRowId : function() {
-		found = true;
+		var found = true;
 		while (found)
 		{
 			found = false;
@@ -4695,7 +4695,7 @@ treeView.prototype = {
 		
 		if (parentNode)
 		{
-			localOpts = {
+			var localOpts = {
 				treeView : this,
 				parentId : parent,
 				parent : parentNode,
