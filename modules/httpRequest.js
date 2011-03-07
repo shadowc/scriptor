@@ -1,6 +1,6 @@
 // JavaScript Document
 /* 
-*  httpReqiest version 1.0b
+*  httpReqiest version 2.0b
 *
 *  Manages multiple asyncronous xmlHttpRequests easily.
 *

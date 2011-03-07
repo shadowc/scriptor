@@ -1,7 +1,7 @@
 // JavaScript Document
 /*
 *
-*  treeView Version 2.0b
+*  treeView Version 3.0b
 *
 *  Javascript component that displays a list of hierarchically organized data much like a
 *   directory listing using an XML service to retrieve the data.
@@ -13,7 +13,7 @@
 *
 * js class for every category (node) on the treeView
 */
-var treeNode = function(opts) /*id, pid, Name, parent, tv)*/ {
+var treeNode = function(opts) {
 	var localOpts = {
 		id : null,
 		parentId : 0,

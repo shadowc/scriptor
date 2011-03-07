@@ -8,7 +8,7 @@
 */
 
 /*
-* tabView
+* tabView version 2.0b
 *
 * This is a tab collection object. It works by taking a UL Html object and adding
 * tab labels for its different panels. The pannels are DIV Html objects which ids must
