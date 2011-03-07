@@ -108,13 +108,13 @@ calendarView.prototype.Show = function() {
 		target.removeChild(target.firstChild);
 	
 	// Create table header
-	cvHeader = document.createElement('div');
+	var cvHeader = document.createElement('div');
 	cvHeader.className = 'calendarViewHeader';
 	
 	target.appendChild( cvHeader );
 	
 	// Create body
-	cvBody = document.createElement('table');
+	var cvBody = document.createElement('table');
 	cvBody.setAttribute('border', '0');
 	cvBody.setAttribute('cellpadding', '0');
 	cvBody.setAttribute('cellspacing', '0');
@@ -122,7 +122,7 @@ calendarView.prototype.Show = function() {
 	target.appendChild( cvBody );
 
 	// Create footer
-	cvFooter = document.createElement('div');
+	var cvFooter = document.createElement('div');
 	cvFooter.className = 'calendarViewFooter';
 	
 	target.appendChild( cvFooter );
@@ -298,7 +298,7 @@ calendarView.prototype.__refreshHeader = function() {
 	var target = document.getElementById(this.div);
 	
 	var divs = target.getElementsByTagName('div');
-	targetDiv = false;
+	var targetDiv = false;
 	
 	for (var n=0; n < divs.length; n++) {
 		if (divs.item(n).className == 'calendarViewHeader') {
@@ -368,7 +368,7 @@ calendarView.prototype.__refreshFooter = function() {
 	var target = document.getElementById(this.div);
 	
 	var divs = target.getElementsByTagName('div');
-	targetDiv = false;
+	var targetDiv = false;
 	
 	for (var n=0; n < divs.length; n++) {
 		if (divs.item(n).className == 'calendarViewFooter') {
