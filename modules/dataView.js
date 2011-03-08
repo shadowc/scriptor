@@ -608,7 +608,7 @@ dataView.prototype = {
 		}
 		
 		var target = this.divElem;
-		target.className = 'dataViewMain';
+		target.className = 'dataViewMain scriptor';
 		target.innerHTML = '';
 		
 		var dvTemplate = '';

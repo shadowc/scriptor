@@ -1,11 +1,9 @@
 /* CSS Document */
 
-* { margin: 0; padding: 0; }
-
-.galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
+.galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; color: #333333; }
 .galleryViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
 .galleryView div { float: left; display: inline; margin: 5px; }
 .galleryView div img { cursor: pointer; display: block; border: 2px solid #ffffff; }
-.galleryView div p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; text-align: center; }
+.galleryView div p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; text-align: center; color: #333333; }
 .galleryView div.gvSelectedImage img { border: 2px solid #000000; }
 .galleryView div.gvSelectedImage p { font-weight: bold; }

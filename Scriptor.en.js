@@ -1948,7 +1948,7 @@ dataView.prototype = {
 		}
 		
 		var target = this.divElem;
-		target.className = 'dataViewMain';
+		target.className = 'dataViewMain scriptor';
 		target.innerHTML = '';
 		
 		var dvTemplate = '';
@@ -4568,7 +4568,7 @@ treeView.prototype = {
 		
 		var target = this.divElem;
 		target.style.display = '';
-		target.className = 'treeView';
+		target.className = 'treeView scriptor';
 		target.innerHTML = '<ul id="'+this.div+'_0_branch" class="treeViewContainer"></ul>';
 		
 		this.visible = true;
@@ -4673,6 +4673,9 @@ treeView.prototype = {
 		}
 				
 		this.selectedNode = (this.selectedNode == nodeNdx) ? null : nodeNdx;
+		
+		Scriptor.event.cancel(e, true);
+		return false;
 	},
 	
 	/*

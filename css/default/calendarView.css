@@ -1,9 +1,6 @@
 /* CSS Document */
 
-
-* { margin: 0; padding: 0; }
-
-.calendarView { border: 1px solid #036188; width: 245px; background: #FFFFFF; }
+.calendarView { border: 1px solid #036188; width: 245px; background: #FFFFFF; color: #333333; }
 .calendarView * { margin: 0 !important; padding: 0 !important; }
 
 .calendarView .calendarViewHeader { width: 245px; height: 20px; overflow: hidden; border-bottom: 1px solid #036188; background: #E9E9E9; }

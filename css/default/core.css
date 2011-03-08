@@ -1,0 +1,18 @@
+/* core.css
+*
+*  Here we define some global css rules that are intended to override
+*  common page specific rules that might affect scriptor components
+*/
+.scriptor {
+	margin: 0;
+	padding: 0;
+}
+
+.scriptor * {
+	margin: 0;
+	padding: 0;
+	font-family: "Arial", Helvetica, sans-serif;
+	color: #333333;
+	font-size: 12px;
+}
+

@@ -1,7 +1,5 @@
 /* CSS Document */
-* { margin: 0; padding: 0 }
-
-.dataViewMain { border: 1px solid #9e9e9e; padding: 3px; background: #ebebeb; }
+.dataViewMain { border: 1px solid #9e9e9e; padding: 3px; background: #ebebeb; color: #333333; }
 
 .dataViewPaginationHeader { font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; background: URL('images/bar-middle.jpg') repeat-x; height: 25px; overflow: hidden; }
 .dataViewPaginationHeader ul { list-style-type: none; background: URL('images/bar-right.jpg') no-repeat top right; height: 25px; overflow: hidden; }
@@ -11,13 +9,13 @@
 .dataViewPaginationHeader ul li a.dataViewPrevBtn { background: URL('images/prev-button.jpg') no-repeat center; border-left: 1px solid #09404c; }
 .dataViewPaginationHeader ul li a.dataViewNextBtn { background: URL('images/next-button.jpg') no-repeat center; border-right: 1px solid #09404c; }
 .dataViewPaginationHeader ul li label.dataViewPaginationGotoPage { float: left; height: 21px; padding: 4px 7px 0 10px; }
-.dataViewPaginationHeader ul li input.dataViewPaginationInput { height: 15px; padding: 1px; border: 1px solid #727272; width: 30px; float: left; margin: 3px 0 0 0; padding: 0 4px 0 0; font-size: 10px; }
-.dataViewPaginationHeader ul li input.dataViewPageButton { height: 17px; padding: 0 1px; width: auto; float: left; margin: 3px 0 0 5px; display: inline; font-size: 9px; }
+.dataViewPaginationHeader ul li input.dataViewPaginationInput { height: 15px; padding: 1px; border: 1px solid #727272; width: 30px; float: left; margin: 3px 0 0 0; padding: 0 4px 0 0; font-size: 10px; font-family: "Arial", Helvetica, sans-serif; color: #333333; }
+.dataViewPaginationHeader ul li input.dataViewPageButton { font-family: "Arial", Helvetica, sans-serif; height: 17px; padding: 0 1px; width: auto; float: left; margin: 3px 0 0 5px; display: inline; font-size: 9px; color: #333333; }
 
 .dataViewHeader { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #072026; height: 25px; overflow: hidden; background: URL('images/fields-middle.jpg') repeat-x; }
 .dataViewHeader ul { list-style-type: none; height: 25px; overflow: hidden; background: URL('images/fields-left.jpg') no-repeat top left; }
 .dataViewHeader ul li { height: 25px; text-align: left; overflow: hidden; float: left; cursor: default; padding: 0 5px; }
-.dataViewHeader ul li a { height: 17px; font-size: 12px; font-weight: normal; color: #072026; text-decoration: none; float: left; padding: 4px 14px 0 5px; overflow: hidden; }
+.dataViewHeader ul li a { height: 17px; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; font-weight: normal; color: #072026; text-decoration: none; float: left; padding: 4px 14px 0 5px; overflow: hidden; }
 .dataViewHeader ul li a.dataViewSortAsc { font-weight: bold; background: URL('images/sort-asc.jpg') no-repeat right 7px; }
 .dataViewHeader ul li a.dataViewSortDesc { font-weight: bold; background: URL('images/sort-desc.jpg') no-repeat right 7px; }
 .dataViewHeader ul li a:hover { text-decoration: underline; }	
@@ -35,7 +33,7 @@
 .dataViewBody { background: #FFFFFF; }
 .dataViewBody ul { list-style-type: none; height: 19px; overflow: hidden; border-bottom: 1px solid #AAAAAA; border-right: 1px solid #AAAAAA; }
 .dataViewBody ul li { height: 17px; float: left;  cursor: default; border-right: 1px solid #AAAAAA;  
-	font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000000; text-align: left; padding: 2px 5px 0 5px; overflow: hidden; }
+	font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #000000; text-align: left; padding: 2px 5px 0 5px; overflow: hidden; }
 
 .dataViewBody ul li.dataViewnum { text-align: right; }
 .dataViewBody ul li.dataViewdate { text-align: right; }
