@@ -1569,6 +1569,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	Scriptor.event.registerCustomEvent(this, 'onrefresh');
 	Scriptor.event.registerCustomEvent(this, 'onhide');
 	Scriptor.event.registerCustomEvent(this, 'onselect');
+	Scriptor.event.registerCustomEvent(this, 'oncolumnresize');
 	
 	this.visible = false;
 	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
@@ -1590,6 +1591,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	this.optionsMenuHeight = 0;
 	
 	this.resizingXCache = 0;
+	this.resizingFrom = 0;
 	this.resColumnId = null;
 	
 	this.nextRowId = 1;
@@ -2132,10 +2134,30 @@ dataView.prototype = {
 	},
 	
 	/*
+	* dataView.clearSelection()
+	*
+	*   Use programatically to clear all selections in the dataView
+	*/
+	clearSelection : function()
+	{
+		this.selectedRow = -1;
+		this.selectedRows = [];
+		
+		document.getElementById(this.div + '_selectAll').checked = false;
+		this.updateRows();
+	},
+	
+	/*
 	* __selectAll()
 	*  This function executes when clicking on a dataView header checkmox in multiselect and selects all rows.
 	*/
 	__selectAll : function(e) {
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e);
+			return;
+		}
+		
 		var elem = document.getElementById(this.div + '_selectAll');
 		
 		if (this.rows.length) {
@@ -3040,6 +3062,7 @@ dataView.prototype = {
 			}
 		}
 		
+		this.resizingFrom = this.columns[colNdx].Width;
 		this.resizingXCache = x;
 		
 		Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bindAsEventListener(this.doResizing, this));
@@ -3052,12 +3075,18 @@ dataView.prototype = {
 	/* performResizing
 	* This function deactivates resizing status and performs complete redrawing
 	*/
-	deactivateResizing : function(e) {
+	deactivateResizing : function(e) {	
 		Scriptor.event.detach(document, 'mousemove', this._mouseMoveBind);
 		Scriptor.event.detach(document, 'mouseup', this._mouseUpBind);
 		
+		var ce = {};
+		ce.columnId = this.resColumnId;
+		ce.resizingFrom = this.resizingFrom;
+		ce.resizedTo = this.columns[this.resColumnId].Width;
+		
+		Scriptor.event.fire(this, 'oncolumnresize', ce);
+		
 		this.resColumnId = null;
-		//this.Show(false);
 		this.resizingXCache = 0;
 	},
 	
