@@ -2,6 +2,8 @@
 
 .galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; color: #333333; }
 .galleryViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
+.galleryViewLoading div, .galleryViewMessage div { display : none !important; }
+.galleryViewMessage p { margin: 10px; text-align: center; font-family: "Verdana", Arial, sans-serif; font-size: 11px; }
 .galleryView div { float: left; display: inline; margin: 5px; }
 .galleryView div img { cursor: pointer; display: block; border: 2px solid #ffffff; }
 .galleryView div p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; text-align: center; color: #333333; }
