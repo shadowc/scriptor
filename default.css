@@ -124,14 +124,14 @@
 .tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; }
 .tabViewDiv { border: 1px solid #ace3f3; border-top: none; }
 
-.tabViewLi { float: left; height: 20px; background: #EEEEEE URL('images/tab_unsel_back.jpg') repeat-x; margin: 0 2px 0 2px; }
-.tabViewLi a { float: left; height: 20px; padding: 0 8px 0 0; text-decoration: none; color: #343434; background: URL('images/tab_unsel_right.jpg') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
-.tabViewLi a span { float: left; height: 14px; padding: 4px 0 2px 8px; background: URL('images/tab_unsel_left.jpg') no-repeat top left; }
+.tabViewLi { float: left; height: 20px; background: URL('images/tab_unsel_left.png') no-repeat; margin: 0 2px 0 2px; }
+.tabViewLi a { float: left; height: 20px; padding: 0 8px 0 8px; text-decoration: none; color: #343434; background: URL('images/tab_unsel_right.png') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
+.tabViewLi a span { float: left; height: 14px; padding: 4px 0 2px 0; background: URL('images/tab_unsel_back.png') repeat-x top left; }
 .tabViewLi a:hover { color: #555555; outline: none; }
 
-.tabViewLiSelected { float: left; height: 20px; background: #dff4f9 URL('images/tab_sel_back.jpg') repeat-x; margin: 0 2px 0 2px; }
-.tabViewLiSelected a { float: left; height: 20px; padding: 0 8px 0 0; font-weight: bold; text-decoration: none; color: #000000; background: URL('images/tab_sel_right.jpg') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
-.tabViewLiSelected a span { float: left; height: 14px; padding: 4px 0 2px 8px; background: URL('images/tab_sel_left.jpg') no-repeat top left; }
+.tabViewLiSelected { float: left; height: 20px; background: URL('images/tab_sel_left.png') no-repeat; margin: 0 2px 0 2px; }
+.tabViewLiSelected a { float: left; height: 20px; padding: 0 8px 0 8px; font-weight: bold; text-decoration: none; color: #000000; background: URL('images/tab_sel_right.png') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
+.tabViewLiSelected a span { float: left; height: 14px; padding: 4px 0 2px 0; background: URL('images/tab_sel_back.png') repeat-x top left; }
 .tabViewLiSelected a:hover { color: #555555; outline: none; }/* CSS Document */
 
 .treeView { margin: 0; padding: 0; border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
