@@ -3558,34 +3558,12 @@ galleryView.prototype = {
 	},
 
 	Refresh : function() {
-		if (this.onbeforerefresh) {
-			if (!this.onbeforerefresh(this)) {
-				return;
-			}
-		}
-		
-		if (typeof(httpRequest) == 'undefined') {
-			alert('Error: Failed to load httpRequest scriptor module.');
+		var e = Scriptor.event.fire(this, 'onrefresh');
+		if (!e.returnValue)
 			return;
-		}
 		
-		if (!this.http_request) {
-			this.http_request = new httpRequest(this.sqlService, 'POST', this.loadXmlData, this.loadError, this);
-		}
-		
-		if (!this.sqlService) {
-			alert( 'Invalid sql XmlService.');
-			return;
-		}
-		
-		var request;
-		if (this.optParams) 
-			request = this.optParams;
-		else
-			request = '';
-	
-		this.http_request.send( request );	
-		
+		if (this.visible)
+			this.updateImages();
 	},
 
 /* galleryView.loadXmlData
@@ -3677,163 +3655,143 @@ galleryView.prototype = {
 
 	Show : function(withRefresh)
 	{
-		if (withRefresh)
-			this.Refresh();
+		var e = Scriptor.event.fire(this, 'onshow');
+		if (!e.returnValue)
+			return;
 		
-		if (!this.div || !document.getElementById(this.div)) {
-			alert( 'No HTML Object assigned to galleryView.' );
+				
+		if (this.visible) 	// we're redrawing
+			this._oldScrollTop = document.getElementById(this.div).scrollTop;
+		
+		if (!this.divElem)
+		{
+			this.divElem = document.getElementById(this.div);
+		}
+		else
+		{
+			if (!this.divElem.id)
+			{
+				if (!this.div)
+					this.div = __getNextHtmlId();
+					
+				this.divElem.id = this.div;
+			}
+		}
+		
+		if (!this.divElem) {
+			Scriptor.error.report('Error: galleryView DIV does not exist.');
 			return;
 		}
 		
-		if (this.onbeforeshow) {
-			if (!this.onbeforeshow(this)) {
-				return;
-			}
-		}
-				
-		var target = document.getElementById(this.div);
+		var target = this.divElem;
+		target.className = 'galleryView scriptor';
+		target.innerHTML = '';
 		
-		while (target.firstChild)
-			target.removeChild(target.firstChild);
-			
-		
-		
-		if (withRefresh) {
-			this.visible = false;
-			// display loading div
-			target.className = target.className + ' galleryViewLoading';
-		}
-		else {
-			var classes = target.className.split(' ');
-			if (classes.length > 1 && classes[classes.length-1] == 'galleryViewLoading') {
-				target.className = '';
-				for (var n=0; n < classes.length-1; n++) {
-					target.className += classes[n];
-					if (n < classes.length -2)
-						target.className += ' ';
-				}
-			}
-			this.visible = true;
-			this.updateImages();
-			if (this.onshow) 
-				this.onshow(this);
-		}
+		this.visible = true;
+		if (withRefresh) 
+			this.Refresh();
 		
 	},
 
+	Hide : function()
+	{
+		var e = Scriptor.event.fire(this, 'onhide');
+		if (!e.returnValue)
+			return;
+		
+		if (this.divElem)
+			this.divElem.style.display = 'none';
+			
+		this.visible = false;
+	},
+	
+	/*
+	* galleryView.setLoading(val)
+	*   If val is true, show loading spinner, else show the actual rows,
+	*   usefull for assync updates
+	*/
+	setLoading : function(val) {
+		var body = document.getElementById(this.div);
+		
+		body.parentNode.className = val ? 'galleryView scriptor galleryViewLoading' : 'galleryView scriptor';		
+	},
+	
 	updateImages : function()
 	{
-		if (!this.visible || !document.getElementById(this.div)) {
-			alert( "Can't update rows on non visible galleryView object.");
+		if (!this.visible) {
+			Scriptor.error.report( "Can't update rows on non visible galleryView object.");
 			return;
 		}
-		
-		var target = document.getElementById(this.div);
-		while (target.firstChild)
-			target.removeChild(target.firstChild);
 			
-		var tmpImg;
+		var target = document.getElementById(this.div);
+		if (!this._oldScrollTop)
+			this._oldScrollTop = target.parentNode.scrollTop;
+			
+		target.innerHTML = '';
+			
+		var iTemplate = '';
 		
 		for (var n=0; n < this.images.length; n++) {
-			tmpImgDiv = document.createElement('div');
-			if (this.fixedThumbSize) {
-				tmpImgDiv.style.width = this.thumbWidth + 'px';
-				tmpImgDiv.style.height = this.thumbHeight + 'px';
-				tmpImgDiv.style.overflow = 'hidden';
-			}
-			
-			tmpImg = document.createElement('img');
-			tmpImg.onclick = GVE.__selectImage;
-			tmpImg.setAttribute('src', this.images[n].thumbnail);
-			tmpImgDiv.appendChild(tmpImg);
-			
-			if (this.showNames && this.images[n].name) {
-				tmpP = document.createElement('p');
-				tmpP.appendChild(document.createTextNode(this.images[n].name));
-				tmpImgDiv.appendChild(tmpP);
-			}
+			iTemplate += '<div id="' + this.div + '_envelop_' + n + '" ';
+			if (this.fixedThumbSize) 
+				iTemplate += 'style="width: ' + this.thumbWidth + 'px; height: ' + this.thumbHeight + 'px; overflow: hidden;"';
 			
 			if (this.selectedImage == n)
-				tmpImgDiv.className = 'gvSelectedImage';
+				iTemplate += 'class="gvSelectedImage" ';
+			iTemplate += '>';
 			
-			target.appendChild(tmpImgDiv);
+			iTemplaet += '<img id="' + this.div + '_img_' + n + '" src="' + this.images[n].thumbnail + '" />';
+			
+			if (this.showNames && this.images[n].name) 
+				iTemplate += '<p>' + this.images[n].name + '</p>'
+			
+			iTemplate += '</div>';
 		}
 		
-		if (this.selectedImage >= this.images.length) {
+		target.innerHTML = iTemplate;
+		for (var n=0; n < this.images.length; n++)
+		{
+			Scriptor.event.attach(document.getElementById(this.div + '_img_' + n), 'onclick', Scriptor.bind(this._selectImage, this, n));
+		}
+		
+		if (this.selectedImage >= this.images.length) 
 			this.selectedImage = -1;
-		}
-	}
-}
-
-//TODO: remove this
-var galleryView_engine = function() {
+		
+	},
 	
-};
-
-galleryView_engine.prototype = {
-	__selectImage : function(e) {
-		if (!e)
-			e = window.event;
-		
-		var elem = (e.target) ? e.target : e.srcElement;
-		
-		if (elem.nodeType == 3)
-			elem = elem.parentNode;
-		
-		var target = false;
-		var curElem = elem;
-		while (curElem.parentNode) {
-			target = curElem.parentNode;
-			if (target.className == 'galleryView')
-				break;
-			else
-				target = false;
-			curElem = curElem.parentNode;
+	_selectImage : function(e, imgNdx) {
+		if (!this.visible || !this.enabled)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
 		}
 		
-		if (!target) {	
-			alert('Error: Unable to find container. Make sure it has class attribute set to galleryView');
-			return;
+		e.selectedImage = this.selectedImage;	
+		e.selecting = rowNdx;
+		e = Scriptor.event.fire(this, 'onselect', e);
+		
+		if (e.returnValue == false)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
 		}
 		
-		var obj = GVE.__findGalleryView(target.id);
-		if (!obj) {
-			alert( 'Error: galleryView object not found.' );
-			return;
-		}
-		
-		if (!obj.enabled) 
-			return;
-		
-		if (obj.onbeforeselect) {
-			if (!obj.onbeforeselect())
-				return;
-		}
-		
-		var imgs = target.getElementsByTagName('div');
-		var imgNdx = -1;
-		for (var n=0; n < imgs.length; n++) {
-			if (imgs.item(n).firstChild == elem) {
-				imgNdx = n;
-				break;
-			}
-		}
-		
+		var imgs = this.div.getElementsByTagName('img');
 		if (imgNdx != -1) {	
-			if (obj.selectedImage != -1) {
+			if (this.selectedImage != -1) {
 				for (var a=0; a < imgs.length; a++) {
-					if (imgs.item(a).className == 'gvSelectedImage') {
-						imgs.item(a).className = '';				
+					if (this.item(a).className == 'gvSelectedImage') {
+						this.item(a).className = '';				
 						break;
 					}
 				}
 			}
 			
-			if (obj.selectedImage == imgNdx) {
-				obj.selectedImage = -1;
+			if (this.selectedImage == imgNdx) {
+				this.selectedImage = -1;
 			}
 			else {
-				obj.selectedImage = imgNdx;
+				this.selectedImage = imgNdx;
 				imgs.item(imgNdx).className = 'gvSelectedImage';
 			}
 		}
@@ -3841,11 +3799,10 @@ galleryView_engine.prototype = {
 		if (obj.onselect)
 			obj.onselect(obj);
 		
+		Scriptor.event.cancel(e);
+		return false;
 	}
-};
-
-var GVE = new galleryView_engine();
-// JavaScript Document
+}// JavaScript Document
 /* 
 *  httpReqiest version 2.0b
 *
