@@ -3615,93 +3615,6 @@ galleryView.prototype = {
 			this.updateImages();
 	},
 
-/* galleryView.loadXmlData
-*  for internal use only
-*/
-/*galleryView.prototype.loadXmlData = function(xmlData, gv) {
-	var root = xmlData.getElementsByTagName('root').item(0);
-
-
-	if (root.getAttribute('success') == '1') {
-		var images = root.getElementsByTagName('image');
-		gv.images.length = 0;
-		for (var n=0; n < images.length; n++) {
-			var thumb = images.item(n).getElementsByTagName('thumbnail');
-			var path = images.item(n).getElementsByTagName('path');
-			var name = images.item(n).getElementsByTagName('name');
-			var thumbText = '';
-			var pathText = '';
-			var nameText = '';
-			
-			if (thumb.length) {
-				if (thumb.item(0).firstChild) {
-					thumbText = thumb.item(0).firstChild.data;
-				}
-			}
-			
-			if (path.length) {
-				if (path.item(0).firstChild) {
-					pathText = path.item(0).firstChild.data;
-				}
-			}
-			
-			if (name.length) {
-				if (name.item(0).firstChild) {
-					nameText = name.item(0).firstChild.data;
-				}
-			}
-			
-			gv.images[gv.images.length] = new gv_ImageObject(thumbText, pathText, nameText);
-			
-			var params = images.item(n).getElementsByTagName('param');
-			if (params.length) {
-				for (var a=0; a < params.length; a++) {
-					var paramName = params.item(a).getAttribute('name');
-					var paramText = '';
-					if (params.item(a).firstChild)
-						paramText = params.item(a).firstChild.data;
-					
-					gv.images[gv.images.length-1][paramName] = paramText;
-				}
-			}
-		}
-			
-		if (gv.onrefresh)
-			gv.onrefresh(gv);
-		
-		if (gv.visible) {
-			gv.updateImages()
-		}
-		else {
-			gv.Show(false);
-		}
-	}
-	else {
-		alert( 'Unsuccessfull XML call.\nMessage: '+ root.getAttribute('error'));
-		if (gv.visible) {
-			gv.updateImages()
-		}
-		else {
-			gv.Show(false);
-		}
-		return;
-	}
-};*/
-
-/* galleryView.loadError
-*  for internal use only
-*/
-/*galleryView.prototype.loadError = function(status, gv) {
-	gv.images.length = 0;
-	
-	if (gv.visible) {
-		gv.updateRows()
-	}
-	else {
-		gv.Show(false);
-	}
-};*/
-
 	Show : function(withRefresh)
 	{
 		var e = Scriptor.event.fire(this, 'onshow');
@@ -3880,7 +3793,219 @@ galleryView.prototype = {
 		Scriptor.event.cancel(e);
 		return false;
 	}
-}// JavaScript Document
+};
+
+/*
+* galleryViewConnector
+* 	Connector object that will connect a galleryView with an api call, so every time
+* 	you call galleryView.Refresh() it will call its api to truly refresh
+* 	the object in real time
+*
+* 	constructor parameters:
+* 	galleryView: A reference to a galleryView object
+* 	api: A String containig the path to the api file
+* 	type: either json or xml, the format of the api file
+*	parameters: query string to be passed on each call to api
+*
+* 	Examples for Api files
+* 	XML:
+* 	<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
+* 	<root success="1" errormessage="">
+* 	   <image>
+*		<thumbnail>gallery/thumbnails/A210d.jpg</thumbnail>
+*		<path>gallery/A210d.jpg</path>
+*		<name>A210d.jpg</name>
+*		<param name="one">value 1.A210d.jpg</param>
+*		<param name="two">value 2.A210d.jpg</param>
+*	  </image>
+* 	</root>
+*
+* 	JSON:
+* 	{ "success" : 1, "errormessage" : "", "images" : [
+*		{ "thumbnail" : "gallery/thumbnails/A210d.jpg", "path" : "A210d.jpg", "name" : "A210d.jpg", "one" : "value 1.A210d.jpg" }
+*    ]}
+*
+*/
+galleryViewConnector = Scriptor.galleryViewConnector = function(opts) {
+	var localOpts = {
+		galleryView : null,
+		api : null,
+		method : 'POST',
+		type : 'json',
+		parameters : ''
+	};
+	
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!localOpts.galleryView)
+	{
+		Scriptor.error.report('Must provide galleryView reference to galleryViewConnector object.');
+		return;
+	}
+	
+	if (typeof(localOpts.api) != 'string' || localOpts.api == '')
+	{
+		Scriptor.error.report('Invalid Api string.');
+		return;
+	}
+	
+	this.api = localOpts.api;
+	this.galleryView = localOpts.galleryView;
+	this.parameters = localOpts.parameters;
+	
+	this.type = 'json';
+	if (localOpts.type)
+		switch (localOpts.type.toLowerCase())
+		{
+			case ('xml'):
+				this.type = 'xml';
+				break;
+			case ('json'):
+			default:
+				this.type = 'json';
+				break;
+		}
+		
+	this.method = 'POST';
+	if (typeof(localOpts.method) == 'string')
+		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
+		
+	// event attaching and httpRequest setup
+	Scriptor.event.attach(this.galleryView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
+	
+	this.httpRequest = new Scriptor.httpRequest({
+		ApiCall : this.api,
+		method : this.method,
+		Type : this.type,
+		onError : Scriptor.bind(this._onError, this),
+		onLoad : Scriptor.bind(this._onLoad, this)
+	});
+};
+
+galleryViewConnector.prototype = {
+	_onRefresh : function(e) {
+		this.galleryView.setLoading(true);
+			
+		this.httpRequest.send(this.parameters);
+		
+		Scriptor.event.cancel(e);
+	},
+	
+	_onLoad : function(data) {
+		this.galleryView.setLoading(false);
+		
+		if (this.type == 'xml')	// xml parsing
+		{
+			var root = data.getElementsByTagName('root').item(0);
+	
+			// TODO: Add/Remove/Update images instead of replacing the whole data structure
+			//   upgrade addImage, deleteImage to avoid using updateImages
+			// fake visible = false so we call updateImages only once
+			var oldVisible = this.galleryView.visible;
+			this.galleryView.visible = false;
+			this.galleryView.images.length = 0;
+
+			if (root.getAttribute('success') == '1') {
+				var images = root.getElementsByTagName('image');
+				
+				for (var n=0; n < images.length; n++) {
+					var thumb = images.item(n).getElementsByTagName('thumbnail');
+					var path = images.item(n).getElementsByTagName('path');
+					var name = images.item(n).getElementsByTagName('name');
+					var thumbText = '';
+					var pathText = '';
+					var nameText = '';
+					
+					if (thumb.length) {
+						if (thumb.item(0).firstChild) {
+							thumbText = thumb.item(0).firstChild.data;
+						}
+					}
+					
+					if (path.length) {
+						if (path.item(0).firstChild) {
+							pathText = path.item(0).firstChild.data;
+						}
+					}
+					
+					if (name.length) {
+						if (name.item(0).firstChild) {
+							nameText = name.item(0).firstChild.data;
+						}
+					}
+					
+					this.galleryView.images.push(new gv_ImageObject(thumbText, pathText, nameText));
+					
+					var params = images.item(n).getElementsByTagName('param');
+					if (params.length) {
+						for (var a=0; a < params.length; a++) {
+							var paramName = params.item(a).getAttribute('name');
+							var paramText = '';
+							if (params.item(a).firstChild)
+								paramText = params.item(a).firstChild.data;
+							
+							this.galleryView.images[this.galleryView.images.length-1][paramName] = paramText;
+						}
+					}
+				}
+				
+			}
+			else {
+				this.galleryView.setMessage(root.getAttribute('errormessage'));
+			}
+			
+			if (oldVisible)
+			{
+				this.galleryView.visible = oldVisible;
+				this.galleryView.updateImages();
+			}
+		}
+		else	// json
+		{
+			// TODO: Add/Remove/Update images instead of replacing the whole data structure
+			//   upgrade addImage, deleteImage to avoid using updateImages
+			// fake visible = false so we call updateImages only once
+			var oldVisible = this.galleryView.visible;
+			this.galleryView.visible = false;
+			this.galleryView.images.length = 0;
+			
+			if (data.success) {
+				for (var n=0; n < data.images.length; n++) {
+					var thumbText = data.images[n].thumbnail;
+					var pathText = data.images[n].path;
+					var nameText = data.images[n].name;
+					
+					this.galleryView.images.push(new gv_ImageObject(thumbText, pathText, nameText));
+					
+					
+					for (var param in data.images[n]) {
+						if (param != 'thumbnail' && param != 'path' && param != 'name')
+						{
+							this.galleryView.images[this.galleryView.images.length-1][param] = data.images[n][param];
+						}
+					}
+					
+				}
+				
+			}
+			else {
+				this.galleryView.setMessage(data.errormessage);
+			}
+			
+			if (oldVisible)
+			{
+				this.galleryView.visible = oldVisible;
+				this.galleryView.updateImages();
+			}
+		}
+	},
+	
+	_onError : function(status)
+	{
+		this.galleryView.setLoading(false);
+		this.galleryView.setMessage('Error: Unable to load galleryView object (HTTP status: ' + status + ')');
+	}
+};// JavaScript Document
 /* 
 *  httpReqiest version 2.0b
 *

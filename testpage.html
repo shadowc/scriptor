@@ -114,8 +114,15 @@
 		
 		myCalendarView = new calendarView('calendarView');
 		
-		myGalleryView = new galleryView('galleryView', 'xml/getData3.php', 150, 180);
-			
+		myGalleryView = new galleryView('galleryView', {thumbWidth : 150, thumbHeight : 180});
+		myGalleryViewCon = new galleryViewConnector({
+				galleryView : myGalleryView,
+				api : 'testapi.php',
+				parameters : 'type=xml&option=4',
+				method : 'POST',
+				type :'xml'
+			});
+		
 		myTreeView = new treeView('treeView');
 		myTreeViewCon = new treeViewConnector({
 				treeView : myTreeView,
@@ -135,7 +142,7 @@
 			myDataView.Show(true);
 			myDataView2.Show(true);
 			myCalendarView.Show();
-			myGalleryView.Show(false);
+			myGalleryView.Show(true);
 			myTreeView.Show(true);
 		}
 		
@@ -143,10 +150,9 @@
 	</script>
 	<style type="text/css">
 		h1 { font-weight: normal; font-size: 24px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 20px; }
-	
 		#container { margin: 20px; }
-		.dataView { border: 1px solid #AAAAAA; margin: 20px; }
-		.calendarView { margin: 20px; }
+		.dataView { border: 1px solid #AAAAAA; }
+		
 		.tabViewDiv { overflow: hidden; }
 		.galleryView { width: 600px; height: 300px; }
 		#treeView { width: 250px; height: 300px; }

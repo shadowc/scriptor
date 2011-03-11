@@ -1,6 +1,6 @@
 /* CSS Document */
 
-.tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; }
+.tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; margin: 0; padding: 0; }
 .tabViewDiv { border: 1px solid #ace3f3; border-top: none; }
 
 .tabViewLi { float: left; height: 20px; background: URL('images/tab_unsel_left.png') no-repeat; margin: 0 2px 0 2px; }

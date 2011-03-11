@@ -123,7 +123,7 @@
 .galleryView div.gvSelectedImage img { border: 2px solid #000000; }
 .galleryView div.gvSelectedImage p { font-weight: bold; }/* CSS Document */
 
-.tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; }
+.tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; margin: 0; padding: 0; }
 .tabViewDiv { border: 1px solid #ace3f3; border-top: none; }
 
 .tabViewLi { float: left; height: 20px; background: URL('images/tab_unsel_left.png') no-repeat; margin: 0 2px 0 2px; }
@@ -140,7 +140,7 @@
 .treeViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
 
 .treeView div.treeViewMessageDiv { margin: 10px; font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
-.treeView ul { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; padding: 3px; list-style-type: none; overflow: hidden; clear: left; }
+.treeView ul { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; padding: 3px; list-style-type: none; overflow: hidden; clear: left; margin: 0; }
 .treeView ul ul { margin-left: 15px; padding: 0; display: none; }
 .treeView ul li { margin: 0; clear: left; overflow: hidden; }
 .treeView ul li a { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; display: block; height: 16px; padding: 2px 4px; border: 1px solid #FFFFFF; float: left; background: transparent; }
