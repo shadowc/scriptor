@@ -247,9 +247,6 @@ dataView = Scriptor.dataView = function(div, opts) {
 	this.curPage = 0;
 	this.totalRows = 0;
 	
-	this.optionsMenuWidth = 120;
-	this.optionsMenuHeight = 0;
-	
 	this.resizingXCache = 0;
 	this.resizingFrom = 0;
 	this.resColumnId = null;

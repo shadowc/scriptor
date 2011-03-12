@@ -4,6 +4,7 @@ rm Scriptor.es.js
 
 cat modules/intro.js 		>> Scriptor.es.js
 cat modules/core.js 		>> Scriptor.es.js
+cat modules/contextMenu.js	>> Scriptor.es.js
 cat modules/calendarView.js	>> Scriptor.es.js
 cat lang/calendarView.es.js >> Scriptor.es.js
 cat modules/dataView.js		>> Scriptor.es.js
