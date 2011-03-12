@@ -18,6 +18,15 @@
 
 /* CSS Document */
 
+.contextMenu { margin: 0; padding: 0; border: 1px solid #9e9e9e; background: #ebebeb; padding: 3px; position: absolute; display: none; }
+.contextMenu ul { list-style-type: none; }
+.contextMenu ul li { display: block; height: 20px; }
+.contextMenu ul li a { display: block; overflow: hidden; height: 17px; padding: 3px 0 0 14px; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; }
+.contextMenu ul li a:hover { text-decoration: none; color: #FFFFFF; background: #114478; }
+.contextMenu ul li.dataViewMenuSep { height: 2px; border-bottom: 1px solid #9e9e9e; margin-bottom: 1px; line-height: 2px; }
+.contextMenu ul li a.dataViewOptionChecked { font-weight: bold; background: #ebebeb URL('images/check.jpg') no-repeat left center; }
+.contextMenu ul li a.dataViewOptionChecked:hover { font-weight: bold; background: #114478 URL('images/check-sel.jpg') no-repeat left center; }/* CSS Document */
+
 .calendarView { border: 1px solid #036188; width: 245px; background: #FFFFFF; color: #333333; }
 .calendarView * { margin: 0 !important; padding: 0 !important; }
 
@@ -106,15 +115,7 @@
 .dataViewFooter ul li.first { background: URL('images/bar-left.jpg') no-repeat bottom left; }
 
 .dataViewLoading { border: 1px solid #57a4b5; background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
-
-.dataViewOptionsMenu { border: 1px solid #9e9e9e; background: #ebebeb; padding: 3px; }
-.dataViewOptionsMenu ul { list-style-type: none; }
-.dataViewOptionsMenu ul li { display: block; height: 20px; }
-.dataViewOptionsMenu ul li a { display: block; overflow: hidden; height: 17px; padding: 3px 0 0 14px; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; }
-.dataViewOptionsMenu ul li a:hover { text-decoration: none; color: #FFFFFF; background: #114478; }
-.dataViewOptionsMenu ul li.dataViewMenuSep { height: 2px; border-bottom: 1px solid #9e9e9e; margin-bottom: 1px; line-height: 2px; }
-.dataViewOptionsMenu ul li a.dataViewOptionChecked { font-weight: bold; background: #ebebeb URL('images/check.jpg') no-repeat left center; }
-.dataViewOptionsMenu ul li a.dataViewOptionChecked:hover { font-weight: bold; background: #114478 URL('images/check-sel.jpg') no-repeat left center; }/* CSS Document */
+/* CSS Document */
 
 .galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; color: #333333; }
 .galleryViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
