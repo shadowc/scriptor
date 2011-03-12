@@ -26,5 +26,7 @@ calendarView.prototype.lang = {
 	
 	error1 : 'El campo del día ingresado es inválido.',
 	error2 : 'El campo del año ingresado es inválido.',
-	error3 : 'La fecha seleccionada no está disponible.'
+	error3 : 'La fecha seleccionada no está disponible.',
+	
+	isFrenchDateFormat : true
 };

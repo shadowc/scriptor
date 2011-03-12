@@ -26,5 +26,7 @@ calendarView.prototype.lang = {
 	
 	error1 : 'The date field entered is invalid.',
 	error2 : 'The year field entered is invalid.',
-	error3 : 'The selected date is not available.'
+	error3 : 'The selected date is not available.',
+	
+	isFrenchDateFormat : false
 };

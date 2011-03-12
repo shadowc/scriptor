@@ -74,6 +74,7 @@ calendarView = Scriptor.calendarView = function(div, opts) {
 	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
 	this.div = typeof(div) == 'string' ? div : this.divElem.id;
 	
+	this.hookedTo = null;
 };
 
 calendarView.prototype = {
@@ -117,10 +118,41 @@ calendarView.prototype = {
 		// Create body
 		cTemplate += '<table border="0" cellpadding="0" cellspacing="0" class="calendarViewBody" id="' + this.div + '_body"></table>';
 		
+		// create advanced dialog
+		cTemplate += '<div class="calendarViewAdvanced" style="display: none;" id="'+this.div+'_advanced">';
+		var targetDate = new Date();
+		if (this.selectedDates.length)
+			targetDate = this.selectedDates[0];
+		
+		// day selector
+		cTemplate += '<p><label for="'+this.div+'DaySelector">'+this.lang.day+'</label>';
+		cTemplate += '<input type="text" id="'+this.div+'DaySelector" value="'+targetDate.getDate()+'" /></p>';
+		
+		// month selector
+		cTemplate += '<p><label for="'+this.div+'MonthSelector">'+this.lang.month+'</label>';
+		cTemplate += '<select id="'+this.div+'MonthSelector">';
+		for (var n=0; n < 12; n++) 
+			cTemplate += '<option value="'+n+'"' + (targetDate.getMonth() == n ? ' selected="selected"' : '') + '>'+this.lang.longMonths[n]+'</option>';	
+		cTemplate += '</select></p>';
+		
+		// year selector
+		cTemplate += '<p><label for="'+this.div+'YearSelector">'+this.lang.year+'</label>';
+		cTemplate += '<input type="text" id="'+this.div+'YearSelector" value="'+targetDate.getFullYear()+'" /></p>';
+		
+		// buttons
+		cTemplate += '<p><a class="calendarAccept" id="'+this.div+'_advancedAccept">'+this.lang.accept+'</a>';
+		cTemplate += '<a class="calendarCancel" id="'+this.div+'_advancedCancel">'+this.lang.cancel+'</a></p>';
+		
+		cTemplate += '</div>';
+		
 		// Create footer
 		cTemplate += '<div class="calendarViewFooter" id="' + this.div + '_footer"></div>';
 		
 		target.innerHTML = cTemplate;
+		
+		// advanced view event handlers
+		Scriptor.event.attach(document.getElementById(this.div+'_advancedAccept'), 'onclick', Scriptor.bind(this.selectAdvanced, this));
+		Scriptor.event.attach(document.getElementById(this.div+'_advancedCancel'), 'onclick', Scriptor.bind(this.cancelAdvanced, this));
 		
 		this.visible = true;
 		this.updateDates();
@@ -151,6 +183,10 @@ calendarView.prototype = {
 		}
 		
 		var targetTable = document.getElementById(this.div+'_body');
+		targetTable.style.display = '';
+		document.getElementById(this.div+'_advanced').style.display = 'none';
+		this.advanced = false;
+		
 		targetTable.innerHTML = '';		
 		
 		// using DOM functions here to overcome possible IE bugs when rendering large tables through innerHTML
@@ -341,7 +377,7 @@ calendarView.prototype = {
 		}
 		
 		targetDiv.innerHTML = fTemplate;
-		Scriptor.event.attach(document.getElementById(this.div+'_goHome'), 'onclick', Scriptor.bind(this.gohomeDate, this));
+		Scriptor.event.attach(document.getElementById(this.div+'_goHome'), 'onclick', Scriptor.bind(this.goHomeDate, this));
 	},
 	
 	/*
@@ -350,107 +386,119 @@ calendarView.prototype = {
 	*   a form. Usefull to select distanct dates.
 	*/
 	setAdvanced : function() {
-		if (!this.visible || !document.getElementById(this.div)) {
-			alert( "Can't go to advanced mode on non visible calendarView object.");
-			return;
-		}
-		
-		var target = document.getElementById(this.div);
-	
-		var divs = target.getElementsByTagName('table');
-		var targetTable = false;
-		
-		for (var n=0; n < divs.length; n++) {
-			if (divs.item(n).className == 'calendarViewBody') {
-				targetTable = divs.item(n);
-				break;
-			}
-		}
-		
-		if (!targetTable) {
-			alert('Error: Unable to find calendar table.');
-			return;
-		}
-		
-		while( targetTable.firstChild )
-			targetTable.removeChild(targetTable.firstChild);
-			
-		var tbody, tr, td, tmpP, tmpLabel, tmpInput, tmpSel, tmpA;
-		tbody = document.createElement('tbody');
-		tr = document.createElement('tr');
-		td = document.createElement('td');
-		td.className = 'calendarTDWide';
+		document.getElementById(this.div+'_body').style.display = 'none';
+		document.getElementById(this.div+'_advanced').style.display = 'block';
 		
 		var targetDate = new Date();
 		if (this.selectedDates.length)
 			targetDate = this.selectedDates[0];
 		
-		// day selector
-		tmpP = document.createElement('p');
-		tmpLabel = document.createElement('label');
-		tmpLabel.setAttribute('for', this.div + 'DaySelector');
-		tmpLabel.appendChild(document.createTextNode(this.lang.day));
-		tmpP.appendChild(tmpLabel);
+		document.getElementById(this.div + 'DaySelector').value = targetDate.getDate();
+		document.getElementById(this.div + 'MonthSelector').selectedIndex = targetDate.getMonth();
+		document.getElementById(this.div + 'YearSelector').value = targetDate.getFullYear();
 		
-		tmpInput = document.createElement('input');
-		tmpInput.setAttribute('type', 'text');
-		tmpInput.id = this.div + 'DaySelector';
-		tmpInput.setAttribute('value', targetDate.getDate());
-		tmpP.appendChild(tmpInput);
-		td.appendChild(tmpP);
+		this.advanced = true;
+	},
+	
+	/*
+	* calendarView.cancelAdvanced()
+	*  This function will return to normal mode, canceling advanced selection in calendar instance
+	*/
+	cancelAdvanced : function (divId) {
+		document.getElementById(this.div+'_body').style.display = '';
+		document.getElementById(this.div+'_advanced').style.display = 'none';
 		
-		// month selector
-		tmpP = document.createElement('p');
-		tmpLabel = document.createElement('label');
-		tmpLabel.setAttribute('for', this.div + 'MonthSelector');
-		tmpLabel.appendChild(document.createTextNode(this.lang.month));
-		tmpP.appendChild(tmpLabel);
+		this.advanced = false;
+	},
+	
+	/*
+	* selectAdvanced()
+	*  This function checks and selects the date entered in advanced mode
+	*/
+	selectAdvanced : function(e) {
+		if (!e) e = window.event;
 		
-		tmpSel = document.createElement('select');
+		var dayNum = document.getElementById(this.div + 'DaySelector').value;
+		var monthNum = document.getElementById(this.div + 'MonthSelector').value;
+		var yearNum = document.getElementById(this.div + 'YearSelector').value;
 		
-		tmpSel.id = this.div + 'MonthSelector';
-		tmpP.appendChild(tmpSel);
-		for (var n=0; n < 12; n++) {
-			tmpSel.options[tmpSel.options.length] = new Option(this.lang.longMonths[n], n);
-			if (targetDate.getMonth() == n) 
-				tmpSel.selectedIndex = n;
+		if (isNaN(Number(dayNum))) {
+			alert(this.lang.error1);
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		if (isNaN(Number(yearNum))) {
+			alert(this.lang.error2);
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		var targetDate = new Date(yearNum, monthNum, dayNum);
+		if (targetDate.getMonth() != monthNum) {
+			alert(this.lang.error1);
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		if (this.isDisabledDate(targetDate)) {
+			alert(this.lang.error3);
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		var fakeE = { selecting : targetDate, selectedDates : this.selectedDates };
+		fakeE = Scriptor.event.fire(this, 'onselect', fakeE);
+		if (fakeE.returnValue == false)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		this.selectedDates.length = 0;
+		this.selectedDates[0] = targetDate;
+		this.goHomeDate(e);
+		
+		Scriptor.event.cancel(e, true);
+		return false;
+	},
+	
+	/*
+	* selectDate()
+	*  This function executes when clicking on a calendarView date and selects that date
+	*/
+	selectDate : function(e, date) {
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		var targetDate = new Date(this.curYear, this.curMonth, date);
+		var fakeE = { selecting : targetDate, selectedDates : this.selectedDates };
+		fakeE = Scriptor.event.fire(this, 'onselect', fakeE);
+		if (fakeE.returnValue == false)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		if (!this.isDisabledDate(targetDate)) {
+			if (!this.multiSelect) {
+				this.selectedDates.length = 0;
+				this.selectedDates[0] = targetDate;
+			}
+			else {
+				Scriptor.error.report('Error: multiselect function not implemented.');
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+			this.updateDates();
 			
 		}
-		td.appendChild(tmpP);
 		
-		// year selector
-		tmpP = document.createElement('p');
-		tmpLabel = document.createElement('label');
-		tmpLabel.setAttribute('for', this.div + 'YearSelector');
-		tmpLabel.appendChild(document.createTextNode(this.lang.year));
-		tmpP.appendChild(tmpLabel);
-		
-		tmpInput = document.createElement('input');
-		tmpInput.setAttribute('type', 'text');
-		tmpInput.id = this.div + 'YearSelector';
-		tmpInput.setAttribute('value', targetDate.getFullYear());
-		tmpP.appendChild(tmpInput);
-		td.appendChild(tmpP);
-		
-		// buttons
-		tmpP = document.createElement('p');
-		tmpA = document.createElement('a');
-		tmpA.className = 'calendarAccept';
-		tmpA.setAttribute('href', 'javascript:CaViE.selectAdvanced("' + this.div + '");');
-		tmpA.appendChild(document.createTextNode(this.lang.accept));
-		tmpP.appendChild(tmpA);
-		td.appendChild(tmpP);
-		
-		tmpA = document.createElement('a');
-		tmpA.className = 'calendarCancel';
-		tmpA.setAttribute('href', 'javascript:CaViE.cancelAdvanced("' + this.div + '");');
-		tmpA.appendChild(document.createTextNode(this.lang.cancel));
-		tmpP.appendChild(tmpA);
-		td.appendChild(tmpP);
-		
-		tr.appendChild(td);
-		tbody.appendChild(tr);
-		targetTable.appendChild(tbody);
+		Scriptor.event.cancel(e, true);
+		return false;
 	},
 	
 	/*
@@ -522,413 +570,211 @@ calendarView.prototype = {
 	},
 	
 	/*
+	* goPrevMonth()
+	*  To go to a previous month
+	*/
+	goPrevMonth : function (e) {
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+		
+		this.curMonth--;
+		if (this.curMonth < 0) {
+			this.curMonth = 11;
+			this.curYear--;
+		}
+		
+		this.updateDates();
+		
+		Scriptor.event.cancel(e, true);
+		return false;
+	},
+	
+	/*
+	* goNextMonth()
+	*  To go to the next month
+	*/
+	goNextMonth : function (e) {
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+			
+		this.curMonth++;
+		if (this.curMonth > 11) {
+			this.curMonth = 0;
+			this.curYear++;
+		}
+		
+		this.updateDates();
+		
+		Scriptor.event.cancel(e, true);
+		return false;
+	},
+	
+	/*
+	* goHomeDate()
+	*  Will make selection visible, or will show current date
+	*/
+	goHomeDate : function (e) {
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e, true);
+			return false;
+		}
+			
+		var showingDate;
+		if (this.selectedDates.length) {
+			showingDate = this.selectedDates[0];
+		}
+		else {
+			showingDate = new Date();
+		}
+		
+		this.curMonth = showingDate.getMonth();
+		this.curYear = showingDate.getFullYear();
+		this.updateDates();
+		
+		Scriptor.event.cancel(e, true);
+		return false;
+	},
+
+	
+	/*
 	* Hooks this calendarView instance to a text input to select a date
 	*/
 	hook : function(elementId) {
-		var elem = document.getElementById(elementId);
+		var elem = null;
 		
+		if (typeof(elementId) == 'string')
+			elem = document.getElementById(elementId);
+		else if (Scriptor.isHTMLElement(elementId))
+			elem = elementId;
+
 		if (elem) {
-			for (var n=0; n < CaViE.registers.length; n++) {
-				if (CaViE.registers[n].ddiv == this.div) {
-					CaViE.registers[n].hookId = elementId;
-				}
-			}
+			this.hookedTo = elem;
 			
 			calElem = document.getElementById(this.div);
-			elem.onfocus = CaViE.showHooked;
+			Scriptor.event.attach(elem, 'onfocus', Scriptor.bind(this.showHooked, this));
 			calElem.style.display = 'none';
 			calElem.style.position = 'absolute';
-			this.Show();
+			
+			//this.Show();
+			Scriptor.event.attach(this, 'onselect', Scriptor.bind(this.assignToHooked, this));
 			this.onselect = CaViE.assignToHooked;
 		}
 	},
 	
-	selectDate : function(e, day) {
-		console.log(arguments);
-	}
-};
-
-calendarView_engine = function() {
-/*
-* This object contains dataView objects with their respective div strings 
-* (the id of the HTMLElement on which dataView is to show). 
-*/
-	this.registers = Array();
-}
-
-calendarView_engine.prototype = {
-
-/*
-* isEqual()
-*  This function compares two date objects and returns true if they point to the same date.
-*/
-
-isEqual : function (date1, date2) {
-	if (date1.getFullYear() == date2.getFullYear() &&
-			date1.getMonth() == date2.getMonth() &&
-			date1.getDate() == date2.getDate()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-},
-
-/*
-* selectDate()
-*  This function executes when clicking on a dataView row and selects that row.
-
-*/
-selectDate : function (date, divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
+	/*
+	* shows a hooked calendar to input text
+	*/
+	showHooked : function(e) {
+		if (!e) e = window.event;
+		var elem = this.hookedTo;
 		
-	if (obj.onbeforeselect) {
-		if (!obj.onbeforeselect())
-			return;
-	}
-	
-	var targetDate = new Date(obj.curYear, obj.curMonth, date);
-	if (!obj.isDisabledDate(targetDate)) {
-		if (!obj.multiSelect) {
-			obj.selectedDates.length = 0;
-			obj.selectedDates[0] = targetDate;
+		var date = this.getDateFromStr(elem.value);
+				
+		this.curMonth = date.getMonth();
+		this.curYear = date.getFullYear();
+		this.selectedDates.length = 0
+		this.selectedDates[0] = date;
+				
+		this.Show();
+		
+		if (this._hideHookedBind)
+			Scriptor.event.detach(document, 'onclick', this._hideHookedBind);
+			
+		Scriptor.event.attach(document, 'onclick', this._hideHooked = Scriptor.bind(this.hideHooked, this));
+		
+		this.divElem.style.display = 'block';
+		this.divElem.zIndex = '1000';
+		if (e.offsetX) {
+			x = e.offsetX;
+			y = e.offsetY
 		}
 		else {
-			alert('Error: multiselect function not implemented.');
-			return;
+			x = e.pageX - document.getBoxObjectFor(elem).x;
+			y = e.pageY - document.getBoxObjectFor(elem).y;
 		}
-		obj.updateDates();
 		
-		if (obj.onselect)
-			obj.onselect(obj);
-	}
-},
-
-/*
-* selectAdvanced()
-*  This function checks and selects the date entered in advanced mode
-*/
-
-selectAdvanced : function(divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-		
-	var dayNum = document.getElementById(divId + 'DaySelector').value;
-	var monthNum = document.getElementById(divId + 'MonthSelector').value;
-	var yearNum = document.getElementById(divId + 'YearSelector').value;
-	
-	if (isNaN(Number(dayNum))) {
-		alert(obj.lang.error1);
-		return;
-	}
-	
-	if (isNaN(Number(yearNum))) {
-		alert(obj.lang.error2);
-		return;
-	}
-	
-	targetDate = new Date(yearNum, monthNum, dayNum);
-	if (targetDate.getMonth() != monthNum) {
-		alert(obj.lang.error1);
-		return;
-	}
-	
-	if (obj.isDisabledDate(targetDate)) {
-		alert(obj.lang.error3);
-		return;
-	}
-	
-	if (obj.onbeforeselect) {
-		if (!obj.onbeforeselect())
-			return;
-	}
-	
-	obj.selectedDates.length = 0;
-	obj.selectedDates[0] = targetDate;
-	CaViE.goHomeDate(divId);
-	
-	if (obj.onselect)
-		obj.onselect(obj);
-},
-
-/*
-* goPrevMonth()
-*  To go to a previous month
-*/
-goPrevMonth : function (divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
-		
-	obj.curMonth--;
-	if (obj.curMonth < 0) {
-		obj.curMonth = 11;
-		obj.curYear--;
-	}
-	
-	obj.updateDates();
-},
-
-/*
-* goNextMonth()
-*  To go to the next month
-*/
-goNextMonth : function (divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
-		
-	obj.curMonth++;
-	if (obj.curMonth > 11) {
-		obj.curMonth = 0;
-		obj.curYear++;
-	}
-	
-	obj.updateDates();
-},
-
-/*
-* goHomeDate()
-*  Will make selection visible, or will show current date
-*/
-goHomeDate : function (divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
-		
-	var showingDate;
-	if (obj.selectedDates.length) {
-		showingDate = obj.selectedDates[0];
-	}
-	else {
-		showingDate = new Date();
-	}
-	
-	obj.curMonth = showingDate.getMonth();
-	obj.curYear = showingDate.getFullYear();
-	obj.updateDates();
-},
-
-/*
-* setAdvanced()
-*  This function will trgger advanced selection mode in calendar instance
-*/
-setAdvanced : function (divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
-	
-	obj.setAdvanced();
-},
-
-/*
-* cancelAdvanced()
-*  This function will return to normal mode, canceling advanced selection in calendar instance
-*/
-cancelAdvanced : function (divId) {
-	var obj = CaViE.__findCalendarView(divId);
-	
-	if (!obj) {	
-		alert('Error: Unable to find calendarView.');
-		return;
-	}
-	
-	if (!obj.enabled) 
-		return;
-	
-	obj.updateDates();
-},
-
-/*
-* __findCalendarView()
-* This function searches a calendarView object in the registered list of calendarViews 
-* providing its div id string
-*/
-__findCalendarView : function (str) {
-	for (var n=0; n < CaViE.registers.length; n++) 
-		if (CaViE.registers[n].ddiv == str) 
-			return CaViE.registers[n].dobj;
-	
-	return false;
-},
-
-/*
-* shows a hooked calendar to input text
-*/
-showHooked : function(e) {
-	if (!e)
-		e = window.event;
-	
-	var elem = (e.target) ? e.target : e.srcElement;
-	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	for (var n=0; n < CaViE.registers.length; n++) {
-		if (CaViE.registers[n].hookId == elem.id) {
-			var date = CaViE.getDateFromStr(elem.value);
+		if (e.pageX) {
+			x = e.pageX - x;
+			y = e.pageY - y + 24;
+		}
+		else {
+			if (e.x) {
+				x = e.x + document.documentElement.scrollLeft - x;
+				y = e.y + document.documentElement.scrollTop - y + 24;
+			}
 			
-			var obj = CaViE.registers[n].dobj;
-			obj.curMonth = date.getMonth();
-			obj.curYear = date.getFullYear();
-			obj.selectedDates.length = 0
-			obj.selectedDates[0] = date;
-			
-			obj.Show();
-			
-			if (document.addEventListener)
-				document.addEventListener('click', CaViE.hideHooked, false);
-			else
-				document.attachEvent('onclick', CaViE.hideHooked);
+		}
+		this.divElem.style.left = x + 'px';
+		this.divElem.style.top = y + 'px';
+		
+	},
+	
+	/*
+	* to hide the showing floating calendars
+	*/
+	hideHooked : function(e) {
+		if (!e) e = window.event;
+		
+		this.Hide();
+		if (this._hideHookedBind)
+			Scriptor.event.detach(document, 'onclick', this._hideHookedBind);
+		
+	},
+
+	/*
+	* Assign selected value in a calendarView to hooked input
+	*  Formatting depends on lang.isFrenchDateFormat
+	*/
+	assignToHooked : function() {
+		
+		var date = this.selectedDates[0];
+		var input = this.hookedTo;
+		
+		if (this.lang.isFrenchDateFormat)
+		{
+			// dd/mm/yyyy
+			input.value =  date.getDate() + '/' + (date.getMonth() +1) + '/' + date.getFullYear();
+		}
+		else
+		{
+			// mm/dd/yyyy
+			input.value =  (date.getMonth() +1) + '/' + date.getDate() + '/' + date.getFullYear();
+		}
+		
+		this.Hide();
+		if (this._hideHookedBind)
+			Scriptor.event.detach(document, 'onclick', this._hideHookedBind);
+	},
+
+	/*
+	* gets date from str. TODO: formatting!
+	*/
+	getDateFromStr : function(str) {
+		var dateCmps = str.split('/');
+		
+		// dd/mm/yyyy
+		var ret;
+		if (!isNaN(Number(dateCmps[0])) && !isNaN(Number(dateCmps[1])) && !isNaN(Number(dateCmps[2]))) {
+			if (dateCmps[1] > 0 && dateCmps[1] < 13 && dateCmps[0] > 0 && dateCmps[0] < 32 && dateCmps[2] > 0) {
 				
-			var cElem = document.getElementById(CaViE.registers[n].ddiv);
-			
-			cElem.style.display = 'block';
-			cElem.zIndex = '1000';
-			if (e.offsetX) {
-				x = e.offsetX;
-				y = e.offsetY
+				ret = new Date(dateCmps[2], dateCmps[1]-1, dateCmps[0], 0, 0, 0);
 			}
 			else {
-				x = e.pageX - document.getBoxObjectFor(elem).x;
-				y = e.pageY - document.getBoxObjectFor(elem).y;
+				ret = new Date();
 			}
-			
-			if (e.pageX) {
-				x = e.pageX - x;
-				y = e.pageY - y + 24;
-			}
-			else {
-				if (e.x) {
-					x = e.x + document.documentElement.scrollLeft - x;
-					y = e.y + document.documentElement.scrollTop - y + 24;
-				}
-				
-			}
-			cElem.style.left = x + 'px';
-			cElem.style.top = y + 'px';
-			
-			break;
-		}
-	}
-	
-},
-
-/*
-* to hide the showing floating calendars
-*/
-hideHooked : function(e, noDetach) {
-	if (!e)
-		e = window.event;
-	
-	var elem = (e.target) ? e.target : e.srcElement;
-	
-	if (elem.nodeType == 3)
-		elem = elem.parentNode;
-	
-	for (var n=0; n < CaViE.registers.length; n++) {
-		if (CaViE.registers[n].hookId) {
-			var cDiv = CaViE.registers[n].ddiv;
-			var hide = true;
-			var curElem = elem;
-			
-			if (elem.id == CaViE.registers[n].hookId) {
-				hide = false;
-			}
-			else {
-				while (curElem.parentNode) {
-					if (curElem.id == cDiv) {
-						hide = false;
-						break;
-					}
-					curElem = curElem.parentNode;
-				}
-			}
-			
-			if (hide) 
-				document.getElementById(CaViE.registers[n].ddiv).style.display = 'none';
-		}
-	}
-},
-
-/*
-* gets date from str. TODO: formatting!
-*/
-getDateFromStr : function(str) {
-	var dateCmps = str.split('/');
-	
-	// dd/mm/yyyy
-	var ret;
-	if (!isNaN(Number(dateCmps[0])) && !isNaN(Number(dateCmps[1])) && !isNaN(Number(dateCmps[2]))) {
-		if (dateCmps[1] > 0 && dateCmps[1] < 13 && dateCmps[0] > 0 && dateCmps[0] < 32 && dateCmps[2] > 0) {
-			
-			ret = new Date(dateCmps[2], dateCmps[1]-1, dateCmps[0], 0, 0, 0);
 		}
 		else {
 			ret = new Date();
 		}
+		
+		return ret;
 	}
-	else {
-		ret = new Date();
-	}
-	
-	return ret;
-},
-
-/*
-* Assign selected value in a calendarView to hooked input
-* TODO: formatting!
-*/
-assignToHooked : function(obj) {
-	for (var n=0; n < CaViE.registers.length; n++) {
-		if (CaViE.registers[n].ddiv == obj.div && CaViE.registers[n].hookId) {
-			document.getElementById(CaViE.registers[n].ddiv).style.display = 'none';
-			document.onclick = null;
-			
-			var date = obj.selectedDates[0];
-			input = document.getElementById(CaViE.registers[n].hookId);
-			// dd/mm/yyyy
-			input.value =  date.getDate() + '/' + (date.getMonth() +1) + '/' + date.getFullYear();
-		}
-	}
-}
-
 };
 
-CaViE = new calendarView_engine();

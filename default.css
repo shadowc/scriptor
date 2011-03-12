@@ -47,18 +47,18 @@
 .calendarView .calendarViewFooter p a.calendarGoHome { width: 20px; height: 20px; float: left; background: URL('images/home.jpg') no-repeat 2px 2px; margin: -2px 0 0 2px !important; display: inline; }
 .calendarView .calendarViewFooter p { padding: 2px 0 0 0 !important; text-align: center; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #434343; font-weight: bold; }
 
-.calendarView table.calendarViewBody td.calendarTDWide { width: 245px; border-left: none; }
-.calendarView table.calendarViewBody td.calendarTDWide p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000000; overflow: hidden; margin: 4px !important; clear: left; }
-.calendarView table.calendarViewBody td.calendarTDWide p label,
-.calendarView table.calendarViewBody td.calendarTDWide p input,
-.calendarView table.calendarViewBody td.calendarTDWide p select { color: #333333; padding: 1px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
-.calendarView table.calendarViewBody td.calendarTDWide p label { float: left; padding: 2px 0 0 0 !important; width: 40px; }
-.calendarView table.calendarViewBody td.calendarTDWide p input { border: 1px solid #036188; width: 50px; padding: 1px; }
-.calendarView table.calendarViewBody td.calendarTDWide p select { border: 1px solid #036188; padding: 1px; }
-.calendarView table.calendarViewBody td.calendarTDWide p a { width: 56px; height: 18px; padding: 2px 0 0 24px !important; font-size: 12px; float: left; display: inline; margin: 5px 0 0 5px !important; color: #0e5970; text-align: left; }
-.calendarView table.calendarViewBody td.calendarTDWide p a.calendarAccept { background: URL('images/btn-accept.jpg') no-repeat; }
-.calendarView table.calendarViewBody td.calendarTDWide p a.calendarCancel { background: URL('images/btn-cancel.jpg') no-repeat; }
-.calendarView table.calendarViewBody td.calendarTDWide p a:hover { color: #333333; }/* CSS Document */
+.calendarView div.calendarViewAdvanced { width: 245px; overflow: hidden; }
+.calendarView div.calendarViewAdvanced p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000000; overflow: hidden; margin: 4px !important; clear: left; }
+.calendarView div.calendarViewAdvanced p label,
+.calendarView div.calendarViewAdvanced p input,
+.calendarView div.calendarViewAdvanced p select { color: #333333; padding: 1px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+.calendarView div.calendarViewAdvanced p label { float: left; padding: 2px 0 0 0 !important; width: 40px; }
+.calendarView div.calendarViewAdvanced p input { border: 1px solid #036188; width: 50px; padding: 1px; }
+.calendarView div.calendarViewAdvanced p select { border: 1px solid #036188; padding: 1px; }
+.calendarView div.calendarViewAdvanced p a { width: 56px; height: 18px; padding: 2px 0 0 24px !important; font-size: 12px; float: left; display: inline; margin: 5px 0 0 5px !important; color: #0e5970; text-align: left; cursor: pointer; }
+.calendarView div.calendarViewAdvanced p a.calendarAccept { background: URL('images/btn-accept.jpg') no-repeat; }
+.calendarView div.calendarViewAdvanced p a.calendarCancel { background: URL('images/btn-cancel.jpg') no-repeat; }
+.calendarView div.calendarViewAdvanced p a:hover { color: #333333; }/* CSS Document */
 .dataViewMain { border: 1px solid #9e9e9e; padding: 3px; background: #ebebeb; color: #333333; }
 
 .dataViewPaginationHeader { font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; background: URL('images/bar-middle.jpg') repeat-x; height: 25px; overflow: hidden; }
