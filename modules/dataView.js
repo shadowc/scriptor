@@ -154,11 +154,7 @@ var dataViewStyle = {
 	'sortWidth' : 14,
 	
 	'optionsIconWidth' : 25,
-	'multiSelectColumnWidth' : 13,
-	'optionsMenuHeight' : 20,
-	'optionsMenuHorizontalPadding' : 20,
-	'optionsMenuVerticalPadding' : 4,
-	'optionsMenuSepHeight' : 4
+	'multiSelectColumnWidth' : 13
 };
 
 /*
@@ -195,10 +191,6 @@ var dataViewStyle = {
 *	paginating: set to true if implementing pagination on table.
 *	rowsPerPage: set number of rows to show per page.
 *	curPage: The current page if paginating
-*
-*   optionsMenuWidth: The width in pixels of the options menu. You may adjust this value
-*    before showing to adjust to the length of the column names.
-*   optionsMenuHeight: The height of the options menu. for internal use only.
 *
 */
 dataView = Scriptor.dataView = function(div, opts) {
@@ -259,6 +251,8 @@ dataView = Scriptor.dataView = function(div, opts) {
 		this.addColumn(this.createColumn(localOpts.columns[n]));
 	}
 	// end add
+	
+	this.optionsMenu = null;
 };
 
 dataView.prototype = {
@@ -699,9 +693,6 @@ dataView.prototype = {
 		
 		// Create footer
 		dvTemplate += '<div id="' + this.div + '_footer" class="dataViewFooter"></div>';
-		
-		// create Options menu
-		dvTemplate += '<div id="' + this.div + '_optionsMenu" class="dataViewOptionsMenu" style="width: ' + (this.optionsMenuWidth - this.style.optionsMenuHorizontalPadding) + 'px; display: none; overflow: hidden; position: absolute"></div>';
 		
 		target.innerHTML = dvTemplate;
 		
@@ -1361,158 +1352,36 @@ dataView.prototype = {
 	*   dataView.optionsMenuWidth to apply these changes.
 	*/
 	updateOptionsMenu : function() {
-		if (!this.visible) {
-			Scriptor.error.report( "Can't update optiosn menu on non visible dataView object.");
-			return;
-		}
+		this.optionsMenu.items = [];
+		this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(this.Refresh, this)});
+		this.optionsMenu.addItem({label : 'sep'});
 		
-		var targetDiv = document.getElementById(this.div + '_optionsMenu');
-		targetDiv.style.width = this.optionsMenuWidth - this.style.optionsMenuHorizontalPadding + 'px';
-		
-		var oTemplate = '<ul><li><a href="#"" id="'+this.div+'_optionsMenuRefresh">' + this.lang.refresh + '</a></li>';
-		oTemplate += '<li class="dataViewMenuSep"></li>';
-		
-		this.optionsMenuHeight = this.style.optionsMenuHeight + this.style.optionsMenuVerticalPadding + this.style.optionsMenuSepHeight;
-		
-		// column togglers
 		for (var n=0; n < this.columns.length; n++) {
-			oTemplate += '<li><a href="#" id="'+this.div+'_optionsMenuItem_'+n+'"';
-			
+			var className = ''
 			if (this.columns[n].show)
-				oTemplate += ' class="dataViewOptionChecked"';
-			oTemplate += '>' + this.columns[n].displayName + '</a></li>';
-			
-			this.optionsMenuHeight += this.style.optionsMenuHeight
+				className = 'dataViewOptionChecked';
+			this.optionsMenu.addItem({label : this.columns[n].displayName, 'class' : className, onclick : Scriptor.bindAsEventListener(this.toggleColumn, this, n)});
 		}
-		oTemplate += '</ul>';
-		
-		targetDiv.innerHTML = oTemplate;
-
-		// Attach menu item events		
-		Scriptor.event.attach(document.getElementById(this.div+"_optionsMenuRefresh"), 'click', Scriptor.bindAsEventListener(this.Refresh, this));
-		for (var n=0; n < this.columns.length; n++)
-			Scriptor.event.attach(document.getElementById(+this.div+'_optionsMenuItem_'+n), 'click', Scriptor.bindAsEventListener(this.toggleColumn, this, n));
 	},
 
 	/* showOptionsMenu
 	*  This function shows the option menu of a dataView object. For internal use only
 	*/
-	// TODO: We need to refactor this with a ContextMenu Component
 	showOptionsMenu : function(e) {
-		/*if (!e)	e = window.event;
-		
-		if (!this.enabled) {
-			Scriptor.event.cancel(e);
-			return false;
+		// create options menu for the first time
+		if (!this.optionsMenu)
+		{
+			var om = document.createElement('div');
+			om.id = this.div+'_optionsMenu';
+			document.getElementsByTagName('body')[0].appendChild(om);
+			this.optionsMenu = new Scriptor.contextMenu(om.id);
 		}
-		
+
 		this.updateOptionsMenu();
-		
-		this._optionsMenu = true;
-		// find optionsMenuDiv
-		optionsDiv = document.getElementById(this.div+'_optionsMenu');
-		
-		// calculate x, y
-		var x, y;
-	
-		if (typeof(e.pageX) == 'number') {
-			x = e.pageX - this.optionsMenuWidth;
-			y = e.pageY;
-		}
-		else {
-			if (typeof(e.clientX) == 'number') {
-				x = (e.clientX + document.documentElement.scrollLeft) - this.optionsMenuWidth;
-				y = (e.clientY + document.documentElement.scrollTop);
-			}
-			else {
-				x = 0;
-				y = 0;
-			}
-		}
-		
-		optionsDiv.style.top = y + 'px';
-		optionsDiv.style.left = x + 'px';
-		optionsDiv.style.display = 'block';
-		
-		document.onclick = Scriptor.bind(this.checkOptionsMenu, this);*/
+		this.optionsMenu.Show(e);
 		
 		Scriptor.event.cancel(e);
 		return false;
-	},
-	
-	/* checkOptionsMenu
-	*  for internal use only
-	*/
-	// TODO: take this out into ContextMenu component
-	checkOptionsMenu : function(e) {
-		/*if (!e)	e = window.event;
-		
-		// calculate x, y
-		var x, y;
-	
-		if (typeof(e.pageX) == 'number') {
-			x = e.pageX;
-			y = e.pageY;
-		}
-		else {
-			if (typeof(e.clientX) == 'number') {
-				x = (e.clientX + document.documentElement.scrollLeft);
-				y = (e.clientY + document.documentElement.scrollTop);
-			}
-			else {
-				x = 0;
-				y = 0;
-			}
-		}
-		
-		
-		// search for dataViews with options menu opened and evaluate closing them
-		for (var n=0; n < DVE.dataRegisters.length; n++) {
-			if (DVE.dataRegisters[n].optionsMenu) { // this dataView has its optionsMenu active
-				var obj = DVE.dataRegisters[n].dobj;
-				
-				// search object div and look at its position
-				var objX, objY, objWidth, objHeight, objDiv;
-				objWidth = obj.optionsMenuWidth;
-				objHeight = obj.optionsMenuHeight;
-				
-				var objDivCollection = document.getElementById(obj.div).getElementsByTagName('div');
-				
-				for (var a=0; a < objDivCollection.length; a++) {
-					if (objDivCollection.item(a).className == 'dataViewOptionsMenu') {
-						objDiv = objDivCollection.item(a);
-						objX = Number(objDiv.style.left.substr(0, objDiv.style.left.length-2));
-						objY = Number(objDiv.style.top.substr(0, objDiv.style.top.length-2));
-						break;
-					}
-				}
-				
-				// see if clicked outside the div
-				if (objDiv) {
-					if ((x < objX || x > objX+objWidth) || (y < objY || y > objY+objHeight)) {
-						DVE.hideOptionsMenu(DVE.dataRegisters[n].ddiv);
-						document.onclick = null;
-					}
-				}
-				else {
-					// hopefully this will never execute
-					DVE.dataRegisters[n].optionsMenu = false;
-					document.onclick = null;
-				}
-			}
-		}
-		*/
-	},
-	
-	/* hideOptionsMenu
-	*  Hides the options menu panel. For internal use only
-	*/
-	// TODO: Take this out into ContextMenu component
-	hideOptionsMenu : function(div) {
-		/*
-		var objDiv = document.getElementById(this.div+'_optionsMenu');
-		objDiv.style.display = 'none';
-		*/
 	},
 	
 	/*
@@ -1521,9 +1390,6 @@ dataView.prototype = {
 	*   dataView.Show(false) instead to change column configuration manually.
 	*/
 	toggleColumn : function(e, colNdx) {
-		
-		this.hideOptionsMenu();
-		
 		if (this.columns[colNdx].show) {
 			this.columns[colNdx].show = false;
 		}
@@ -1532,6 +1398,7 @@ dataView.prototype = {
 		}
 		
 		this.Show(false);
+		this.updateRows();
 	},
 	
 	/*

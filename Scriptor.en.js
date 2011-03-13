@@ -1,4 +1,4 @@
-/* Scriptor 2.0b
+/* Scriptor 3.0b
   
   A tiny Javascript component library plus a few usefull functions
   
@@ -329,11 +329,13 @@ var __getNextHtmlId = function() {
 // A private stack of context menu instances, used
 // to hide any instance that is visible on activation of
 // another one.
-var context_menus = {
+var context_menus =
+{
 	stack : [],
 	
 	// to hide the active context menu
-	hide_actives : function() {
+	hide_actives : function()
+	{
 		for (var n=0; n < this.stack.length; n++)
 			if (this.stack[n].visible)
 				this.stack[n].Hide();
@@ -350,6 +352,7 @@ var context_menus = {
 * options are:
 * 	items : an array of item objects in the form { label : "label", onclick : callback }
 * 	  will form the menu system, if label == "sep", it will render a separator
+* 	  (see addItem for details)
 *
 * 	 width: the width of the context menu
 */
@@ -367,8 +370,8 @@ contextMenu = Scriptor.contextMenu = function(div, opts)
 		};
 	Scriptor.mixin(localOpts, opts);
 	
-	this.items = items;
-	this.Width = !isNan(Number(localOpts.width)) ? Number(localOpts.width) : 120;
+	this.items = [];
+	this.Width = !isNaN(Number(localOpts.width)) ? Number(localOpts.width) : 120;
 	this.Height = 0;
 	
 	Scriptor.event.init(this);
@@ -380,6 +383,11 @@ contextMenu = Scriptor.contextMenu = function(div, opts)
 	
 	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
 	this.div = typeof(div) == 'string' ? div : this.divElem.id;
+	
+	for (var n=0; n < localOpts.items.length; n++)
+		this.addItem(this.items[n]);
+		
+	context_menus.stack.push(this);
 };
 
 contextMenu.prototype = {
@@ -421,15 +429,47 @@ contextMenu.prototype = {
 			return false;
 		}
 		
+		// hide previously active context menus
+		context_menus.hide_actives();
+		
 		var target = this.divElem;
 		target.className = 'contextMenu scriptor';
 		target.innerHTML = '';
 		target.style.display = 'block';
 		
+		this.Height = 4;
+		for (var n=0; n < this.items.length; n++)
+			this.Height += (this.items[n].label == 'sep') ? 4 : 20;
 		
-		// TODO: render elements and calculate this.Height
+		// calculate x, y
+		var x, y;
+	
+		if (typeof(e.pageX) == 'number') {
+			x = e.pageX - this.Width;
+			y = e.pageY;
+		}
+		else {
+			if (typeof(e.clientX) == 'number') {
+				x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+				y = (e.clientY + document.documentElement.scrollTop);
+			}
+			else {
+				x = 0;
+				y = 0;
+			}
+		}
+		target.style.top = y + 'px';
+		target.style.left = x + 'px';
+		
+		if (this._checkMenuBind)
+			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+		
+		setTimeout(Scriptor.bind(function() {	
+			Scriptor.event.attach(document, 'onclick', this._checkMenuBind = Scriptor.bind(this.checkMenu, this));
+		}, this), 1);
 		
 		this.visible = true;
+		this.updateItems();
 		
 		Scriptor.event.cancel(e);
 		return false;
@@ -445,6 +485,118 @@ contextMenu.prototype = {
 			this.divElem.style.display = 'none';
 			
 		this.visible = false;
+	},
+	
+	updateItems : function()
+	{
+		if (!this.visible)
+		{
+			Scriptor.error.report("Cannot update items in a non visible contextMenu.");
+			return;
+		}
+		
+		this.Height = 4;
+		for (var n=0; n < this.items.length; n++)
+			this.Height += (this.items[n].label == 'sep') ? 4 : 20;
+			
+		// TODO: render elements
+		var target = this.divElem;
+		target.innerHTML = '';
+		target.style.width = this.Width + 'px';
+		target.style.height = this.height + 'px';
+		
+		var cTemplate = '<ul>';
+		
+		for (var n=0; n < this.items.length; n++)
+		{
+			var item = this.items[n];
+			if (item.label == 'sep')
+			{
+				cTemplate += '<li class="contextMenuSep"></li>';
+			}
+			else
+			{
+				cTemplate += '<li><a href="#"" id="'+this.div+'_itm_' + n + '"';
+				if (item['class'])
+					cTemplate += ' class="' + item['class'] + '"';
+				cTemplate += '>' + item.label + '</a></li>';
+			}
+		}
+		
+		cTemplate += '</ul>';
+		target.innerHTML = cTemplate;
+		
+		for (var n=0; n < this.items.length; n++)
+		{
+			if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
+			{
+				Scriptor.event.attach(document.getElementById(this.div+'_itm_' + n), 'onclick', this.items[n].onclick);
+			}
+		}
+	},
+	
+	/*
+	* contextMenu.addItem
+	*
+	*   Ads an item to the contextMenu dynamically
+	*   Options are:
+	*    label: the name of the item (if set to "sep" it will render a separator)
+	*    class: a class formatting the item
+	*    onclick: the callback fucntion when clicked
+	*    
+	*   ndx if specified will insert the item in the specified index
+	*/
+	addItem : function(opts, ndx)
+	{
+		var localOpts = {
+			label : 'sep',
+			onclick : null
+		};
+		Scriptor.mixin(localOpts, opts);
+		
+		if (!isNaN(Number(ndx)) && ndx >= 0 && ndx < this.items.length)
+			this.items.splice(ndx, 0, localOpts);
+		else
+			this.items.push(localOpts);
+			
+		if (this.visible)
+			this.updateItems();
+	},
+	
+	/*
+	* contextMenu.removeItem
+	*
+	*   Will remove the item specified by identifier, this can be
+	*    a Number stating the index of the item in the array
+	*    or the item itself as an Object
+	*/
+	removeItem : function(identifier)
+	{
+		if (typeof(identifier) == 'number')
+		{
+			if (identifier >= 0 && identifier <= this.items.length-1)
+				this.items.splice(identifier, 1);
+		}
+		else if (typeof(identifier) == 'object')
+		{
+			for (var n=0; n < this.items.length; n++)
+			{
+				if (this.items[n] == identifier)
+				{
+					this.items.splice(n, 1);
+					break;
+				}
+			}
+		}
+	},
+	
+	checkMenu : function()
+	{
+		if (this._checkMenuBind)
+			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+			
+		// always hide after click?
+		this.Hide();
 	}
 };/* JavaScript Document
 *
@@ -1413,11 +1565,7 @@ var dataViewStyle = {
 	'sortWidth' : 14,
 	
 	'optionsIconWidth' : 25,
-	'multiSelectColumnWidth' : 13,
-	'optionsMenuHeight' : 20,
-	'optionsMenuHorizontalPadding' : 20,
-	'optionsMenuVerticalPadding' : 4,
-	'optionsMenuSepHeight' : 4
+	'multiSelectColumnWidth' : 13
 };
 
 /*
@@ -1454,10 +1602,6 @@ var dataViewStyle = {
 *	paginating: set to true if implementing pagination on table.
 *	rowsPerPage: set number of rows to show per page.
 *	curPage: The current page if paginating
-*
-*   optionsMenuWidth: The width in pixels of the options menu. You may adjust this value
-*    before showing to adjust to the length of the column names.
-*   optionsMenuHeight: The height of the options menu. for internal use only.
 *
 */
 dataView = Scriptor.dataView = function(div, opts) {
@@ -1518,6 +1662,8 @@ dataView = Scriptor.dataView = function(div, opts) {
 		this.addColumn(this.createColumn(localOpts.columns[n]));
 	}
 	// end add
+	
+	this.optionsMenu = null;
 };
 
 dataView.prototype = {
@@ -1958,9 +2104,6 @@ dataView.prototype = {
 		
 		// Create footer
 		dvTemplate += '<div id="' + this.div + '_footer" class="dataViewFooter"></div>';
-		
-		// create Options menu
-		dvTemplate += '<div id="' + this.div + '_optionsMenu" class="dataViewOptionsMenu" style="width: ' + (this.optionsMenuWidth - this.style.optionsMenuHorizontalPadding) + 'px; display: none; overflow: hidden; position: absolute"></div>';
 		
 		target.innerHTML = dvTemplate;
 		
@@ -2620,158 +2763,36 @@ dataView.prototype = {
 	*   dataView.optionsMenuWidth to apply these changes.
 	*/
 	updateOptionsMenu : function() {
-		if (!this.visible) {
-			Scriptor.error.report( "Can't update optiosn menu on non visible dataView object.");
-			return;
-		}
+		this.optionsMenu.items = [];
+		this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(this.Refresh, this)});
+		this.optionsMenu.addItem({label : 'sep'});
 		
-		var targetDiv = document.getElementById(this.div + '_optionsMenu');
-		targetDiv.style.width = this.optionsMenuWidth - this.style.optionsMenuHorizontalPadding + 'px';
-		
-		var oTemplate = '<ul><li><a href="#"" id="'+this.div+'_optionsMenuRefresh">' + this.lang.refresh + '</a></li>';
-		oTemplate += '<li class="dataViewMenuSep"></li>';
-		
-		this.optionsMenuHeight = this.style.optionsMenuHeight + this.style.optionsMenuVerticalPadding + this.style.optionsMenuSepHeight;
-		
-		// column togglers
 		for (var n=0; n < this.columns.length; n++) {
-			oTemplate += '<li><a href="#" id="'+this.div+'_optionsMenuItem_'+n+'"';
-			
+			var className = ''
 			if (this.columns[n].show)
-				oTemplate += ' class="dataViewOptionChecked"';
-			oTemplate += '>' + this.columns[n].displayName + '</a></li>';
-			
-			this.optionsMenuHeight += this.style.optionsMenuHeight
+				className = 'dataViewOptionChecked';
+			this.optionsMenu.addItem({label : this.columns[n].displayName, 'class' : className, onclick : Scriptor.bindAsEventListener(this.toggleColumn, this, n)});
 		}
-		oTemplate += '</ul>';
-		
-		targetDiv.innerHTML = oTemplate;
-
-		// Attach menu item events		
-		Scriptor.event.attach(document.getElementById(this.div+"_optionsMenuRefresh"), 'click', Scriptor.bindAsEventListener(this.Refresh, this));
-		for (var n=0; n < this.columns.length; n++)
-			Scriptor.event.attach(document.getElementById(+this.div+'_optionsMenuItem_'+n), 'click', Scriptor.bindAsEventListener(this.toggleColumn, this, n));
 	},
 
 	/* showOptionsMenu
 	*  This function shows the option menu of a dataView object. For internal use only
 	*/
-	// TODO: We need to refactor this with a ContextMenu Component
 	showOptionsMenu : function(e) {
-		/*if (!e)	e = window.event;
-		
-		if (!this.enabled) {
-			Scriptor.event.cancel(e);
-			return false;
+		// create options menu for the first time
+		if (!this.optionsMenu)
+		{
+			var om = document.createElement('div');
+			om.id = this.div+'_optionsMenu';
+			document.getElementsByTagName('body')[0].appendChild(om);
+			this.optionsMenu = new Scriptor.contextMenu(om.id);
 		}
-		
+
 		this.updateOptionsMenu();
-		
-		this._optionsMenu = true;
-		// find optionsMenuDiv
-		optionsDiv = document.getElementById(this.div+'_optionsMenu');
-		
-		// calculate x, y
-		var x, y;
-	
-		if (typeof(e.pageX) == 'number') {
-			x = e.pageX - this.optionsMenuWidth;
-			y = e.pageY;
-		}
-		else {
-			if (typeof(e.clientX) == 'number') {
-				x = (e.clientX + document.documentElement.scrollLeft) - this.optionsMenuWidth;
-				y = (e.clientY + document.documentElement.scrollTop);
-			}
-			else {
-				x = 0;
-				y = 0;
-			}
-		}
-		
-		optionsDiv.style.top = y + 'px';
-		optionsDiv.style.left = x + 'px';
-		optionsDiv.style.display = 'block';
-		
-		document.onclick = Scriptor.bind(this.checkOptionsMenu, this);*/
+		this.optionsMenu.Show(e);
 		
 		Scriptor.event.cancel(e);
 		return false;
-	},
-	
-	/* checkOptionsMenu
-	*  for internal use only
-	*/
-	// TODO: take this out into ContextMenu component
-	checkOptionsMenu : function(e) {
-		/*if (!e)	e = window.event;
-		
-		// calculate x, y
-		var x, y;
-	
-		if (typeof(e.pageX) == 'number') {
-			x = e.pageX;
-			y = e.pageY;
-		}
-		else {
-			if (typeof(e.clientX) == 'number') {
-				x = (e.clientX + document.documentElement.scrollLeft);
-				y = (e.clientY + document.documentElement.scrollTop);
-			}
-			else {
-				x = 0;
-				y = 0;
-			}
-		}
-		
-		
-		// search for dataViews with options menu opened and evaluate closing them
-		for (var n=0; n < DVE.dataRegisters.length; n++) {
-			if (DVE.dataRegisters[n].optionsMenu) { // this dataView has its optionsMenu active
-				var obj = DVE.dataRegisters[n].dobj;
-				
-				// search object div and look at its position
-				var objX, objY, objWidth, objHeight, objDiv;
-				objWidth = obj.optionsMenuWidth;
-				objHeight = obj.optionsMenuHeight;
-				
-				var objDivCollection = document.getElementById(obj.div).getElementsByTagName('div');
-				
-				for (var a=0; a < objDivCollection.length; a++) {
-					if (objDivCollection.item(a).className == 'dataViewOptionsMenu') {
-						objDiv = objDivCollection.item(a);
-						objX = Number(objDiv.style.left.substr(0, objDiv.style.left.length-2));
-						objY = Number(objDiv.style.top.substr(0, objDiv.style.top.length-2));
-						break;
-					}
-				}
-				
-				// see if clicked outside the div
-				if (objDiv) {
-					if ((x < objX || x > objX+objWidth) || (y < objY || y > objY+objHeight)) {
-						DVE.hideOptionsMenu(DVE.dataRegisters[n].ddiv);
-						document.onclick = null;
-					}
-				}
-				else {
-					// hopefully this will never execute
-					DVE.dataRegisters[n].optionsMenu = false;
-					document.onclick = null;
-				}
-			}
-		}
-		*/
-	},
-	
-	/* hideOptionsMenu
-	*  Hides the options menu panel. For internal use only
-	*/
-	// TODO: Take this out into ContextMenu component
-	hideOptionsMenu : function(div) {
-		/*
-		var objDiv = document.getElementById(this.div+'_optionsMenu');
-		objDiv.style.display = 'none';
-		*/
 	},
 	
 	/*
@@ -2780,9 +2801,6 @@ dataView.prototype = {
 	*   dataView.Show(false) instead to change column configuration manually.
 	*/
 	toggleColumn : function(e, colNdx) {
-		
-		this.hideOptionsMenu();
-		
 		if (this.columns[colNdx].show) {
 			this.columns[colNdx].show = false;
 		}
@@ -2791,6 +2809,7 @@ dataView.prototype = {
 		}
 		
 		this.Show(false);
+		this.updateRows();
 	},
 	
 	/*

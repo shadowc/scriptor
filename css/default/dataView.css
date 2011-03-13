@@ -46,3 +46,6 @@
 .dataViewFooter ul li.first { background: URL('images/bar-left.jpg') no-repeat bottom left; }
 
 .dataViewLoading { border: 1px solid #57a4b5; background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
+
+.contextMenu ul li a.dataViewOptionChecked { font-weight: bold; background: #ebebeb URL('images/check.jpg') no-repeat left center; }
+.contextMenu ul li a.dataViewOptionChecked:hover { font-weight: bold; background: #114478 URL('images/check-sel.jpg') no-repeat left center; }
