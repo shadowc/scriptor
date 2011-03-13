@@ -303,6 +303,121 @@ var Scriptor = {
 			if (!Scriptor.error.muteErrors)
 				throw msg;
 		}
+	},
+	
+	// make obj transparent by ndx
+	makeTransparent : function(obj, ndx) { 
+		if (obj.style) {
+			if (obj.style.opacity !== undefined)
+				obj.style.opacity = '0.' + ndx;
+			else if (obj.style.MozOpacity !== undefined)
+				obj.style.MozOpacity = '0.' + ndx;
+			else if (obj.style.filter !== undefined) 
+				obj.style.filter = 'alpha(opacity=' + ndx + ');';
+		}
+	},
+	
+	/*
+	* Scriptor.invalidate
+	*
+	*   Creates an invalidator blocking the interface, if
+	*   state is true, it shows the invalidator, otherwise it hides
+	*   it, reenabling the interface.
+	*
+	*   Optional msg parameter can be passed to show a message
+	*   with an "ajax" spinner
+	*   
+	*/
+	invalidate : function(state, msg)
+	{
+		if (state)
+		{
+			Scriptor._calculateBrowserSize();
+			
+			var invDiv = document.getElementById('scriptor_invalidator');
+			if (!invDiv)
+			{
+				invDiv = document.createElement('div');
+				invDiv.id = 'scriptor_invalidator';
+				Scriptor.makeTransparent(invDiv, 50);
+				invDiv.style.width = browserWindowWidth + 'px';
+				invDiv.style.height = browserWindowHeight + 'px';
+				document.getElementsByTagName('body')[0].appendChild(invDiv);
+			}
+			
+			if (msg)
+			{
+				if (!invDiv.firstChild)
+				{
+					var invTemplate = '<div class="msg">'+msg+'</div>';
+					invDiv.innerHTML = invTemplate;
+					invDiv.firstChild.style.left = ((browserWindowWidth / 2) - 100) + 'px';
+					invDiv.firstChild.style.top = ((browserWindowHeight / 2) - 15) + 'px';
+				}
+			}
+			
+			Scriptor.event.attach(window, 'onresize', Scriptor._calculateBrowserSize);
+		}
+		else
+		{
+			if (document.getElementById('scriptor_invalidator'))
+			{
+				document.getElementById('scriptor_invalidator').parentNode.removeChild(document.getElementById('scriptor_invalidator'));
+			}
+			
+			Scriptor.event.detach(window, 'onresize', Scriptor._calculateBrowserSize);
+		}
+	},
+	
+	_calculateBrowserSize : function()
+	{
+		// calculate window width - height
+		if (navigator.userAgent.indexOf('MSIE') != -1) {
+			if (document.documentElement.clientWidth == 0)
+				browserWindowWidth = document.body.clientWidth;
+			else	
+				browserWindowWidth = document.documentElement.clientWidth;
+				
+			if (document.documentElement.clientHeight == 0)
+				browserWindowHeight = document.body.clientHeight;
+			else
+				browserWindowHeight = document.documentElement.clientHeight;
+		}
+		else {
+			browserWindowWidth = window.innerWidth;
+			browserWindowHeight = window.innerHeight;
+		}
+		
+		// calculate document width height
+		var x,y;
+		var test1 = document.body.scrollHeight;
+		var test2 = document.body.offsetHeight
+		if (test1 > test2) { // all but Explorer Mac
+			x = document.body.scrollWidth;
+			y = document.body.scrollHeight;
+		}
+		else {// Explorer Mac;
+			 //would also work in Explorer 6 Strict, Mozilla and Safari
+			x = document.body.offsetWidth;
+			y = document.body.offsetHeight;
+		}
+		
+		// set the max of both
+		browserWindowWidth = Math.max(browserWindowWidth, x);
+		browserWindowHeight = Math.max(browserWindowHeight, y);
+		
+		// update invalidator?
+		var inv = document.getElementById('scriptor_invalidator');
+		if (inv)
+		{
+			inv.style.width = browserWindowWidth + 'px';
+			inv.style.height = browserWindowHeight + 'px';
+			if (inv.firstChild)
+			{
+				inv.firstChild.style.left = ((browserWindowWidth / 2) - 100) + 'px';
+				inv.firstChild.style.top = ((browserWindowHeight / 2) - 15) + 'px';
+			}
+		}
 	}
 };
 
@@ -315,7 +430,9 @@ var __getNextHtmlId = function() {
 	
 	return __lastId;
 };
-/* JavaScript Document
+
+var browserWindowHeight = 0;
+var browserWindowWidth = 0;/* JavaScript Document
 *
 * Context Menu version 1.0b
 *
