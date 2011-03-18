@@ -86,6 +86,8 @@ tabView.prototype = {
 	*
 	*/
 	selectTab : function(e, tabNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);

@@ -34,7 +34,7 @@ var treeNode = function(opts) {
 
 treeNode.prototype = {
 	// TODO: Remove this function and set it on treeNodeConnector, XML
-	getChildNodes : function(parentNode, tv)
+	/*getChildNodes : function(parentNode, tv)
 	{
 		for (var n=0; n<parentNode.childNodes.length; n++) {
 			if (parentNode.childNodes[n].nodeName == 'category') {
@@ -50,7 +50,7 @@ treeNode.prototype = {
 				}
 			}
 		}
-	},
+	},*/
 	
 	searchNode : function(id)
 	{
@@ -282,6 +282,8 @@ treeView.prototype = {
 	},
 	
 	_expandNode : function(e, nodeId) {
+		if (!e) e = window.event;
+		
 		var node = this.searchNode(nodeId);
 		if (node.expanded)
 		{
@@ -300,6 +302,8 @@ treeView.prototype = {
 	
 	_selectNode : function(e, nodeNdx)
 	{
+		if (!e) e = window.event;
+		
 		if (this.selectedNode !== null) {
 			var selNode = this.searchNode(this.selectedNode);
 			

@@ -297,6 +297,8 @@ galleryView.prototype = {
 	},
 	
 	_selectImage : function(e, imgNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);

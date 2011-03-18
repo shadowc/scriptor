@@ -1889,8 +1889,6 @@ dataViewConnector = Scriptor.dataViewConnector = function(opts) {
 
 dataViewConnector.prototype = {
 	_onRefresh : function(e) {
-		if (!e) e = window.event;
-		
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
 		

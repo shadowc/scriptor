@@ -1102,7 +1102,9 @@ calendarView.prototype = {
 	*   Internal function. Goes to advanced mode in which user will select a date using
 	*   a form. Usefull to select distanct dates.
 	*/
-	setAdvanced : function() {
+	setAdvanced : function(e) {
+		if (!e) e = window.event;
+		
 		document.getElementById(this.div+'_body').style.display = 'none';
 		document.getElementById(this.div+'_advanced').style.display = 'block';
 		
@@ -1115,6 +1117,9 @@ calendarView.prototype = {
 		document.getElementById(this.div + 'YearSelector').value = targetDate.getFullYear();
 		
 		this.advanced = true;
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 	
 	/*
@@ -1185,6 +1190,8 @@ calendarView.prototype = {
 	*  This function executes when clicking on a calendarView date and selects that date
 	*/
 	selectDate : function(e, date) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1291,6 +1298,8 @@ calendarView.prototype = {
 	*  To go to a previous month
 	*/
 	goPrevMonth : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1314,6 +1323,8 @@ calendarView.prototype = {
 	*  To go to the next month
 	*/
 	goNextMonth : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1337,6 +1348,8 @@ calendarView.prototype = {
 	*  Will make selection visible, or will show current date
 	*/
 	goHomeDate : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1390,6 +1403,7 @@ calendarView.prototype = {
 	*/
 	showHooked : function(e) {
 		if (!e) e = window.event;
+		
 		var elem = this.hookedTo;
 		
 		var date = this.getDateFromStr(elem.value);
@@ -3417,8 +3431,6 @@ dataViewConnector = Scriptor.dataViewConnector = function(opts) {
 
 dataViewConnector.prototype = {
 	_onRefresh : function(e) {
-		if (!e) e = window.event;
-		
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
 		
@@ -3861,6 +3873,8 @@ galleryView.prototype = {
 	},
 	
 	_selectImage : function(e, imgNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -4389,6 +4403,8 @@ tabView.prototype = {
 	*
 	*/
 	selectTab : function(e, tabNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible)
 		{
 			Scriptor.event.cancel(e, true);
@@ -4684,7 +4700,7 @@ var treeNode = function(opts) {
 
 treeNode.prototype = {
 	// TODO: Remove this function and set it on treeNodeConnector, XML
-	getChildNodes : function(parentNode, tv)
+	/*getChildNodes : function(parentNode, tv)
 	{
 		for (var n=0; n<parentNode.childNodes.length; n++) {
 			if (parentNode.childNodes[n].nodeName == 'category') {
@@ -4700,7 +4716,7 @@ treeNode.prototype = {
 				}
 			}
 		}
-	},
+	},*/
 	
 	searchNode : function(id)
 	{
@@ -4932,6 +4948,8 @@ treeView.prototype = {
 	},
 	
 	_expandNode : function(e, nodeId) {
+		if (!e) e = window.event;
+		
 		var node = this.searchNode(nodeId);
 		if (node.expanded)
 		{
@@ -4950,6 +4968,8 @@ treeView.prototype = {
 	
 	_selectNode : function(e, nodeNdx)
 	{
+		if (!e) e = window.event;
+		
 		if (this.selectedNode !== null) {
 			var selNode = this.searchNode(this.selectedNode);
 			

@@ -385,7 +385,9 @@ calendarView.prototype = {
 	*   Internal function. Goes to advanced mode in which user will select a date using
 	*   a form. Usefull to select distanct dates.
 	*/
-	setAdvanced : function() {
+	setAdvanced : function(e) {
+		if (!e) e = window.event;
+		
 		document.getElementById(this.div+'_body').style.display = 'none';
 		document.getElementById(this.div+'_advanced').style.display = 'block';
 		
@@ -398,6 +400,9 @@ calendarView.prototype = {
 		document.getElementById(this.div + 'YearSelector').value = targetDate.getFullYear();
 		
 		this.advanced = true;
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 	
 	/*
@@ -468,6 +473,8 @@ calendarView.prototype = {
 	*  This function executes when clicking on a calendarView date and selects that date
 	*/
 	selectDate : function(e, date) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -574,6 +581,8 @@ calendarView.prototype = {
 	*  To go to a previous month
 	*/
 	goPrevMonth : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -597,6 +606,8 @@ calendarView.prototype = {
 	*  To go to the next month
 	*/
 	goNextMonth : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -620,6 +631,8 @@ calendarView.prototype = {
 	*  Will make selection visible, or will show current date
 	*/
 	goHomeDate : function (e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -673,6 +686,7 @@ calendarView.prototype = {
 	*/
 	showHooked : function(e) {
 		if (!e) e = window.event;
+		
 		var elem = this.hookedTo;
 		
 		var date = this.getDateFromStr(elem.value);
