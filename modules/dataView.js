@@ -800,6 +800,8 @@ dataView.prototype = {
 	*  This function executes when clicking on a dataView header checkmox in multiselect and selects all rows.
 	*/
 	__selectAll : function(e) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled)
 		{
 			Scriptor.event.cancel(e);
@@ -868,6 +870,8 @@ dataView.prototype = {
 	*  This function executes to capture <enter> key press on the dataView page input
 	*/
 	__checkGoToPage : function (e) {
+		if (!e) e = window.event;
+		
 		if (e.keyCode == 13) {
 			this.__goToPage(e)
 		}
@@ -877,9 +881,14 @@ dataView.prototype = {
 	* __goToPagePrev
 	*  This function executes when clicked on the "previous" link
 	*/
-	__goToPagePrev : function () {
-		if (!this.enabled) 
-			return;
+	__goToPagePrev : function (e) {
+		if (!e) e = window.event;
+		
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e);
+			return false;
+		}
 		
 		if (this.curPage > 0) {
 			this.curPage--;
@@ -888,16 +897,24 @@ dataView.prototype = {
 				
 			this.Show(true);
 		}
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 	
 	/*
 	* __goToPageNext
 	*  This function executes when clicked on the "next" link
 	*/
-	__goToPageNext : function () {
-		if (!this.enabled) 
-			return;
-			
+	__goToPageNext : function (e) {
+		if (!e) e = window.event;
+		
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e);
+			return false;
+		}
+		
 		var totalPages = this.getTotalPages();
 		
 		if (this.curPage < totalPages -1) {
@@ -907,6 +924,9 @@ dataView.prototype = {
 				
 			this.Show(true);
 		}
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 
 	/*
@@ -1118,8 +1138,13 @@ dataView.prototype = {
 	*  will be switched upon subsecuent calls to __setOrder()
 	*/
 	__setOrder : function (e, colNdx) {
-		if (!this.enabled) 
-			return;
+		if (!e) e = window.event;
+		
+		if (!this.enabled)
+		{
+			Scriptor.event.cancel(e);
+			return false;
+		}
 		
 		var colName = this.columns[colNdx].Name;
 		
@@ -1149,6 +1174,9 @@ dataView.prototype = {
 				}
 			}
 		}
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 	
 	/*
@@ -1156,6 +1184,8 @@ dataView.prototype = {
 	*  This function executes when clicking on a dataView row and selects that row.
 	*/
 	__selectRow : function (e, rowNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1277,7 +1307,7 @@ dataView.prototype = {
 			}
 		}
 		
-		Scriptor.event.cancel(e);
+		/*Scriptor.event.cancel(e);*/
 		return false;
 	},
 	
@@ -1286,6 +1316,8 @@ dataView.prototype = {
 	*  This function executes when clicking on a dataView row checkmox in multiselect and selects that row.
 	*/
 	__markRow : function(e, rowNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.visible || !this.enabled)
 		{
 			Scriptor.event.cancel(e, true);
@@ -1353,7 +1385,15 @@ dataView.prototype = {
 	*/
 	updateOptionsMenu : function() {
 		this.optionsMenu.items = [];
-		this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(this.Refresh, this)});
+		this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
+			if (!e) e = window.event;
+			
+			this.Refresh();
+			this.optionsMenu.Hide();
+			
+			Scriptor.event.cancel(e);
+			return false;
+		}, this)});
 		this.optionsMenu.addItem({label : 'sep'});
 		
 		for (var n=0; n < this.columns.length; n++) {
@@ -1368,6 +1408,8 @@ dataView.prototype = {
 	*  This function shows the option menu of a dataView object. For internal use only
 	*/
 	showOptionsMenu : function(e) {
+		if (!e) e = window.event;
+		
 		// create options menu for the first time
 		if (!this.optionsMenu)
 		{
@@ -1390,6 +1432,8 @@ dataView.prototype = {
 	*   dataView.Show(false) instead to change column configuration manually.
 	*/
 	toggleColumn : function(e, colNdx) {
+		if (!e) e = window.event;
+		
 		if (this.columns[colNdx].show) {
 			this.columns[colNdx].show = false;
 		}
@@ -1399,6 +1443,10 @@ dataView.prototype = {
 		
 		this.Show(false);
 		this.updateRows();
+		this.optionsMenu.Hide();
+		
+		Scriptor.event.cancel(e);
+		return false;
 	},
 	
 	/*
@@ -1561,6 +1609,8 @@ dataView.prototype = {
 	*  This function will search for a valid dataView id and mark it for column resizing
 	*/
 	activateResizing : function(e, colNdx) {
+		if (!e) e = window.event;
+		
 		if (!this.enabled) {
 			Scriptor.event.cancel(e);
 			return false;
@@ -1599,7 +1649,9 @@ dataView.prototype = {
 	/* performResizing
 	* This function deactivates resizing status and performs complete redrawing
 	*/
-	deactivateResizing : function(e) {	
+	deactivateResizing : function(e) {
+		if (!e) e = window.event;
+		
 		Scriptor.event.detach(document, 'mousemove', this._mouseMoveBind);
 		Scriptor.event.detach(document, 'mouseup', this._mouseUpBind);
 		
@@ -1618,6 +1670,7 @@ dataView.prototype = {
 	*  This function calculates the resizing upon mouse movement
 	*/
 	doResizing : function(e) {
+		if (!e) e = window.event;
 		// get delta x
 		var x;
 	
@@ -1836,6 +1889,8 @@ dataViewConnector = Scriptor.dataViewConnector = function(opts) {
 
 dataViewConnector.prototype = {
 	_onRefresh : function(e) {
+		if (!e) e = window.event;
+		
 		this.dataView.setLoading(true);
 		this.dataView.__refreshFooter();
 		
