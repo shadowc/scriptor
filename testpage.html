@@ -27,7 +27,10 @@
 					Type : 'num',
 					Width: 60,
 					Format : function (n) {
-						return 'xxx';
+						var a = document.createElement('a');
+						a.setAttribute('href', 'javascript:alert("'+n+'");');
+						a.innerHTML = 'xxx';
+						return a;
 					}
 				},
 				{

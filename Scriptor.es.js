@@ -2738,7 +2738,34 @@ dataView.prototype = {
 		if (this.multiselect)
 			e.selectedRows = this.selectedRows;
 			
-		e.selecting = rowNdx;
+		if (this.selectedRow == rowNdx)
+		{
+			e.unselecting = rowNdx;
+		}
+		else
+		{
+			if (this.multiselect)
+			{
+				var found = false;
+				for (var n=0; n < this.selectedRows.length; n++)
+				{
+					if (this.selectedRows[n] == rowNdx)
+					{
+						found = true;
+						break;
+					}
+				}
+				if (found)
+					e.unselecting = rowNdx;
+				else
+					e.selecting = rowNdx;
+			}
+			else
+			{
+				e.selecting = rowNdx;
+			}
+		}
+		
 		e = Scriptor.event.fire(this, 'onselect', e);
 		
 		if (e.returnValue == false)
