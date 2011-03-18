@@ -219,6 +219,7 @@ dataView = Scriptor.dataView = function(div, opts) {
 	Scriptor.event.init(this);
 	Scriptor.event.registerCustomEvent(this, 'onshow');
 	Scriptor.event.registerCustomEvent(this, 'onrefresh');
+	Scriptor.event.registerCustomEvent(this, 'oncontentupdated');
 	Scriptor.event.registerCustomEvent(this, 'onhide');
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	Scriptor.event.registerCustomEvent(this, 'oncolumnresize');
@@ -1088,6 +1089,8 @@ dataView.prototype = {
 		}
 			
 		this.__refreshFooter();
+		
+		Scriptor.event.fire(this, 'oncontentupdated');
 	},
 	
 	/*
