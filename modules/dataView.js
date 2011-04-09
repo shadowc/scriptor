@@ -429,6 +429,32 @@ dataView.prototype = {
 		return this.multiselect ? rows : this.curRow();
 	},
 	
+	/* dataView.getById()
+	* returns a row if found one matching the id, or null
+	*/
+	getById : function(id) {
+		for (var n=0; n < this.rows.length; n++)
+			if (this.rows[n].id == id)
+				return this.rows[n];
+		
+		return null;
+	},
+	
+	/* dataView.searchRow()
+	* returns an array of rows matching the value for the columnName given
+	*/
+	searchRows : function(columnName, value) {
+		var ret = [];
+		
+		for (var n=0; n < this.rows.length; n++)
+		{
+			if (this.rows[n][columnName] == value)
+				ret.push(this.rows[n]);
+		}
+		
+		return ret;
+	},
+	
 	/*
 	* dataView.insertRow()
 	*  Use this the same way as addRow() to inset the row before the indicated row index.
