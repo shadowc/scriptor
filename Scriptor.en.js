@@ -2,7 +2,8 @@
   
   A tiny Javascript component library plus a few usefull functions
   
-  This is open source and I don't care about licenses
+  Published under the Creative Commons License
+  http://creativecommons.org/licenses/by/3.0/
   
   by Matias Jose
   http://www.matiasjose.com
