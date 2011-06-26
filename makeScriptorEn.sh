@@ -14,4 +14,6 @@ cat modules/httpRequest.js	>> Scriptor.en.js
 cat lang/httpRequest.en.js	>> Scriptor.en.js
 cat modules/tabView.js		>> Scriptor.en.js
 cat modules/treeView.js		>> Scriptor.en.js
+cat modules/ui/component.js	>> Scriptor.en.js
+cat modules/ui/panel.js		>> Scriptor.en.js
 cat modules/outro.js		>> Scriptor.en.js

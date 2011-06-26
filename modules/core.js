@@ -226,6 +226,56 @@ var Scriptor = {
 		}
 	},
 	
+	// add classname / remove classname
+	className : {
+		// add a classname if not already added
+		add : function(elem, className) {
+			if (typeof(className) != 'string')
+				return;
+			
+			if (typeof(elem.className) == 'undefined')
+				elem.className = '';
+			
+			var classes = elem.className.split(' ');
+			var found = false;
+			
+			for (var n=0; n < classes.length; n++)
+			{
+				if (classes[n] == className)
+				{
+					found = true;
+					break;
+				}
+			}
+			
+			if (!found)
+				classes.push(className);
+				
+			elem.className = classes.join(' ');
+		},
+		
+		remove : function(elem, className) {
+			if (typeof(className) != 'string')
+				return;
+			
+			if (typeof(elem.className) == 'undefined')
+				elem.className = '';
+			
+			var classes = elem.className.split(' ');
+			
+			for (var n=0; n < classes.length; n++)
+			{
+				if (classes[n] == className)
+				{
+					classes.splice(n, 1);
+					n--;
+				}
+			}
+			
+			elem.className = classes.join(' ');
+		}
+	},
+	
 	// Basic cookie handling system
 	cookie : {
 		cookies : {},
@@ -829,11 +879,17 @@ var Scriptor = {
 };
 
 // internal id generation system
-var __nextIdNdx = 0;
-var __lastId = 'scriptor_' + __nextIdNdx++;
-var __getNextHtmlId = function() {
+__nextIdNdx = 0;
+__lastId = 'scriptor_' + __nextIdNdx;
+__getNextHtmlId = function() {
+	__lastId = 'scriptor_' + __nextIdNdx;
+	__nextIdNdx++;
+	
 	while (document.getElementById(__lastId))
-		__lastId = 'scriptor_' + __nextIdNdx++;
+	{
+		__nextIdNdx++;
+		__lastId = 'scriptor_' + __nextIdNdx;
+	}
 	
 	return __lastId;
 };

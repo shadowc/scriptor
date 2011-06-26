@@ -177,4 +177,7 @@
 .treeView ul li a.treeViewExpandableNode { width: 15px; height: 18px; background: URL('images/plus.gif') no-repeat 2px 5px; padding: 0; border: none; }
 .treeView ul li a.treeViewCollapsableNode { width: 15px; height: 18px; background: URL('images/minus.gif') no-repeat 2px 5px; padding: 0; border: none; }
 
-.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
+.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; background: #FAFAFF; position: relative; }
+div.jsComponent.jsComponentHidden { visibility: hidden; }
+div.jsComponent.jsComponentChild { position: relative; top: 0; left: 0; }
+div.jsComponent.jsComponentFocused { background: #FAFAFA; }
