@@ -1,4 +1,5 @@
 div.jsComponent { display: block; visibility: visible; background: #FAFAFF; position: relative; }
 div.jsComponent.jsComponentHidden { visibility: hidden; }
-div.jsComponent.jsComponentChild { position: relative; top: 0; left: 0; }
+div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
+div.jsComponentInvalidator { position: absolute; z-index: 1000; visibility: hidden; }
 div.jsComponent.jsComponentFocused { background: #FAFAFA; }

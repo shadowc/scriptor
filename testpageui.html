@@ -8,19 +8,43 @@
 		Scriptor.addOnLoad(function() {
 			TestComponent = new Scriptor.Panel({
 				divId : 'container',
-				style : 'height: 50%; background: #CC0000;'
+				style : 'height: 50%; background: #CC0000; margin: 5px;'
 			});
 			
 			ChildComponent = new Scriptor.Panel({
-				style : 'margin: 5px; background: #0000CC;'
+				style : 'margin-top: 5px; padding: 5px; background: #0000CC;'
 			});
 			
 			TopComponent = new Scriptor.Panel({
 				region : "top",
-				height : 50
+				style : "padding: 5px",
+				height : 60
 			});
+			TopComponent.setContent(document.getElementsByTagName('h1')[0]);
+			
+			LeftComponent = new Scriptor.Panel({
+				region : "left",
+				style : "width: 120px",
+				width : 120
+			});
+			
+			RightComponent = new Scriptor.Panel({
+				region : "right",
+				style : "width: 120px",
+				width : 120
+			});
+			
+			BottomComponent = new Scriptor.Panel({
+				region : "bottom",
+				style : "height: 30px; background: #CDCDCD; ",
+				height : 30
+			});
+			
 			TestComponent.addChild(ChildComponent);
 			TestComponent.addChild(TopComponent);
+			TestComponent.addChild(LeftComponent);
+			//TestComponent.addChild(RightComponent);
+			TestComponent.addChild(BottomComponent);
 			
 			TestComponent.show();
 		});
@@ -45,5 +69,6 @@
 		<div id="container">
 			
 		</div>
+		
 	</body>
 </html>

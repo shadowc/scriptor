@@ -59,6 +59,9 @@ var Component = {
 			maxHeight : localOpts.maxHeight,
 			minWidth : localOpts.minWidth,
 			maxWidth : localOpts.maxWidth,
+			_percentWidth : null,
+			_percentHeight : null,
+			_origWidth : null,
 			zIndexCache : 1,
 			
 			components : [],
@@ -197,6 +200,14 @@ var Component = {
 					if (this.height == null)
 						this.height = this.target.offsetHeight;
 					
+					if (this.target.style.width.substr(this.target.style.width.length-1) == '%')
+						this._percentWidth = this.target.style.width;
+					else
+						this._origWidth = this.target.style.width;
+						
+					if (this.target.style.height.substr(this.target.style.height.length-1) == '%')
+						this._percentHeight = this.target.style.height;
+						
 					this.target.className = this.className ? 'jsComponent jsComponent_hidden ' + this.className : 'jsComponent jsComponent_hidden';
 					Scriptor.event.attach(this.target, 'mousedown', Scriptor.bindAsEventListener(this.focus, this));
 					
@@ -331,8 +342,8 @@ var Component = {
 							var outerBox = leftChildren[n].__getOuterBox();
 							
 							leftChildren[n].x = innerBox.left;
-							leftChildren[n].y = innerBox.top + (n*leftUniformHeight);
-							leftChildren[n].height = leftUniformHeight - outerBox.top - outerBox.bottom;
+							leftChildren[n].y = maxTopHeight + innerBox.top + (n*leftUniformHeight);
+							leftChildren[n].height = leftUniformHeight - outerBox.top - outerBox.bottom - maxTopHeight - maxBottomHeight;
 							leftChildren[n].width = leftChildren[n].width - outerBox.left - outerBox.right;
 						}
 						
@@ -351,8 +362,8 @@ var Component = {
 							var outerBox = rightChildren[n].__getOuterBox();
 							
 							rightChildren[n].x = this.width - innerBox.right - maxRightWidth;
-							rightChildren[n].y = innerBox.top +  (n*rightUniformHeight);
-							rightChildren[n].width = maxRightWidth - outerBox.left - outerBox.right;
+							rightChildren[n].y = maxTopHeight + innerBox.top + (n*rightUniformHeight);
+							rightChildren[n].width = maxRightWidth - outerBox.left - outerBox.right - maxTopHeight - maxBottomHeight;
 							rightChildren[n].height = rightChildren[n].height - outerBox.top - outerBox.bottom;
 						}
 						
@@ -420,7 +431,7 @@ var Component = {
 			setContent : function(ref) {
 				if (this.created)
 				{
-					while (this.components)
+					while (this.components.length)
 						this.removeChild(this.components[0]);
 					
 					if (ref.CMP_SIGNATURE)
@@ -463,6 +474,7 @@ var Component = {
 							
 						this.components.push(ref);
 						this.cmpTarget.appendChild(ref.target);
+						Scriptor.className.add(ref.target, 'jsComponentChild');
 						this.resize();
 						return true;
 					}
@@ -482,6 +494,7 @@ var Component = {
 						{
 							ref.target.parentNode.removeChild(ref.target);
 							this.components.splice(n, 1);
+							Scriptor.className.remove(ref.target, 'jsComponentChild');
 							this.resize();
 							
 							return true;
@@ -543,10 +556,35 @@ var Component = {
 			__updatePosition : function() {
 				if (this.target)
 				{
+					var innerBox = this.__getInnerBox();
+					
+					if (this._percentWidth !== null)
+					{
+						this.target.style.width = this._percentWidth;
+						this.width = this.target.offsetWidth;
+					}
+					else if (this._origWidth !== null)
+					{
+						if (!this._origWidth || this._origWidth == "auto")
+						{
+							if (this.target.parentNode)
+							{
+								outerBox = this.__getOuterBox();
+								this.width = this.target.parentNode.offsetWidth - outerBox.left - outerBox.right;
+							}
+						}
+					}
+					
+					if (this._percentHeight !== null)
+					{
+						this.target.style.height = this._percentHeight;
+						this.height = this.target.offsetHeight;
+					}
+					
 					if (this.width !== null)
-						this.target.style.width = this.width + 'px';
+						this.target.style.width = (this.width - innerBox.left - innerBox.right) + 'px';
 					if (this.height !== null)
-						this.target.style.height = this.height + 'px';
+						this.target.style.height = (this.height  - innerBox.top - innerBox.bottom) + 'px';
 					if (this.x !== null)
 						this.target.style.left = this.x + 'px';
 					if (this.y !== null)
@@ -591,7 +629,7 @@ var Component = {
 			__getOuterBox : function() {
 				var box = { top : 0, bottom: 0, left : 0, right : 0 };
 				
-				var outerTop = parseInt(this.target.style.margingTop);
+				var outerTop = parseInt(this.target.style.marginTop);
 				var outerBottom = parseInt(this.target.style.marginBottom);
 				var outerLeft = parseInt(this.target.style.marginLeft);
 				var outerRight = parseInt(this.target.style.marginRight);
@@ -711,7 +749,7 @@ Scriptor.ComponentRegistry = {
 		
 		ret = document.createElement('div');
 		ret.id = cmp.divId + '_invalidator';
-		
+		ret.className = 'jsComponentInvalidator';
 		cmp.target.appendChild(ret);
 		
 		return ret;

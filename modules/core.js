@@ -879,9 +879,9 @@ var Scriptor = {
 };
 
 // internal id generation system
-__nextIdNdx = 0;
-__lastId = 'scriptor_' + __nextIdNdx;
-__getNextHtmlId = function() {
+var __nextIdNdx = 0;
+var __lastId = 'scriptor_' + __nextIdNdx;
+var __getNextHtmlId = function() {
 	__lastId = 'scriptor_' + __nextIdNdx;
 	__nextIdNdx++;
 	
