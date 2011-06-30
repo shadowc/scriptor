@@ -34,5 +34,5 @@ Scriptor.Panel = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
 	this.create();
-	
+	Scriptor.className.add(this.target, "jsPanel");
 };

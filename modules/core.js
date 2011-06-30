@@ -273,6 +273,52 @@ var Scriptor = {
 			}
 			
 			elem.className = classes.join(' ');
+		},
+		
+		// returns the actual computed style of an element
+		// property must be a css property name like border-top-width
+		// (with dashes)
+		getComputedProperty : function(el, property) {
+			if (window.getComputedStyle)	// DOM Implementation
+			{
+				var st = window.getComputedStyle(el);
+				if (st)
+				{
+					return st.getPropertyValue(property);
+				}
+			}
+			else if (el.currentStyle)	// IE implementation
+			{
+				st = el.currentStyle;
+				
+				if (st)
+				{
+					// convert dashed-css-declaration to javascriptCssDeclaration
+					var convprop = '';
+					var capt = false;
+					for (var n=0; n < property.length; n++)
+					{
+						var c = property.substr(n, 1);
+						if (c == '-')
+						{
+							capt = true;
+						}
+						else if (capt)
+						{
+							convprop += c.toUpperCase();
+							capt = false;
+						}
+						else
+						{
+							convprop += c;
+						}
+					}
+					
+					return st[convprop];
+				}
+			}
+			
+			return null;
 		}
 	},
 	

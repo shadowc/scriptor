@@ -4,7 +4,7 @@
 
 // local support for JSON parsing
 // JSON implementation for unsupported browsers
-if (!JSON) {
+if (typeof(JSON) == 'undefined') {
     JSON = {};
 }
 

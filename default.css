@@ -177,8 +177,18 @@
 .treeView ul li a.treeViewExpandableNode { width: 15px; height: 18px; background: URL('images/plus.gif') no-repeat 2px 5px; padding: 0; border: none; }
 .treeView ul li a.treeViewCollapsableNode { width: 15px; height: 18px; background: URL('images/minus.gif') no-repeat 2px 5px; padding: 0; border: none; }
 
-.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; background: #FAFAFF; position: relative; overflow: auto; }
+.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; position: relative; overflow: hidden; }
 div.jsComponent.jsComponentHidden { visibility: hidden; }
 div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
-div.jsComponentInvalidator { position: absolute; z-index: 1000; visibility: hidden; }
-div.jsComponent.jsComponentFocused { background: #FAFAFA; }
+div.jsComponentInvalidator { position: relative; z-index: 1000; width: 100%; height: 100%; background: #FFFFFF; 
+	opacity: 0.8; -moz-opacity: 0.8; }
+div.jsComponent.jsComponentFocused { border-color: #888888 !important; }
+div.jsTargetComponent { position: relative; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+
+div.jsPanel { border: none; background: #FFFFFF; }
+div.jsPanel.jsComponentChild { background: #FAFAFF; border: 1px solid #AAAAAA; }
+
+div.jsComponent div.jsSplitter { position: absolute; border: none; overflow: hidden; margin: 0; padding: 0; background: transparent; }
+div.jsComponent div.jsSplitter:hover { background: #BEE4F4; }
+div.jsComponent div.jsSplitterHorizontal { height: 5px; cursor: n-resize; }
+div.jsComponent div.jsSplitterVertical { width: 5px; cursor: e-resize; }
