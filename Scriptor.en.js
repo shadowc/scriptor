@@ -6167,8 +6167,11 @@ var Component = {
 					
 					this.__updatePosition();
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].resize();
+					if (this.parent)
+						this.parent.resize();
+					else
+						for (var n=0; n < this.components.length; n++) 
+							this.components[n].resize();
 				}
 			},
 			
@@ -6329,7 +6332,7 @@ var Component = {
 					if (this._percentWidth !== null)
 					{
 						this.target.style.width = this._percentWidth;
-						this.width = this.target.offsetWidth;
+						this.width = this.target.offsetWidth - outerBox.left - outerBox.right - innerBox.left - innerBox.right;
 					}
 					else if (this._origWidth !== null)
 					{
