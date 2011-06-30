@@ -38,7 +38,7 @@
 			TopComponent.setContent(document.getElementsByTagName('h1')[0]);
 			TopComponent.cmpTarget.style.overflow = 'auto';
 			
-			LeftComponent = new Scriptor.Panel({
+			LeftComponent = new Scriptor.TabContainer({
 				region : "left",
 				id : "container_left",
 				resizable : true,
@@ -54,7 +54,7 @@
 			
 			BottomComponent = new Scriptor.Panel({
 				region : "bottom",
-				resizable : true,
+				
 				id : "container_bottom",
 				style : "height: 35px; margin-top: 5px;"
 			});

@@ -152,6 +152,7 @@
 .galleryView div.gvSelectedImage img { border: 2px solid #000000; }
 .galleryView div.gvSelectedImage p { font-weight: bold; }/* CSS Document */
 
+/* to be deleted*/
 .tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; margin: 0; padding: 0; }
 .tabViewDiv { border: 1px solid #ace3f3; border-top: none; }
 
@@ -163,7 +164,22 @@
 .tabViewLiSelected { float: left; height: 20px; background: URL('images/tab_sel_left.png') no-repeat; margin: 0 2px 0 2px; }
 .tabViewLiSelected a { float: left; height: 20px; padding: 0 8px 0 8px; font-weight: bold; text-decoration: none; color: #000000; background: URL('images/tab_sel_right.png') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
 .tabViewLiSelected a span { float: left; height: 14px; padding: 4px 0 2px 0; background: URL('images/tab_sel_back.png') repeat-x top left; }
-.tabViewLiSelected a:hover { color: #555555; outline: none; }/* CSS Document */
+.tabViewLiSelected a:hover { color: #555555; outline: none; }
+
+/* new tabContainer css style */
+div.jsTabContainer div.jsTabList {
+	height: 24px;
+}
+
+div.jsTabContainer div.jsTabListInner {
+	border-bottom: 1px solid #AAAAAA;
+	height: 23px; 
+}
+
+div.jsTabContainer div.jsPageContainer {
+	border: 1px solid #AAAAAA;
+	border-top: none;
+}/* CSS Document */
 
 .treeView { margin: 0; padding: 0; border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
 .treeViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
@@ -180,7 +196,7 @@
 .treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; position: relative; overflow: hidden; }
 div.jsComponent.jsComponentHidden { visibility: hidden; }
 div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
-div.jsComponentInvalidator { position: relative; z-index: 1000; width: 100%; height: 100%; background: #FFFFFF; 
+div.jsComponentInvalidator { position: absolute; z-index: 1000; width: 100%; height: 100%; top: 0; left: 0; background: #FFFFFF; 
 	opacity: 0.8; -moz-opacity: 0.8; }
 div.jsComponent.jsComponentFocused { border-color: #888888 !important; }
 div.jsTargetComponent { position: relative; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }

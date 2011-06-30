@@ -5904,7 +5904,6 @@ var Component = {
 			
 			// basic functions
 			// List of functions to be optionally overriden by children
-			createImplementation : function () {},
 			showImplementation : function() {},
 			resizeImplementation : function() {},
 			focusImplementation : function() {},
@@ -6008,6 +6007,8 @@ var Component = {
 					if (this.style)
 						this.target.setAttribute('style', this.style);
 					
+					this.target.className = this.className ? 'jsComponent jsComponent_hidden ' + this.className : 'jsComponent jsComponent_hidden';
+					
 					targetMinHeight = parseInt(this.target.style.minHeight);
 					targetMaxHeight = parseInt(this.target.style.maxHeight);
 					targetMinWidth = parseInt(this.target.style.minWidth);
@@ -6031,11 +6032,10 @@ var Component = {
 						this._percentWidth = this.target.style.width;
 					else
 						this._origWidth = this.target.style.width;
-						
+					
 					if (this.target.style.height.substr(this.target.style.height.length-1) == '%')
 						this._percentHeight = this.target.style.height;
-						
-					this.target.className = this.className ? 'jsComponent jsComponent_hidden ' + this.className : 'jsComponent jsComponent_hidden';
+					
 					Scriptor.event.attach(this.target, 'mousedown', Scriptor.bindAsEventListener(this.focus, this));
 					
 					if (this.canHaveChildren)
@@ -6056,12 +6056,47 @@ var Component = {
 						this.invalidator = Scriptor.ComponentRegistry.spawnInvalidator(this);
 					}
 					
-					this.createImplementation();
-					
 					Scriptor.event.fire(this, 'oncreate');
 					
 					this.created = true;
 				}
+			},
+			
+			__reReadDimentions : function() {
+				if (document.getElementById(this.target.id))
+				{
+					targetMinHeight = parseInt(Scriptor.className.getComputedProperty(this.target, 'min-height'));
+					targetMaxHeight = parseInt(Scriptor.className.getComputedProperty(this.target, 'max-height'));
+					targetMinWidth = parseInt(Scriptor.className.getComputedProperty(this.target, 'min-width'));
+					targetMaxWidth = parseInt(Scriptor.className.getComputedProperty(this.target, 'max-width'));
+					
+					if (!isNaN(targetMinHeight))
+						this.minHeight = targetMinHeight;
+					if (!isNaN(targetMaxHeight))
+						this.maxHeight = targetMaxHeight;
+					if (!isNaN(targetMinWidth))
+						this.minWidth = targetMinWidth;
+					if (!isNaN(targetMaxWidth))
+						this.maxWidth = targetMaxWidth;
+					
+					var computedWidth = Scriptor.className.getComputedProperty(this.target, 'width');
+					var computedHeight = Scriptor.className.getComputedProperty(this.target, 'height');
+					if (this.width == null && !isNaN(parseInt(computedWidth)))
+						this.width = parseInt(computedWidth);
+					if (this.height == null && !isNaN(parseInt(computedHeight)))
+						this.height = parseInt(computedHeight);
+					
+					if (computedWidth.substr(computedWidth.length-1) == '%')
+						this._percentWidth = computedWidth;
+					else
+						this._origWidth = computedWidth;
+					
+					if (computedHeight.substr(computedHeight.length-1) == '%')
+						this._percentHeight = computedHeight;
+				}
+				
+				for (var n=0; n < this.components.length; n++)
+					this.components[n].__reReadDimentions();
 			},
 			
 			destroy : function() {
@@ -6127,11 +6162,11 @@ var Component = {
 					{
 						// get the component's padding if any
 						var innerBox = this.__getInnerBox();
-						
+						var outerBox = this.__getOuterBox();
 						// top region, stack horizontally with uniform widths
 						var topChildren = this.__getChildrenForRegion("top");
 						var maxTopHeight = 0;
-						var topUniformWidth = (this.width - innerBox.left - innerBox.right) / topChildren.length;
+						var topUniformWidth = (this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right) / topChildren.length;
 						var topResizable = false;
 						for (var n=0; n < topChildren.length; n++)
 						{
@@ -6150,7 +6185,7 @@ var Component = {
 						// bottom region, stack horizontally with uniform widths
 						var bottomChildren = this.__getChildrenForRegion("bottom");
 						var maxBottomHeight = 0;
-						var bottomUniformWidth = (this.width - innerBox.left - innerBox.right) / bottomChildren.length;
+						var bottomUniformWidth = (this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right) / bottomChildren.length;
 						var bottomResizable = false;
 						for (var n=0; n < bottomChildren.length; n++)
 						{
@@ -6172,7 +6207,7 @@ var Component = {
 						// left region, stack vertically with uniform heights
 						var leftChildren = this.__getChildrenForRegion("left");
 						var maxLeftWidth = 0;
-						var leftUniformHeight = (this.height - innerBox.top - innerBox.bottom) / leftChildren.length;
+						var leftUniformHeight = (this.height - innerBox.top - innerBox.bottom - outerBox.left - outerBox.right) / leftChildren.length;
 						var leftResizable = false;
 						for (var n=0; n < leftChildren.length; n++)
 						{
@@ -6191,7 +6226,7 @@ var Component = {
 						// right region, stack vertically with uniform widths
 						var rightChildren = this.__getChildrenForRegion("right");
 						var maxRightWidth = 0;
-						var rightUniformHeight = (this.height - innerBox.top - innerBox.bottom) / rightChildren.length;
+						var rightUniformHeight = (this.height - innerBox.top - innerBox.bottom - outerBox.top - outerBox.bottom) / rightChildren.length;
 						var rightResizable = false;
 						for (var n=0; n < rightChildren.length; n++)
 						{
@@ -6212,13 +6247,13 @@ var Component = {
 						
 						// center elements, stack vertically with uniform heights
 						var centerChildren = this.__getChildrenForRegion("center");
-						var centerUniformHeight = (this.height - innerBox.top - innerBox.bottom - maxBottomHeight - maxTopHeight) / centerChildren.length;
+						var centerUniformHeight = (this.height - innerBox.top - innerBox.bottom - outerBox.top - outerBox.bottom - maxBottomHeight - maxTopHeight) / centerChildren.length;
 						for (var n=0; n < centerChildren.length; n++)
 						{
 							centerChildren[n].x = maxLeftWidth;
 							centerChildren[n].y = maxTopHeight + (n*centerUniformHeight);
 							centerChildren[n].height = centerUniformHeight;
-							centerChildren[n].width = this.width - innerBox.left - innerBox.right - maxLeftWidth - maxRightWidth;
+							centerChildren[n].width = this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right - maxLeftWidth - maxRightWidth;
 						}
 						
 						// spawn splitters as needed
@@ -6384,7 +6419,7 @@ var Component = {
 			// replace the contents of the component's target div
 			// or child target with the passed HTMLElement or component
 			setContent : function(ref) {
-				if (this.created)
+				if (this.created && this.canHaveChildren)
 				{
 					while (this.components.length)
 						this.removeChild(this.components[0]);
@@ -6414,7 +6449,7 @@ var Component = {
 			// add a children component into the component's target
 			// div and relayout
 			addChild : function(ref) {
-				if (this.created)
+				if (this.created && this.canHaveChildren)
 				{
 					var found = false;
 					for (var n=0; n < this.components.length; n++)
@@ -6437,6 +6472,8 @@ var Component = {
 						this.cmpTarget.appendChild(ref.target);
 						ref.parent = this;
 						Scriptor.className.add(ref.target, 'jsComponentChild');
+						this.__reReadDimentions();	// stylesheet properties are applyed at this point and
+													// we should update them
 						this.resize();
 						return true;
 					}
@@ -6448,7 +6485,7 @@ var Component = {
 			// remove a component from its children collection, does not destroy
 			// the component
 			removeChild : function(ref) {
-				if (this.created)
+				if (this.created && this.canHaveChildren)
 				{
 					for (var n=0; n < this.components.length; n++)
 					{
@@ -6933,6 +6970,129 @@ Scriptor.Panel = function(opts) {
 	
 	this.create();
 	Scriptor.className.add(this.target, "jsPanel");
+};
+/*
+*
+* Scriptor TabContainer
+*
+* Panel component class
+*
+*/
+
+Scriptor.TabContainer = function(opts) {
+	var localOpts = {
+		canHaveChildren : true,
+		hasInvalidator : true
+	};
+	Scriptor.mixin(localOpts, opts);
+	
+	var cmp = Component.get(localOpts);
+	for (var prop in cmp)
+	{
+		this[prop] = cmp[prop];
+	}
+	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer"
+	
+	// initialize events!
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onbeforeshow');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onbeforehide');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onbeforedestroy');
+	Scriptor.event.registerCustomEvent(this, 'ondestroy');
+	Scriptor.event.registerCustomEvent(this, 'oncreate');
+	Scriptor.event.registerCustomEvent(this, 'onresize');
+	Scriptor.event.registerCustomEvent(this, 'onfocus');
+	Scriptor.event.registerCustomEvent(this, 'onblur');
+	
+	this.create();
+	Scriptor.className.add(this.target, "jsTabContainer");
+	
+	this._tabList = new TabListObj({
+		id : this.divId + '_tabList',
+		region : "top",
+		className : 'jsTabList'
+	});
+	this.addChild(this._tabList);
+	
+	this._pageContainer = new TabPageContainer({
+		id : this.divId + '_pageContainer',
+		region : "center",
+		className : 'jsPageContainer'
+	});
+	this.addChild(this._pageContainer);
+	
+	this._canHaveChildren = false;
+	this._tabs = [];
+	this._selectedTabId = null;
+};
+
+Scriptor.TabContainer.prototype.addTab = function(title, panel, ndx) {
+	
+};
+
+// private tab container inner components
+var TabListObj = function(opts) {
+	var localOpts = {
+		canHaveChildren : true,
+		hasInvalidator : false
+	};
+	Scriptor.mixin(localOpts, opts);
+	
+	var cmp = Component.get(localOpts);
+	for (var prop in cmp)
+	{
+		this[prop] = cmp[prop];
+	}
+	this.CMP_SIGNATURE = "Scriptor.ui.private.TabListObj";
+	
+	// initialize events!
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onbeforeshow');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onbeforehide');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onbeforedestroy');
+	Scriptor.event.registerCustomEvent(this, 'ondestroy');
+	Scriptor.event.registerCustomEvent(this, 'oncreate');
+	Scriptor.event.registerCustomEvent(this, 'onresize');
+	Scriptor.event.registerCustomEvent(this, 'onfocus');
+	Scriptor.event.registerCustomEvent(this, 'onblur');
+	
+	this.create();
+	
+	Scriptor.className.add(this.cmpTarget, 'jsTabListInner');
+};
+
+var TabPageContainer = function(opts) {
+	var localOpts = {
+		canHaveChildren : true,
+		hasInvalidator : false
+	};
+	Scriptor.mixin(localOpts, opts);
+	
+	var cmp = Component.get(localOpts);
+	for (var prop in cmp)
+	{
+		this[prop] = cmp[prop];
+	}
+	this.CMP_SIGNATURE = "Scriptor.ui.private.TabPageContainer";
+	
+	// initialize events!
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onbeforeshow');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onbeforehide');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onbeforedestroy');
+	Scriptor.event.registerCustomEvent(this, 'ondestroy');
+	Scriptor.event.registerCustomEvent(this, 'oncreate');
+	Scriptor.event.registerCustomEvent(this, 'onresize');
+	Scriptor.event.registerCustomEvent(this, 'onfocus');
+	Scriptor.event.registerCustomEvent(this, 'onblur');
+	
+	this.create();
 };
 
 	return Scriptor;
