@@ -15,7 +15,7 @@ var Component = {
 	get : function(opts) {
 		
 		var localOpts = {
-			divId : null,
+			id : null,
 			region : "center",
 			style : "",
 			className : "",
@@ -38,7 +38,7 @@ var Component = {
 		
 		var cmp = {
 			CMP_SIGNATURE : "Scriptor.ui.Component",
-			divId : localOpts.divId,
+			divId : localOpts.id,
 			region : localOpts.region,
 			style : localOpts.style,
 			className : localOpts.className,
@@ -102,7 +102,7 @@ var Component = {
 						}
 					
 					this.focusImplementation();
-					Scriptor.event.fire(this, 'onfocus', e);
+					Scriptor.event.fire(this, 'onfocus');
 					
 					this.hasFocus = true;
 					Scriptor.className.add(this.target, 'jsComponentFocused');
@@ -116,7 +116,7 @@ var Component = {
 					this.target.style.zIndex = this.zIndexCache;
 					
 					this.blurImplementation();
-					Scriptor.event.fire(this, 'onblur', e);
+					Scriptor.event.fire(this, 'onblur');
 						
 					this.hasFocus = false;
 					Scriptor.className.remove(this.target, 'jsComponentFocused');
@@ -195,10 +195,10 @@ var Component = {
 					if (!isNaN(targetMaxWidth))
 						this.maxWidth = targetMaxWidth;
 					
-					if (this.width == null)
-						this.width = this.target.offsetWidth;
-					if (this.height == null)
-						this.height = this.target.offsetHeight;
+					if (this.width == null && !isNaN(parseInt(this.target.style.width)))
+						this.width = parseInt(this.target.style.width);
+					if (this.height == null && !isNaN(parseInt(this.target.style.height)))
+						this.height = parseInt(this.target.style.height);
 					
 					if (this.target.style.width.substr(this.target.style.width.length-1) == '%')
 						this._percentWidth = this.target.style.width;
@@ -302,12 +302,10 @@ var Component = {
 							if (topChildren[n].height > maxTopHeight)
 								maxTopHeight = topChildren[n].height;
 							
-							var outerBox = topChildren[n].__getOuterBox();
-							
 							topChildren[n].x = innerBox.left + (n*topUniformWidth);
 							topChildren[n].y = innerBox.top;
-							topChildren[n].width = topUniformWidth - outerBox.left - outerBox.right;
-							topChildren[n].height = topChildren[n].height - outerBox.top - outerBox.bottom;
+							topChildren[n].width = topUniformWidth;
+							topChildren[n].height = topChildren[n].height;
 						}
 						
 						// bottom region, stack horizontally with uniform widths
@@ -322,12 +320,10 @@ var Component = {
 						
 						for (var n=0; n < bottomChildren.length; n++)
 						{
-							var outerBox = bottomChildren[n].__getOuterBox();
-							
 							bottomChildren[n].x = innerBox.left + (n*bottomUniformWidth);
 							bottomChildren[n].y = this.height - innerBox.bottom - maxBottomHeight;
-							bottomChildren[n].width = bottomUniformWidth - outerBox.left - outerBox.right;
-							bottomChildren[n].height = bottomChildren[n].height - outerBox.top - outerBox.bottom;
+							bottomChildren[n].width = bottomUniformWidth;
+							bottomChildren[n].height = bottomChildren[n].height;
 						}
 						
 						// left region, stack vertically with uniform heights
@@ -339,12 +335,10 @@ var Component = {
 							if (leftChildren[n].width > maxLeftWidth)
 								maxLeftWidth = leftChildren[n].width;
 								
-							var outerBox = leftChildren[n].__getOuterBox();
-							
 							leftChildren[n].x = innerBox.left;
 							leftChildren[n].y = maxTopHeight + innerBox.top + (n*leftUniformHeight);
-							leftChildren[n].height = leftUniformHeight - outerBox.top - outerBox.bottom - maxTopHeight - maxBottomHeight;
-							leftChildren[n].width = leftChildren[n].width - outerBox.left - outerBox.right;
+							leftChildren[n].height = leftUniformHeight - maxTopHeight - maxBottomHeight;
+							leftChildren[n].width = leftChildren[n].width;
 						}
 						
 						// right region, stack vertically with uniform widths
@@ -359,12 +353,10 @@ var Component = {
 						
 						for (var n=0; n < rightChildren.length; n++)
 						{
-							var outerBox = rightChildren[n].__getOuterBox();
-							
 							rightChildren[n].x = this.width - innerBox.right - maxRightWidth;
 							rightChildren[n].y = maxTopHeight + innerBox.top + (n*rightUniformHeight);
-							rightChildren[n].width = maxRightWidth - outerBox.left - outerBox.right - maxTopHeight - maxBottomHeight;
-							rightChildren[n].height = rightChildren[n].height - outerBox.top - outerBox.bottom;
+							rightChildren[n].width = maxRightWidth;
+							rightChildren[n].height = rightUniformHeight - maxTopHeight - maxBottomHeight;
 						}
 						
 						// center elements, stack vertically with uniform heights
@@ -372,12 +364,10 @@ var Component = {
 						var centerUniformHeight = (this.height - innerBox.top - innerBox.bottom - maxBottomHeight - maxTopHeight) / centerChildren.length;
 						for (var n=0; n < centerChildren.length; n++)
 						{
-							var outerBox = centerChildren[n].__getOuterBox();
-							
 							centerChildren[n].x = innerBox.left + maxLeftWidth;
 							centerChildren[n].y = innerBox.top + maxTopHeight + (n*centerUniformHeight);
-							centerChildren[n].height = centerUniformHeight - outerBox.top - outerBox.bottom;
-							centerChildren[n].width = this.width - innerBox.left - innerBox.right - maxLeftWidth - maxRightWidth - outerBox.left - outerBox.right;
+							centerChildren[n].height = centerUniformHeight;
+							centerChildren[n].width = this.width - innerBox.left - innerBox.right - maxLeftWidth - maxRightWidth;
 						}
 						
 						// TODO: add splitters for automatic resizing
@@ -474,6 +464,7 @@ var Component = {
 							
 						this.components.push(ref);
 						this.cmpTarget.appendChild(ref.target);
+						ref.parent = this;
 						Scriptor.className.add(ref.target, 'jsComponentChild');
 						this.resize();
 						return true;
@@ -495,6 +486,7 @@ var Component = {
 							ref.target.parentNode.removeChild(ref.target);
 							this.components.splice(n, 1);
 							Scriptor.className.remove(ref.target, 'jsComponentChild');
+							ref.parent = null;
 							this.resize();
 							
 							return true;
@@ -557,6 +549,7 @@ var Component = {
 				if (this.target)
 				{
 					var innerBox = this.__getInnerBox();
+					var outerBox = this.__getOuterBox();
 					
 					if (this._percentWidth !== null)
 					{
@@ -565,12 +558,12 @@ var Component = {
 					}
 					else if (this._origWidth !== null)
 					{
-						if (!this._origWidth || this._origWidth == "auto")
+						if ((!this._origWidth || this._origWidth == "auto") && this.parent === null)
 						{
 							if (this.target.parentNode)
 							{
 								outerBox = this.__getOuterBox();
-								this.width = this.target.parentNode.offsetWidth - outerBox.left - outerBox.right;
+								this.width = this.target.parentNode.offsetWidth - outerBox.left - outerBox.right - innerBox.left - innerBox.right;
 							}
 						}
 					}
@@ -578,13 +571,13 @@ var Component = {
 					if (this._percentHeight !== null)
 					{
 						this.target.style.height = this._percentHeight;
-						this.height = this.target.offsetHeight;
+						this.height = this.target.offsetHeight - outerBox.top - outerBox.bottom - innerBox.top - innerBox.bottom;
 					}
 					
 					if (this.width !== null)
-						this.target.style.width = (this.width - innerBox.left - innerBox.right) + 'px';
+						this.target.style.width = (this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right) + 'px';
 					if (this.height !== null)
-						this.target.style.height = (this.height  - innerBox.top - innerBox.bottom) + 'px';
+						this.target.style.height = (this.height  - innerBox.top - innerBox.bottom - outerBox.top - outerBox.bottom) + 'px';
 					if (this.x !== null)
 						this.target.style.left = this.x + 'px';
 					if (this.y !== null)
@@ -620,6 +613,20 @@ var Component = {
 					box.left = innerLeft;
 				if (!isNaN(innerRight))
 					box.right = innerRight;
+				
+				var borderTop = parseInt(this.target.style.borderTopWidth);
+				var borderBottom = parseInt(this.target.style.borderBottomWidth)
+				var borderLeft = parseInt(this.target.style.borderLeftWidth)
+				var borderRight = parseInt(this.target.style.borderRightWidth)
+				
+				if (!isNaN(borderTop))
+					box.top += borderTop;
+				if (!isNaN(borderBottom))
+					box.bottom += borderBottom;
+				if (!isNaN(borderLeft))
+					box.left += borderLeft;
+				if (!isNaN(borderRight))
+					box.right += borderRight;
 					
 				return box;
 			},
