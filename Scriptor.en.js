@@ -6711,6 +6711,16 @@ Scriptor.TabContainer = function(opts) {
 	// redefine component implementation
 	this.resizeImplementation = function() {
 		var tabsInnerWidth = this._tabList.cmpTarget.offsetWidth;
+		var orignTabsInnerWidth = tabsInnerWidth;
+		
+		var moreDropDown = document.getElementById(this._tabList.divId + "_more");
+		if (moreDropDown)
+		{
+			var moreOuterLeft = parseInt(Scriptor.className.getComputedProperty(moreDropDown, 'margin-left'));
+			var moreOuterRight = parseInt(Scriptor.className.getComputedProperty(moreDropDown, 'margin-right'));
+			
+			tabsInnerWidth -= (moreDropDown.offsetWidth + moreOuterLeft + moreOuterRight);
+		}
 		
 		var totalTabsWidth = 0;
 		var extraTabReached = false;
@@ -6729,6 +6739,9 @@ Scriptor.TabContainer = function(opts) {
 			
 			totalTabsWidth += theTab.offsetWidth + outerLeft + outerRight;
 			
+			if (n == this._tabList.cmpTarget.childNodes.length-1)
+				tabsInnerWidth = orignTabsInnerWidth;
+				
 			if (totalTabsWidth >= tabsInnerWidth)
 			{
 				if (!this._tabList._showingMore)
@@ -6739,6 +6752,12 @@ Scriptor.TabContainer = function(opts) {
 					this._tabList._extraTabs = n;
 					extraTabReached = true;
 				}
+				
+				theTab.style.visibility = "hidden";
+			}
+			else
+			{
+				theTab.style.visibility = "visible";
 			}
 		}
 		

@@ -76,7 +76,8 @@ span.jsTabCloseHidden {
 span.jsTabListDropdown {
 	position: absolute;
 	top: 0;
-	right: 2px;
+	right: 0;
+	margin-right: 2px;
 	width: 12px;
 	height: 23px;
 	background: #FFFFFF url(../../images/drop-down.png) -2px 5px no-repeat;
