@@ -246,3 +246,20 @@ div.jsTabSelected span.jsTabCloseBtn {
 span.jsTabCloseHidden {
 	display: none !important;
 }
+
+span.jsTabListDropdown {
+	position: absolute;
+	top: 0;
+	right: 2px;
+	width: 12px;
+	height: 23px;
+	background: #FFFFFF url(../../images/drop-down.png) -2px 5px no-repeat;
+}
+
+span.jsTabListDropdown:hover {
+	background-color: #BEE4F4;
+}
+
+span.jsTabListDropdownHidden {
+	visibility: hidden;
+}

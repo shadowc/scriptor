@@ -56,6 +56,51 @@ Scriptor.TabContainer = function(opts) {
 	this._canHaveChildren = false;
 	this._tabs = [];
 	this._selectedTabId = null;
+	
+	// redefine component implementation
+	this.resizeImplementation = function() {
+		var tabsInnerWidth = this._tabList.cmpTarget.offsetWidth;
+		
+		var totalTabsWidth = 0;
+		var extraTabReached = false;
+		for (var n=0; n < this._tabList.cmpTarget.childNodes.length; n++)
+		{
+			var theTab = this._tabList.cmpTarget.childNodes[n];
+			
+			var outerLeft = parseInt(Scriptor.className.getComputedProperty(theTab, 'margin-left'));
+			var outerRight = parseInt(Scriptor.className.getComputedProperty(theTab, 'margin-right'));
+			
+			if (isNaN(outerLeft))
+				outerLeft = 0;
+				
+			if (isNaN(outerRight))
+				outerRight = 0;
+			
+			totalTabsWidth += theTab.offsetWidth + outerLeft + outerRight;
+			
+			if (totalTabsWidth >= tabsInnerWidth)
+			{
+				if (!this._tabList._showingMore)
+					this._tabList.showMore();
+				
+				if (!extraTabReached)
+				{
+					this._tabList._extraTabs = n;
+					extraTabReached = true;
+				}
+			}
+		}
+		
+		if (totalTabsWidth < tabsInnerWidth)
+		{
+			if (this._tabList._showingMore)
+				this._tabList.hideMore();
+				
+			this._tabList._extraTabs = this._tabs.length;
+		}
+		
+	};
+
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
@@ -410,11 +455,6 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	return false;
 };
 
-Scriptor.TabContainer.prototype.resizeImplementation = function() {
-	// TODO: refresh tablist here and implement dropdown menu for extra tabs
-	
-};
-
 // private tab container inner components
 /* This is the component that represents the list of tabs in the TabContainer */
 var TabListObj = function(opts) {
@@ -446,7 +486,46 @@ var TabListObj = function(opts) {
 	
 	this.create();
 	
+	// first ndx of extra tab not visible
+	this._extraTabs = 0;
+	this._showingMore = false;
+	
+	// add the "more" dropdown button
+	var moreSpan = document.createElement('span');
+	moreSpan.id = this.divId + '_more';
+	moreSpan.className = 'jsTabListDropdown jsTabListDropdownHidden';
+	this.target.appendChild(moreSpan);
+	moreSpan.innerHTML = ' ';
+	
 	Scriptor.className.add(this.cmpTarget, 'jsTabListInner');
+	
+	// add "more" dropdown button onclick event
+	Scriptor.event.attach(moreSpan, 'onclick', Scriptor.bindAsEventListener(this._onDropdownClick, this));
+};
+
+TabListObj.prototype._onDropdownClick = function(e) {
+	if (!e) e = window.event;
+	
+	// TODO: show the context menu with extra options
+	
+	Scriptor.event.cancel(e, true);
+	return false;
+};
+
+TabListObj.prototype.showMore = function() {
+	if (!this._showingMore)
+	{
+		Scriptor.className.remove(document.getElementById(this.divId + '_more'), 'jsTabListDropdownHidden');
+		this._showingMore = true;
+	}
+};
+
+TabListObj.prototype.hideMore = function() {
+	if (this._showingMore)
+	{
+		Scriptor.className.add(document.getElementById(this.divId + '_more'), 'jsTabListDropdownHidden');
+		this._showingMore = false;
+	}
 };
 
 /* This is the component that holds the Panels iteself (or other components) */
