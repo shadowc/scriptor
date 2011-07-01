@@ -170,7 +170,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 		
 		// remove tab
 		this._tabList.cmpTarget.removeChild(this._tabList.cmpTarget.childNodes[ndx]);
-		this._pageContainer.removePage(this._tabs[ndx].paneId, destroy);
+		this._pageContainer.removePage(this._tabs[ndx].pane, destroy);
 		this._tabs.splice(ndx, 1);
 		
 		if (reselect)
@@ -479,26 +479,31 @@ var TabPageContainer = function(opts) {
 	
 	this.create();
 	
-	this._pages = {};
 };
 
 TabPageContainer.prototype.addPage = function(pane) {
 	Scriptor.className.add(pane.target, "jsTabPage");
-	this._pages[pane.divId] = pane;
+	this.addChild(pane);
 };
 
-TabPageContainer.prototype.removePage = function(paneId, destroy) {
+TabPageContainer.prototype.removePage = function(pane, destroy) {
+	this.removeChild(pane)
+	
 	if (destroy)
-		this._pages[paneId].destroy();
-		
-	delete this._pages[paneId];
+		pane.destroy();
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	if (paneId)
-		this.setContent(this._pages[paneId]);
-	else
-		this.setContent(null);
+	for (var n=0; n < this.components.length; n++)
+		this.components[n].hide();
+		
+	for (var n=0; n < this.components.length; n++)
+	{
+		if (this.components[n].divId == paneId)
+		{
+			this.components[n].show();
+		}
+	}
 };
 
 /* this object represents a single tab with its title and its component */

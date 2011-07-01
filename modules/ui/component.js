@@ -185,7 +185,7 @@ var Component = {
 					if (this.style)
 						this.target.setAttribute('style', this.style);
 					
-					this.target.className = this.className ? 'jsComponent jsComponent_hidden ' + this.className : 'jsComponent jsComponent_hidden';
+					this.target.className = this.className ? 'jsComponent jsComponentHidden ' + this.className : 'jsComponent jsComponentHidden';
 					
 					targetMinHeight = parseInt(this.target.style.minHeight);
 					targetMaxHeight = parseInt(this.target.style.maxHeight);
@@ -314,7 +314,7 @@ var Component = {
 				this.calculateOffset();
 				
 				if (!this.visible && this.target) {
-					Scriptor.className.remove(this.target, 'jsComponent_hidden');
+					Scriptor.className.remove(this.target, 'jsComponentHidden');
 					this.visible = true;
 					
 					this.showImplementation();
@@ -322,7 +322,10 @@ var Component = {
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].show();	
 					
-					this.resize();	// we're doing component layout here!
+					if (this.parent)
+						this.parent.resize();
+					else
+						this.resize();	// we're doing component layout here!
 					
 					this.focus();
 					
@@ -581,16 +584,22 @@ var Component = {
 					return;
 				
 				if (this.visible && this.target) {
-					Scriptor.className.add(this.target, 'jsComponent_hidden');
+					Scriptor.className.add(this.target, 'jsComponentHidden');
 					this.visible = false;
 					
 					this.hideImplementation();
 					
 					for (var n=0; n < this.components.length; n++) 
-						this.components[n].hide();	
+						this.components[n].hide();
+					
+					if (this.parent)
+						this.parent.resize();
+					else
+						this.resize();	// we're doing component layout here!
+						
+					this.passFocus();
 					
 					Scriptor.event.fire(this, 'onhide');
-					this.passFocus();
 				}
 			},
 			
@@ -655,6 +664,14 @@ var Component = {
 						Scriptor.className.add(ref.target, 'jsComponentChild');
 						this.__reReadDimentions();	// stylesheet properties are applyed at this point and
 													// we should update them
+						
+						if (ref.visible != this.visible)
+						{
+							if (ref.visible)
+								ref.hide();
+							else
+								ref.show();
+						}
 						this.resize();
 						return true;
 					}
@@ -870,7 +887,7 @@ var Component = {
 				
 				for (var n=0; n < this.components.length; n++)
 				{
-					if (this.components[n].region == str)
+					if (this.components[n].region == str && this.components[n].visible)
 						ret.push(this.components[n]);
 				}
 				

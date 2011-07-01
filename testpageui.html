@@ -70,11 +70,11 @@
 			
 			LeftComponent.addTab({title : "Tab 1"}, new Scriptor.Panel());
 			LeftComponent.addTab({title : "Tab 2"}, new Scriptor.Panel());
-			LeftComponent.addTab({title : "Closable", closable : true}, new Scriptor.Panel());
+			LeftComponent.addTab({title : "Close me...", closable : true}, new Scriptor.Panel());
 			
 			LeftComponent._tabs[0].pane.setContent('Tab 1 contents');
 			LeftComponent._tabs[1].pane.setContent('Tab 2 contents');
-			LeftComponent._tabs[2].pane.setContent('Tab 3 contents');
+			LeftComponent._tabs[2].pane.setContent('If you close this tab I will be destroyed!');
 		});
 	</script>
 	

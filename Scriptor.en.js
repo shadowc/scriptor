@@ -5665,7 +5665,7 @@ var Component = {
 					if (this.style)
 						this.target.setAttribute('style', this.style);
 					
-					this.target.className = this.className ? 'jsComponent jsComponent_hidden ' + this.className : 'jsComponent jsComponent_hidden';
+					this.target.className = this.className ? 'jsComponent jsComponentHidden ' + this.className : 'jsComponent jsComponentHidden';
 					
 					targetMinHeight = parseInt(this.target.style.minHeight);
 					targetMaxHeight = parseInt(this.target.style.maxHeight);
@@ -5794,7 +5794,7 @@ var Component = {
 				this.calculateOffset();
 				
 				if (!this.visible && this.target) {
-					Scriptor.className.remove(this.target, 'jsComponent_hidden');
+					Scriptor.className.remove(this.target, 'jsComponentHidden');
 					this.visible = true;
 					
 					this.showImplementation();
@@ -5802,7 +5802,10 @@ var Component = {
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].show();	
 					
-					this.resize();	// we're doing component layout here!
+					if (this.parent)
+						this.parent.resize();
+					else
+						this.resize();	// we're doing component layout here!
 					
 					this.focus();
 					
@@ -6061,16 +6064,22 @@ var Component = {
 					return;
 				
 				if (this.visible && this.target) {
-					Scriptor.className.add(this.target, 'jsComponent_hidden');
+					Scriptor.className.add(this.target, 'jsComponentHidden');
 					this.visible = false;
 					
 					this.hideImplementation();
 					
 					for (var n=0; n < this.components.length; n++) 
-						this.components[n].hide();	
+						this.components[n].hide();
+					
+					if (this.parent)
+						this.parent.resize();
+					else
+						this.resize();	// we're doing component layout here!
+						
+					this.passFocus();
 					
 					Scriptor.event.fire(this, 'onhide');
-					this.passFocus();
 				}
 			},
 			
@@ -6135,6 +6144,14 @@ var Component = {
 						Scriptor.className.add(ref.target, 'jsComponentChild');
 						this.__reReadDimentions();	// stylesheet properties are applyed at this point and
 													// we should update them
+						
+						if (ref.visible != this.visible)
+						{
+							if (ref.visible)
+								ref.hide();
+							else
+								ref.show();
+						}
 						this.resize();
 						return true;
 					}
@@ -6350,7 +6367,7 @@ var Component = {
 				
 				for (var n=0; n < this.components.length; n++)
 				{
-					if (this.components[n].region == str)
+					if (this.components[n].region == str && this.components[n].visible)
 						ret.push(this.components[n]);
 				}
 				
@@ -6804,7 +6821,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 		
 		// remove tab
 		this._tabList.cmpTarget.removeChild(this._tabList.cmpTarget.childNodes[ndx]);
-		this._pageContainer.removePage(this._tabs[ndx].paneId, destroy);
+		this._pageContainer.removePage(this._tabs[ndx].pane, destroy);
 		this._tabs.splice(ndx, 1);
 		
 		if (reselect)
@@ -7113,26 +7130,31 @@ var TabPageContainer = function(opts) {
 	
 	this.create();
 	
-	this._pages = {};
 };
 
 TabPageContainer.prototype.addPage = function(pane) {
 	Scriptor.className.add(pane.target, "jsTabPage");
-	this._pages[pane.divId] = pane;
+	this.addChild(pane);
 };
 
-TabPageContainer.prototype.removePage = function(paneId, destroy) {
+TabPageContainer.prototype.removePage = function(pane, destroy) {
+	this.removeChild(pane)
+	
 	if (destroy)
-		this._pages[paneId].destroy();
-		
-	delete this._pages[paneId];
+		pane.destroy();
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	if (paneId)
-		this.setContent(this._pages[paneId]);
-	else
-		this.setContent(null);
+	for (var n=0; n < this.components.length; n++)
+		this.components[n].hide();
+		
+	for (var n=0; n < this.components.length; n++)
+	{
+		if (this.components[n].divId == paneId)
+		{
+			this.components[n].show();
+		}
+	}
 };
 
 /* this object represents a single tab with its title and its component */
