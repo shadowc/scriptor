@@ -7045,7 +7045,7 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 };
 
 Scriptor.TabContainer.prototype.resizeImplementation = function() {
-	// refresh tablist here!
+	// TODO: refresh tablist here and implement dropdown menu for extra tabs
 	
 };
 
