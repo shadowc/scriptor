@@ -146,21 +146,33 @@
 .galleryView div.gvSelectedImage img { border: 2px solid #000000; }
 .galleryView div.gvSelectedImage p { font-weight: bold; }/* CSS Document */
 
-/* to be deleted*/
-.tabViewUl { overflow: hidden; list-style-type: none; height: 20px; border-bottom: 1px solid #ace3f3; margin: 0; padding: 0; }
-.tabViewDiv { border: 1px solid #ace3f3; border-top: none; }
+.treeView { margin: 0; padding: 0; border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
+.treeViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
 
-.tabViewLi { float: left; height: 20px; background: URL('images/tab_unsel_left.png') no-repeat; margin: 0 2px 0 2px; }
-.tabViewLi a { float: left; height: 20px; padding: 0 8px 0 8px; text-decoration: none; color: #343434; background: URL('images/tab_unsel_right.png') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
-.tabViewLi a span { float: left; height: 14px; padding: 4px 0 2px 0; background: URL('images/tab_unsel_back.png') repeat-x top left; }
-.tabViewLi a:hover { color: #555555; outline: none; }
+.treeView div.treeViewMessageDiv { margin: 10px; font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
+.treeView ul { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; padding: 3px; list-style-type: none; overflow: hidden; clear: left; margin: 0; }
+.treeView ul ul { margin-left: 15px; padding: 0; display: none; }
+.treeView ul li { margin: 0; clear: left; overflow: hidden; }
+.treeView ul li a { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; display: block; height: 16px; padding: 2px 4px; border: 1px solid #FFFFFF; float: left; background: transparent; }
+.treeView ul li a.treeViewSingleNode { margin-left: 15px; }
+.treeView ul li a.treeViewExpandableNode { width: 15px; height: 18px; background: URL('images/plus.gif') no-repeat 2px 5px; padding: 0; border: none; }
+.treeView ul li a.treeViewCollapsableNode { width: 15px; height: 18px; background: URL('images/minus.gif') no-repeat 2px 5px; padding: 0; border: none; }
 
-.tabViewLiSelected { float: left; height: 20px; background: URL('images/tab_sel_left.png') no-repeat; margin: 0 2px 0 2px; }
-.tabViewLiSelected a { float: left; height: 20px; padding: 0 8px 0 8px; font-weight: bold; text-decoration: none; color: #000000; background: URL('images/tab_sel_right.png') no-repeat top right; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 12px; cursor: pointer; }
-.tabViewLiSelected a span { float: left; height: 14px; padding: 4px 0 2px 0; background: URL('images/tab_sel_back.png') repeat-x top left; }
-.tabViewLiSelected a:hover { color: #555555; outline: none; }
+.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; position: relative; overflow: hidden; }
+div.jsComponent.jsComponentHidden { visibility: hidden; }
+div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
+div.jsComponentInvalidator { position: absolute; z-index: 1000; width: 100%; height: 100%; top: 0; left: 0; background: #FFFFFF; 
+	opacity: 0.8; -moz-opacity: 0.8; }
+div.jsComponent.jsComponentFocused { border-color: #888888 !important; }
+div.jsTargetComponent { position: relative; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
 
-/* new tabContainer css style */
+div.jsPanel { border: none; background: #FFFFFF; }
+div.jsPanel.jsComponentChild { background: #FAFAFF; border: 1px solid #AAAAAA; }
+
+div.jsComponent div.jsSplitter { position: absolute; border: none; overflow: hidden; margin: 0; padding: 0; background: transparent; }
+div.jsComponent div.jsSplitter:hover { background: #BEE4F4; }
+div.jsComponent div.jsSplitterHorizontal { height: 5px; cursor: n-resize; }
+div.jsComponent div.jsSplitterVertical { width: 5px; cursor: e-resize; }/* CSS Document */
 div.jsTabContainer div.jsTabList {
 	height: 24px;
 }
@@ -203,35 +215,29 @@ div.jsTabLabel.jsTabSelected {
 	color: #333333;
 }
 
+div.jsTabLabel.jsTabClosable {
+	padding-right: 14px;
+}
+
 div.jsTabPage {
 	border: none !important;
 	background: transparent !important;
-}/* CSS Document */
+}
 
-.treeView { margin: 0; padding: 0; border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
-.treeViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
+span.jsTabCloseBtn {
+	display: block;
+	position: absolute;
+	top: 6px;
+	right: 4px; 
+	width: 8px;
+	height: 8px;
+	background: #CC0000;
+}
 
-.treeView div.treeViewMessageDiv { margin: 10px; font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
-.treeView ul { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; padding: 3px; list-style-type: none; overflow: hidden; clear: left; margin: 0; }
-.treeView ul ul { margin-left: 15px; padding: 0; display: none; }
-.treeView ul li { margin: 0; clear: left; overflow: hidden; }
-.treeView ul li a { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; display: block; height: 16px; padding: 2px 4px; border: 1px solid #FFFFFF; float: left; background: transparent; }
-.treeView ul li a.treeViewSingleNode { margin-left: 15px; }
-.treeView ul li a.treeViewExpandableNode { width: 15px; height: 18px; background: URL('images/plus.gif') no-repeat 2px 5px; padding: 0; border: none; }
-.treeView ul li a.treeViewCollapsableNode { width: 15px; height: 18px; background: URL('images/minus.gif') no-repeat 2px 5px; padding: 0; border: none; }
+div.jsTabSelected span.jsTabCloseBtn {
+	top: 8px;
+}
 
-.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; position: relative; overflow: hidden; }
-div.jsComponent.jsComponentHidden { visibility: hidden; }
-div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
-div.jsComponentInvalidator { position: absolute; z-index: 1000; width: 100%; height: 100%; top: 0; left: 0; background: #FFFFFF; 
-	opacity: 0.8; -moz-opacity: 0.8; }
-div.jsComponent.jsComponentFocused { border-color: #888888 !important; }
-div.jsTargetComponent { position: relative; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-
-div.jsPanel { border: none; background: #FFFFFF; }
-div.jsPanel.jsComponentChild { background: #FAFAFF; border: 1px solid #AAAAAA; }
-
-div.jsComponent div.jsSplitter { position: absolute; border: none; overflow: hidden; margin: 0; padding: 0; background: transparent; }
-div.jsComponent div.jsSplitter:hover { background: #BEE4F4; }
-div.jsComponent div.jsSplitterHorizontal { height: 5px; cursor: n-resize; }
-div.jsComponent div.jsSplitterVertical { width: 5px; cursor: e-resize; }
+span.jsTabCloseHidden {
+	display: none !important;
+}

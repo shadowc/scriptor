@@ -33,6 +33,9 @@ Scriptor.TabContainer = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	Scriptor.event.registerCustomEvent(this, 'ontabclosed');
+	
 	this.create();
 	Scriptor.className.add(this.target, "jsTabContainer");
 	
@@ -96,8 +99,8 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 		Scriptor.className.add(tabNode, 'jsTabSelected');
 	}
 	
-	// TODO: add close button
-	tabNode.innerHTML = '<span>' + theTab.title + '</span>';
+	tabNode.innerHTML = '<span>' + theTab.title + '</span>' +
+		'<span class="jsTabCloseBtn" id="'+theTab.paneId + '_closeHandler"> </span>';
 	if (ndx == this._tabs.length-1)
 		this._tabList.cmpTarget.appendChild(tabNode);
 	else
@@ -107,8 +110,21 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	this._pageContainer.addPage(theTab.pane);
 	this._pageContainer.activate(this._selectedTabId);
 	
+	var theTabCloseHandler = document.getElementById(theTab.paneId + '_closeHandler');
+	if (!theTab.closable)
+	{
+		Scriptor.className.add(theTabCloseHandler, 'jsTabCloseHidden');
+	}
+	else
+	{
+		Scriptor.className.add(tabNode, 'jsTabClosable');
+	}
+	
 	// event handlers
 	Scriptor.event.attach(tabNode, 'onclick', Scriptor.bindAsEventListener(this.selectTab, this, theTab.paneId));
+	Scriptor.event.attach(theTabCloseHandler, 'onclick', Scriptor.bindAsEventListener(this.closeTab, this, theTab.paneId));
+	
+	this.resize();
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
@@ -169,13 +185,17 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 			Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 			this._pageContainer.activate(this._selectedTabId);
 		}
+		
+		this.resize();
 	}
 };
 
 Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	if (arguments.length == 1)	// not a click event
+	{
 		ref = e;
-		
+	}
+	
 	var ndx = null;
 	
 	// identify tab
@@ -208,6 +228,19 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	
 	if (ndx !== null)
 	{
+		if (arguments.length > 1)
+		{
+			e.selectedTabId = this._selectedTabId;
+			e.selecting = ndx;
+			e = Scriptor.event.fire(this, 'onselect', e);
+			
+			if (e.returnValue == false)
+			{
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+		}
+		
 		Scriptor.className.remove(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		
 		if (this._tabs[ndx])
@@ -216,6 +249,9 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		this._pageContainer.activate(this._selectedTabId);
 	}
+	
+	Scriptor.event.cancel(e, true);
+	return false;
 };
 
 Scriptor.TabContainer.prototype.getSelectedTab = function() {
@@ -226,6 +262,157 @@ Scriptor.TabContainer.prototype.getSelectedTab = function() {
 	}
 	
 	return null;
+};
+
+Scriptor.TabContainer.prototype.setTitle = function(ref, title) {
+	var ndx = null;
+	
+	// identify tab
+	if (typeof(ref) == 'number')
+	{
+		ndx = ref;
+	}
+	else if (typeof(ref) == 'string')
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].paneId == ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	else if (ref.CMP_SIGNATURE)
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].pane === ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	
+	if (ndx !== null)
+	{
+		this._tabList.cmpTarget.childNodes[ndx].firstChild.innerHTML = title;
+		this.resize();
+	}
+};
+
+Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
+	var ndx = null;
+	
+	// identify tab
+	if (typeof(ref) == 'number')
+	{
+		ndx = ref;
+	}
+	else if (typeof(ref) == 'string')
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].paneId == ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	else if (ref.CMP_SIGNATURE)
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].pane === ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	
+	if (ndx !== null)
+	{
+		var theTab = this._tabList.cmpTarget.childNodes[ndx];
+		var theTabCloseHandler = document.getElementById(this._tabs[ndx].paneId + "_closeHandler");
+		if (closable)
+		{
+			Scriptor.className.add(theTab, 'jsTabClosable');
+			Scriptor.className.remove(theTabCloseHandler, 'jsTabCloseHidden');
+		}
+		else
+		{
+			Scriptor.className.remove(theTab, 'jsTabClosable');
+			Scriptor.className.add(theTabCloseHandler, 'jsTabCloseHidden');
+		}
+		
+		this.resize();
+	}
+};
+
+Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
+	if (arguments.length == 1)	// not a click event
+	{
+		ref = e;
+	}
+	
+	var ndx = null;
+	
+	// identify tab
+	if (typeof(ref) == 'number')
+	{
+		ndx = ref;
+	}
+	else if (typeof(ref) == 'string')
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].paneId == ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	else if (ref.CMP_SIGNATURE)
+	{
+		for (var n=0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].pane === ref)
+			{
+				ndx = n;
+				break;
+			}
+		}
+	}
+	
+	if (ndx !== null)
+	{
+		if (arguments.length > 1)
+		{
+			e.selectedTabId = this._selectedTabId;
+			e.closing = ndx;
+			e = Scriptor.event.fire(this, 'ontabclosed', e);
+			
+			if (e.returnValue == false)
+			{
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+		}
+		
+		this.removeTab(ndx);
+	}
+	
+	Scriptor.event.cancel(e, true);
+	return false;
+};
+
+Scriptor.TabContainer.prototype.resizeImplementation = function() {
+	// TODO: refresh tablist here and implement dropdown menu for extra tabs
+	
 };
 
 // private tab container inner components
