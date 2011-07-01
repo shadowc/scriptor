@@ -251,7 +251,11 @@ var Scriptor = {
 			if (!found)
 				classes.push(className);
 				
-			elem.className = classes.join(' ');
+			var newClassName = classes.join(' ');
+			if (newClassName.substr(0, 1) == ' ')
+				newClassName = newClassName.substr(1);
+				
+			elem.className = newClassName;
 		},
 		
 		remove : function(elem, className) {
@@ -272,7 +276,11 @@ var Scriptor = {
 				}
 			}
 			
-			elem.className = classes.join(' ');
+			var newClassName = classes.join(' ');
+			if (newClassName.substr(0, 1) == ' ')
+				newClassName = newClassName.substr(1);
+				
+			elem.className = newClassName;
 		},
 		
 		// returns the actual computed style of an element

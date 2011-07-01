@@ -6,14 +6,8 @@
 .scriptor {
 	margin: 0;
 	padding: 0;
-}
-
-.scriptor * {
-	margin: 0;
-	padding: 0;
 	font-family: "Arial", Helvetica, sans-serif;
 	color: #333333;
-	font-size: 12px;
 }
 
 #scriptor_invalidator {

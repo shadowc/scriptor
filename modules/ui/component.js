@@ -602,22 +602,25 @@ var Component = {
 					while (this.components.length)
 						this.removeChild(this.components[0]);
 					
-					if (ref.CMP_SIGNATURE)
+					if (ref)
 					{
-						this.addChild(ref);
-						return true;
-					}
-					else if (Scriptor.isHtmlElement(ref))
-					{
-						this.cmpTarget.appendChild(ref);
-						this.resize();
-						return true;
-					}
-					else if (typeof(ref) == "string")
-					{
-						this.cmpTarget.innerHTML = ref;
-						this.resize();
-						return true;
+						if (ref.CMP_SIGNATURE)
+						{
+							this.addChild(ref);
+							return true;
+						}
+						else if (Scriptor.isHtmlElement(ref))
+						{
+							this.cmpTarget.appendChild(ref);
+							this.resize();
+							return true;
+						}
+						else if (typeof(ref) == "string")
+						{
+							this.cmpTarget.innerHTML = ref;
+							this.resize();
+							return true;
+						}
 					}
 				}
 				

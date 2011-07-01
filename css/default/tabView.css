@@ -20,11 +20,44 @@ div.jsTabContainer div.jsTabList {
 }
 
 div.jsTabContainer div.jsTabListInner {
-	border-bottom: 1px solid #AAAAAA;
-	height: 23px; 
+	border-bottom: 1px solid #888888;
+	height: 23px;
+	overflow: visible;
 }
 
 div.jsTabContainer div.jsPageContainer {
-	border: 1px solid #AAAAAA;
+	border: 1px solid #888888;
 	border-top: none;
+	padding: 5px;
+}
+
+div.jsTabLabel {
+	position: relative;
+	float: left;
+	bottom: 0;
+	top: 2px;
+	background: #FFFFFF;
+	padding: 2px 6px;
+	height: 16px;
+	color: #666666;
+	cursor: pointer;
+	font-size: 12px;
+	margin-right: 1px;
+	border: 1px solid #888888;
+	border-radius: 4px 4px 0 0; 
+	border-bottom: none;
+	font-weight: bold; 
+}
+
+div.jsTabLabel.jsTabSelected {
+	bottom: -1px;
+	height: 17px;
+	padding-top: 4px;
+	top: 0;
+	color: #333333;
+}
+
+div.jsTabPage {
+	border: none !important;
+	background: transparent !important;
 }
