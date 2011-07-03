@@ -105,7 +105,7 @@ var Component = {
 							}
 						}
 					
-					this.focusImplementation();
+					this.focusImplementation.apply(this, arguments);
 					Scriptor.event.fire(this, 'onfocus');
 					
 					this.hasFocus = true;
@@ -119,7 +119,7 @@ var Component = {
 				if (this.hasFocus) {
 					this.target.style.zIndex = this.zIndexCache;
 					
-					this.blurImplementation();
+					this.blurImplementation.apply(this, arguments);
 					Scriptor.event.fire(this, 'onblur');
 						
 					this.hasFocus = false;
@@ -288,7 +288,7 @@ var Component = {
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].destroy();
 					
-					this.destroyImplementation();
+					this.destroyImplementation.apply(this, arguments);
 					
 					Scriptor.event.fire(this, 'ondestroy');
 						
@@ -311,13 +311,11 @@ var Component = {
 				if (!this.created)
 					this.create();
 					
-				this.calculateOffset();
-				
 				if (!this.visible && this.target) {
 					Scriptor.className.remove(this.target, 'jsComponentHidden');
 					this.visible = true;
 					
-					this.showImplementation();
+					this.showImplementation.apply(this, arguments);
 					
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].show();	
@@ -551,7 +549,7 @@ var Component = {
 						}
 					}
 					
-					this.resizeImplementation();
+					this.resizeImplementation.apply(this, arguments);
 					
 					Scriptor.event.fire(this, 'onresize');
 						
@@ -593,7 +591,7 @@ var Component = {
 					Scriptor.className.add(this.target, 'jsComponentHidden');
 					this.visible = false;
 					
-					this.hideImplementation();
+					this.hideImplementation.apply(this, arguments);
 					
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].hide();
@@ -707,54 +705,6 @@ var Component = {
 				}
 				
 				return false;
-			},
-			
-			calculateOffset : function() {
-				
-				var curOffsetParent = this.target;
-				var foundOffsetParent = false;
-				
-				this.componentOffset.windowX = 0;
-				this.componentOffset.windowY = 0;
-				
-				var isOldIe = (navigator.userAgent.indexOf('MSIE') != -1 && navigator.userAgent.indexOf('MSIE 8') == -1);
-				var isGecko = (navigator.userAgent.indexOf('Gecko') != -1);
-				var isIe8 = (navigator.userAgent.indexOf('MSIE 8') != -1);
-				var isOpera = (navigator.userAgent.indexOf('Opera') != -1);
-				
-				while (curOffsetParent) {
-					
-					this.componentOffset.windowX += curOffsetParent.offsetLeft;
-					
-					// Gecko browsers need the border of the element added to the offset!
-					if ((isGecko) && curOffsetParent.style.borderLeftWidth)
-						this.componentOffset.windowX += parseInt(curOffsetParent.style.borderLeftWidth);
-						
-					this.componentOffset.windowY += curOffsetParent.offsetTop;
-					if ((isGecko || isOldIe) && curOffsetParent.style.borderTopWidth)
-						this.componentOffset.windowY += parseInt(curOffsetParent.style.borderTopWidth);
-					
-					if (curOffsetParent.scrollTop)
-						this.componentOffset.windowY -= curOffsetParent.scrollTop;
-					if (curOffsetParent.scrollLeft)
-						this.componentOffset.windowX -= curOffsetParent.scrollLeft;
-							
-					curOffsetParent = curOffsetParent.offsetParent;
-					
-					if (this.parent && curOffsetParent == this.parent.cmpTarget) {
-						foundOffsetParent = true;
-						this.componentOffset.parentX = this.componentOffset.windowX;
-						this.componentOffset.parentY = this.componentOffset.windowY;
-					}
-					
-					if (curOffsetParent && (curOffsetParent.tagName == 'BODY' || curOffsetParent.tagName == 'HTML'))
-						curOffsetParent = null;
-				}
-				
-				if (!foundOffsetParent) {
-					this.componentOffset.parentX = this.componentOffset.windowX;
-					this.componentOffset.parentY = this.componentOffset.windowY;
-				}
 			},
 			
 			__updatePosition : function() {

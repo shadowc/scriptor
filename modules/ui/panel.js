@@ -18,7 +18,7 @@ Scriptor.Panel = function(opts) {
 	{
 		this[prop] = cmp[prop];
 	}
-	this.CMP_SIGNATURE = "Scriptor.ui.Panel"
+	this.CMP_SIGNATURE = "Scriptor.ui.Panel";
 	
 	// initialize events!
 	Scriptor.event.init(this);

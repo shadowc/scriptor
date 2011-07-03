@@ -18,7 +18,7 @@ Scriptor.TabContainer = function(opts) {
 	{
 		this[prop] = cmp[prop];
 	}
-	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer"
+	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer";
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -52,6 +52,8 @@ Scriptor.TabContainer = function(opts) {
 		className : 'jsPageContainer'
 	});
 	this.addChild(this._pageContainer);
+	
+	this._tabsContextMenu = new Scriptor.ContextMenu();
 	
 	this._canHaveChildren = false;
 	this._tabs = [];
@@ -99,6 +101,7 @@ Scriptor.TabContainer = function(opts) {
 				if (!extraTabReached)
 				{
 					this._tabList._extraTabs = n;
+					this._updateExtraTabsContextMenu();
 					extraTabReached = true;
 				}
 				
@@ -308,7 +311,14 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		Scriptor.className.remove(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		
 		if (this._tabs[ndx])
+		{
 			this._selectedTabId = this._tabs[ndx].paneId;
+			
+			if (ndx >= this._tabList._extraTabs)
+				this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
+			else
+				this._tabsContextMenu.checkItem();
+		}
 		
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		this._pageContainer.activate(this._selectedTabId);
@@ -474,6 +484,48 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	return false;
 };
 
+Scriptor.TabContainer.prototype._updateExtraTabsContextMenu = function()
+{
+	var optsLength = this._tabs.length - this._tabList._extraTabs;
+	
+	if (this._tabsContextMenu.items.length != optsLength)
+	{
+		if (this._tabsContextMenu.items.length > optsLength)	// remove extra options
+		{
+			while (this._tabsContextMenu.items.length > optsLength)
+				this._tabsContextMenu.removeItem(0);
+		}
+		else	// add new options
+		{
+			for (var n = 0; n < optsLength - this._tabsContextMenu.items.length; n++)
+			{
+				var tabNdx = this._tabList._extraTabs+n;
+				this._tabsContextMenu.addItem({
+					label : this._tabs[tabNdx].title,
+					onclick : Scriptor.bindAsEventListener(function(e, tabNdx, xtraTabs) {
+						this.selectTab(tabNdx);
+					}, this, tabNdx, this._tabList._extraTabs)
+				}, 0);
+			}
+		}
+		
+		var ndx = null;
+		for (var n = 0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].paneId == this._selectedTabId)
+			{
+				ndx = n;
+				break;
+			}
+		}
+		
+		if (ndx >= this._tabList._extraTabs)
+			this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
+		else
+			this._tabsContextMenu.checkItem();
+	}
+};
+
 // private tab container inner components
 /* This is the component that represents the list of tabs in the TabContainer */
 var TabListObj = function(opts) {
@@ -519,13 +571,13 @@ var TabListObj = function(opts) {
 	Scriptor.className.add(this.cmpTarget, 'jsTabListInner');
 	
 	// add "more" dropdown button onclick event
-	Scriptor.event.attach(moreSpan, 'onclick', Scriptor.bindAsEventListener(this._onDropdownClick, this));
+	Scriptor.event.attach(moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this));
 };
 
-TabListObj.prototype._onDropdownClick = function(e) {
+TabListObj.prototype.onDropdownClick = function(e) {
 	if (!e) e = window.event;
 	
-	// TODO: show the context menu with extra options
+	this.parent._tabsContextMenu.show(e);
 	
 	Scriptor.event.cancel(e, true);
 	return false;

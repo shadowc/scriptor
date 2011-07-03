@@ -16,6 +16,15 @@ window.Scriptor = (function(window, document, undefined) {
 
 // define the Scriptor object
 var Scriptor = {
+	version : {
+		major : 2,
+		minor : 0,
+		instance : "alpha",
+		toString : function() {
+			return this.major + "." + this.minor + " " + this.instance;
+		}
+	},
+	
 	// prototype bind
 	bind : function(func, obj/*, staticArg1, staticArg2... */) {
 		if (arguments.length > 2)
@@ -210,6 +219,9 @@ var Scriptor = {
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
+			if (!e)
+				return;
+			
 			if (typeof(alsoStopPropagation) == 'undefined')
 				alsoStopPropagation = true;
 				
@@ -465,6 +477,15 @@ var Scriptor = {
 		}
 	},
 	
+	body : function() {
+		if (!_body)
+		{
+			_body = document.getElementsByTagName('body')[0];
+		}
+		
+		return _body;
+	},
+	
 	/*
 	* Scriptor.invalidate
 	*
@@ -565,6 +586,67 @@ var Scriptor = {
 				inv.firstChild.style.left = ((browserWindowWidth / 2) - 100) + 'px';
 				inv.firstChild.style.top = ((browserWindowHeight / 2) - 15) + 'px';
 			}
+		}
+	},
+	
+	/* some usefull html element functions */
+	element : {
+		// get top, bottom, left, right values according to the component's
+		// padding
+		getInnerBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var innerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-top'));
+			var innerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-bottom'));
+			var innerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-left'));
+			var innerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-right'));
+			
+			if (!isNaN(innerTop))
+				box.top = innerTop;
+			if (!isNaN(innerBottom))
+				box.bottom = innerBottom;
+			if (!isNaN(innerLeft))
+				box.left = innerLeft;
+			if (!isNaN(innerRight))
+				box.right = innerRight;
+			
+			var borderTop = parseInt(Scriptor.className.getComputedProperty(elem, 'border-top-width'));
+			var borderBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'border-bottom-width'))
+			var borderLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'border-left-width'))
+			var borderRight = parseInt(Scriptor.className.getComputedProperty(elem, 'border-right-width'))
+			
+			if (!isNaN(borderTop))
+				box.top += borderTop;
+			if (!isNaN(borderBottom))
+				box.bottom += borderBottom;
+			if (!isNaN(borderLeft))
+				box.left += borderLeft;
+			if (!isNaN(borderRight))
+				box.right += borderRight;
+				
+			return box;
+		},
+			
+		// get top, bottom, left, right values according to the component's
+		// margin
+		getOuterBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var outerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-top'));
+			var outerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-bottom'));
+			var outerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-left'));
+			var outerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-right'));
+			
+			if (!isNaN(outerTop))
+				box.top = outerTop;
+			if (!isNaN(outerBottom))
+				box.bottom = outerBottom;
+			if (!isNaN(outerLeft))
+				box.left = outerLeft;
+			if (!isNaN(outerRight))
+				box.right = outerRight;
+				
+			return box;
 		}
 	},
 	
@@ -966,290 +1048,9 @@ var __getNextHtmlId = function() {
 var browserWindowHeight = 0;
 var browserWindowWidth = 0;
 
+var _body = null;
+
 Scriptor.cookie.init();/* JavaScript Document
-*
-* Context Menu version 1.0b
-*
-* Global context menu system for the Scriptor framework
-*
-* Browser Compatibility: Gecko 1.8+, IE6+, Opera 9+, Safari 3.1+ (for Windows)
-*
-* This object is part of the scriptor framework
-*/
-
-// A private stack of context menu instances, used
-// to hide any instance that is visible on activation of
-// another one.
-var context_menus =
-{
-	stack : [],
-	
-	// to hide the active context menu
-	hide_actives : function()
-	{
-		for (var n=0; n < this.stack.length; n++)
-			if (this.stack[n].visible)
-				this.stack[n].Hide();
-	}
-};
-
-/*
-* contextMenu
-*
-* A menu that can be shown on rightClick (or clicking on an icon or link)
-*
-* div: The div id or element in which to render the menu
-*
-* options are:
-* 	items : an array of item objects in the form { label : "label", onclick : callback }
-* 	  will form the menu system, if label == "sep", it will render a separator
-* 	  (see addItem for details)
-*
-* 	 width: the width of the context menu
-*/
-contextMenu = Scriptor.contextMenu = function(div, opts)
-{
-	// parameter control section
-	if ((typeof(div) != 'string' && !Scriptor.isHtmlElement(div)) || div == '') {
-		Scriptor.error.report('Error: first parameter must be a non empty string or a html object.');
-		return;
-	}
-	
-	var localOpts = {
-			items : [],
-			width : 120
-		};
-	Scriptor.mixin(localOpts, opts);
-	
-	this.items = [];
-	this.Width = !isNaN(Number(localOpts.width)) ? Number(localOpts.width) : 120;
-	this.Height = 0;
-	
-	Scriptor.event.init(this);
-	Scriptor.event.registerCustomEvent(this, 'onshow');
-	Scriptor.event.registerCustomEvent(this, 'onhide');
-	Scriptor.event.registerCustomEvent(this, 'onselect');
-	
-	this.visible = false;
-	
-	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
-	this.div = typeof(div) == 'string' ? div : this.divElem.id;
-	
-	for (var n=0; n < localOpts.items.length; n++)
-		this.addItem(this.items[n]);
-		
-	context_menus.stack.push(this);
-};
-
-contextMenu.prototype = {
-	/*
-	* contextMenu.Show
-	*
-	* To show the actual contextMenu on screen,
-	*   the function must be called from a click callback so
-	*   the system gets x and y position for the menu
-	*/
-	Show : function(e)
-	{
-		if (!e) e = window.event;
-		e = Scriptor.event.fire(this, 'onshow', e);
-		if (!e.returnValue)
-		{
-			Scriptor.event.cancel(e);
-			return false;
-		}
-		
-		if (!this.divElem)
-		{
-			this.divElem = document.getElementById(this.div);
-		}
-		else
-		{
-			if (!this.divElem.id)
-			{
-				if (!this.div)
-					this.div = __getNextHtmlId();
-					
-				this.divElem.id = this.div;
-			}
-		}
-		
-		if (!this.divElem) {
-			Scriptor.error.report('Error: contextMenu DIV does not exist.');
-			Scriptor.event.cancel(e);
-			return false;
-		}
-		
-		// hide previously active context menus
-		context_menus.hide_actives();
-		
-		var target = this.divElem;
-		target.className = 'contextMenu scriptor';
-		target.innerHTML = '';
-		target.style.display = 'block';
-		
-		this.Height = 4;
-		for (var n=0; n < this.items.length; n++)
-			this.Height += (this.items[n].label == 'sep') ? 4 : 20;
-		
-		// calculate x, y
-		var x, y;
-	
-		if (typeof(e.pageX) == 'number') {
-			x = e.pageX - this.Width;
-			y = e.pageY;
-		}
-		else {
-			if (typeof(e.clientX) == 'number') {
-				x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
-				y = (e.clientY + document.documentElement.scrollTop);
-			}
-			else {
-				x = 0;
-				y = 0;
-			}
-		}
-		target.style.top = y + 'px';
-		target.style.left = x + 'px';
-		
-		if (this._checkMenuBind)
-			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
-		
-		setTimeout(Scriptor.bind(function() {	
-			Scriptor.event.attach(document, 'onclick', this._checkMenuBind = Scriptor.bind(this.checkMenu, this));
-		}, this), 1);
-		
-		this.visible = true;
-		this.updateItems();
-		
-		Scriptor.event.cancel(e);
-		return false;
-	},
-	
-	Hide : function()
-	{
-		var e = Scriptor.event.fire(this, 'onhide');
-		if (!e.returnValue)
-			return;
-		
-		if (this.divElem)
-			this.divElem.style.display = 'none';
-			
-		this.visible = false;
-	},
-	
-	updateItems : function()
-	{
-		if (!this.visible)
-		{
-			Scriptor.error.report("Cannot update items in a non visible contextMenu.");
-			return;
-		}
-		
-		this.Height = 4;
-		for (var n=0; n < this.items.length; n++)
-			this.Height += (this.items[n].label == 'sep') ? 4 : 20;
-			
-		// TODO: render elements
-		var target = this.divElem;
-		target.innerHTML = '';
-		target.style.width = this.Width + 'px';
-		target.style.height = this.height + 'px';
-		
-		var cTemplate = '<ul>';
-		
-		for (var n=0; n < this.items.length; n++)
-		{
-			var item = this.items[n];
-			if (item.label == 'sep')
-			{
-				cTemplate += '<li class="contextMenuSep"></li>';
-			}
-			else
-			{
-				cTemplate += '<li><a href="#"" id="'+this.div+'_itm_' + n + '"';
-				if (item['class'])
-					cTemplate += ' class="' + item['class'] + '"';
-				cTemplate += '>' + item.label + '</a></li>';
-			}
-		}
-		
-		cTemplate += '</ul>';
-		target.innerHTML = cTemplate;
-		
-		for (var n=0; n < this.items.length; n++)
-		{
-			if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
-			{
-				Scriptor.event.attach(document.getElementById(this.div+'_itm_' + n), 'onclick', this.items[n].onclick);
-			}
-		}
-	},
-	
-	/*
-	* contextMenu.addItem
-	*
-	*   Ads an item to the contextMenu dynamically
-	*   Options are:
-	*    label: the name of the item (if set to "sep" it will render a separator)
-	*    class: a class formatting the item
-	*    onclick: the callback fucntion when clicked
-	*    
-	*   ndx if specified will insert the item in the specified index
-	*/
-	addItem : function(opts, ndx)
-	{
-		var localOpts = {
-			label : 'sep',
-			onclick : null
-		};
-		Scriptor.mixin(localOpts, opts);
-		
-		if (!isNaN(Number(ndx)) && ndx >= 0 && ndx < this.items.length)
-			this.items.splice(ndx, 0, localOpts);
-		else
-			this.items.push(localOpts);
-			
-		if (this.visible)
-			this.updateItems();
-	},
-	
-	/*
-	* contextMenu.removeItem
-	*
-	*   Will remove the item specified by identifier, this can be
-	*    a Number stating the index of the item in the array
-	*    or the item itself as an Object
-	*/
-	removeItem : function(identifier)
-	{
-		if (typeof(identifier) == 'number')
-		{
-			if (identifier >= 0 && identifier <= this.items.length-1)
-				this.items.splice(identifier, 1);
-		}
-		else if (typeof(identifier) == 'object')
-		{
-			for (var n=0; n < this.items.length; n++)
-			{
-				if (this.items[n] == identifier)
-				{
-					this.items.splice(n, 1);
-					break;
-				}
-			}
-		}
-	},
-	
-	checkMenu : function()
-	{
-		if (this._checkMenuBind)
-			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
-			
-		// always hide after click?
-		this.Hide();
-	}
-};/* JavaScript Document
 *
 * calendarView version 1.1.0b MODIFIED!!
 *
@@ -5585,7 +5386,7 @@ var Component = {
 							}
 						}
 					
-					this.focusImplementation();
+					this.focusImplementation.apply(this, arguments);
 					Scriptor.event.fire(this, 'onfocus');
 					
 					this.hasFocus = true;
@@ -5599,7 +5400,7 @@ var Component = {
 				if (this.hasFocus) {
 					this.target.style.zIndex = this.zIndexCache;
 					
-					this.blurImplementation();
+					this.blurImplementation.apply(this, arguments);
 					Scriptor.event.fire(this, 'onblur');
 						
 					this.hasFocus = false;
@@ -5768,7 +5569,7 @@ var Component = {
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].destroy();
 					
-					this.destroyImplementation();
+					this.destroyImplementation.apply(this, arguments);
 					
 					Scriptor.event.fire(this, 'ondestroy');
 						
@@ -5791,13 +5592,11 @@ var Component = {
 				if (!this.created)
 					this.create();
 					
-				this.calculateOffset();
-				
 				if (!this.visible && this.target) {
 					Scriptor.className.remove(this.target, 'jsComponentHidden');
 					this.visible = true;
 					
-					this.showImplementation();
+					this.showImplementation.apply(this, arguments);
 					
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].show();	
@@ -6031,7 +5830,7 @@ var Component = {
 						}
 					}
 					
-					this.resizeImplementation();
+					this.resizeImplementation.apply(this, arguments);
 					
 					Scriptor.event.fire(this, 'onresize');
 						
@@ -6073,7 +5872,7 @@ var Component = {
 					Scriptor.className.add(this.target, 'jsComponentHidden');
 					this.visible = false;
 					
-					this.hideImplementation();
+					this.hideImplementation.apply(this, arguments);
 					
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].hide();
@@ -6187,54 +5986,6 @@ var Component = {
 				}
 				
 				return false;
-			},
-			
-			calculateOffset : function() {
-				
-				var curOffsetParent = this.target;
-				var foundOffsetParent = false;
-				
-				this.componentOffset.windowX = 0;
-				this.componentOffset.windowY = 0;
-				
-				var isOldIe = (navigator.userAgent.indexOf('MSIE') != -1 && navigator.userAgent.indexOf('MSIE 8') == -1);
-				var isGecko = (navigator.userAgent.indexOf('Gecko') != -1);
-				var isIe8 = (navigator.userAgent.indexOf('MSIE 8') != -1);
-				var isOpera = (navigator.userAgent.indexOf('Opera') != -1);
-				
-				while (curOffsetParent) {
-					
-					this.componentOffset.windowX += curOffsetParent.offsetLeft;
-					
-					// Gecko browsers need the border of the element added to the offset!
-					if ((isGecko) && curOffsetParent.style.borderLeftWidth)
-						this.componentOffset.windowX += parseInt(curOffsetParent.style.borderLeftWidth);
-						
-					this.componentOffset.windowY += curOffsetParent.offsetTop;
-					if ((isGecko || isOldIe) && curOffsetParent.style.borderTopWidth)
-						this.componentOffset.windowY += parseInt(curOffsetParent.style.borderTopWidth);
-					
-					if (curOffsetParent.scrollTop)
-						this.componentOffset.windowY -= curOffsetParent.scrollTop;
-					if (curOffsetParent.scrollLeft)
-						this.componentOffset.windowX -= curOffsetParent.scrollLeft;
-							
-					curOffsetParent = curOffsetParent.offsetParent;
-					
-					if (this.parent && curOffsetParent == this.parent.cmpTarget) {
-						foundOffsetParent = true;
-						this.componentOffset.parentX = this.componentOffset.windowX;
-						this.componentOffset.parentY = this.componentOffset.windowY;
-					}
-					
-					if (curOffsetParent && (curOffsetParent.tagName == 'BODY' || curOffsetParent.tagName == 'HTML'))
-						curOffsetParent = null;
-				}
-				
-				if (!foundOffsetParent) {
-					this.componentOffset.parentX = this.componentOffset.windowX;
-					this.componentOffset.parentY = this.componentOffset.windowY;
-				}
 			},
 			
 			__updatePosition : function() {
@@ -6617,7 +6368,303 @@ Scriptor.ComponentRegistry = {
 };
 
 Scriptor.event.attach(window, 'onresize', Scriptor.bindAsEventListener(Scriptor.ComponentRegistry.onWindowResized, Scriptor.ComponentRegistry));
+/* JavaScript Document
+*
+*
+* Global context menu system for the Scriptor framework
+*
+*
+* This object is part of the scriptor framework
+*/
+
 /*
+* contextMenu
+*
+* A menu that can be shown on rightClick (or clicking on an icon or link)
+*
+* div: The div id or element in which to render the menu
+*
+* options are:
+* 	items : an array of item objects in the form { label : "label", onclick : callback }
+* 	  will form the menu system, if label == "sep", it will render a separator
+* 	  (see addItem for details)
+*
+* 	 width: the width of the context menu
+*/
+Scriptor.ContextMenu = function(opts)
+{
+	var localOpts = {
+		canHaveChildren : false,
+		hasInvalidator : false,
+		items : []
+	};
+	Scriptor.mixin(localOpts, opts);
+	
+	var cmp = Component.get(localOpts);
+	for (var prop in cmp)
+	{
+		this[prop] = cmp[prop];
+	}
+	this.CMP_SIGNATURE = "Scriptor.ui.ContextMenu";
+	
+	// initialize events!
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onbeforeshow');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onbeforehide');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onbeforedestroy');
+	Scriptor.event.registerCustomEvent(this, 'ondestroy');
+	Scriptor.event.registerCustomEvent(this, 'oncreate');
+	Scriptor.event.registerCustomEvent(this, 'onresize');
+	Scriptor.event.registerCustomEvent(this, 'onfocus');
+	Scriptor.event.registerCustomEvent(this, 'onblur');
+	
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	
+	this.create();
+	Scriptor.className.add(this.target, "jsContextMenu");
+	Scriptor.body().appendChild(this.target);
+	
+	// reset original width since we will leave this property to the widest option
+	this._origWidth = null;
+	
+	this.items = [];
+	this._checkedItemNdx = null;
+	for (var n=0; n < localOpts.items.length; n++)
+		this.addItem(this.items[n]);
+	
+	// redefine component implementation
+	/*
+	* contextMenu.Show
+	*
+	* To show the actual contextMenu on screen,
+	*   the function must be called from a click callback so
+	*   the system gets x and y position for the menu
+	*/
+	this.showImplementation = function(e)
+	{
+		if (!e)	e = window.event;
+		
+		// hide previously active context menus
+		for (var n=0; n < Scriptor.ComponentRegistry._registry.length; n++)
+		{
+			var cmp = Scriptor.ComponentRegistry._registry[n];
+			if (cmp.CMP_SIGNATURE == "Scriptor.ui.ContextMenu" && cmp.visible)
+				cmp.hide();
+		}
+		
+		// calculate x, y
+		var x = 0, y = 0;
+		
+		if (e)
+		{
+			if (typeof(e.pageX) == 'number') {
+				x = e.pageX;
+				y = e.pageY;
+			}
+			else {
+				if (typeof(e.clientX) == 'number') {
+					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					y = (e.clientY + document.documentElement.scrollTop);
+				}
+				else {
+					x = 0;
+					y = 0;
+				}
+			}
+		}
+		
+		this.y = y;
+		this.x = x;
+		this.updateItems();
+		
+		if (this._checkMenuBind)
+			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+		
+		setTimeout(Scriptor.bind(function() {	
+			Scriptor.event.attach(document, 'onclick', this._checkMenuBind = Scriptor.bind(this.checkMenu, this));
+		}, this), 1);
+		
+		Scriptor.event.cancel(e);
+		return false;
+	}
+};
+
+Scriptor.ContextMenu.prototype.updateItems = function()
+{
+	var target = this.target;
+	target.innerHTML = '';
+	
+	var cTemplate = '<ul id="'+this.divId+'_ul">';
+	
+	for (var n=0; n < this.items.length; n++)
+	{
+		var item = this.items[n];
+		if (item.label == 'sep')
+		{
+			cTemplate += '<li class="contextMenuSep"></li>';
+		}
+		else
+		{
+			cTemplate += '<li' + (n == this._checkedItemNdx ? ' class="OptionChecked"' : '') + '><a href="#" id="'+this.divId+'_itm_' + n + '"';
+			if (item['class'])
+				cTemplate += ' class="' + item['class'] + '"';
+			cTemplate += '>' + item.label + '</a></li>';
+		}
+	}
+	
+	cTemplate += '</ul>';
+	target.innerHTML = cTemplate;
+	
+	var ul = document.getElementById(this.divId+"_ul");
+	var ubox = Scriptor.element.getOuterBox(ul);
+	var ibox = this.__getInnerBox();
+	
+	this.width = ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
+	this.height = ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
+	this.__updatePosition();
+	
+	for (var n=0; n < this.items.length; n++)
+	{
+		if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
+		{
+			Scriptor.event.attach(document.getElementById(this.divId+'_itm_' + n), 'onclick', this.items[n].onclick);
+		}
+	}
+};
+
+/*
+* contextMenu.addItem
+*
+*   Ads an item to the contextMenu dynamically
+*   Options are:
+*    label: the name of the item (if set to "sep" it will render a separator)
+*    class: a class formatting the item
+*    onclick: the callback fucntion when clicked
+*    
+*   ndx if specified will insert the item in the specified index
+*/
+Scriptor.ContextMenu.prototype.addItem = function(opts, ndx)
+{
+	var localOpts = {
+		label : 'sep',
+		onclick : null
+	};
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!isNaN(Number(ndx)) && ndx >= 0 && ndx < this.items.length)
+		this.items.splice(ndx, 0, localOpts);
+	else
+		this.items.push(localOpts);
+		
+	if (this.visible)
+		this.updateItems();
+};
+	
+/*
+* contextMenu.removeItem
+*
+*   Will remove the item specified by identifier, this can be
+*    a Number stating the index of the item in the array
+*    or the item itself as an Object
+*/
+Scriptor.ContextMenu.prototype.removeItem = function(identifier)
+{
+	if (typeof(identifier) == 'number')
+	{
+		if (identifier >= 0 && identifier <= this.items.length-1)
+			this.items.splice(identifier, 1);
+	}
+	else if (typeof(identifier) == 'object')
+	{
+		for (var n=0; n < this.items.length; n++)
+		{
+			if (this.items[n] == identifier)
+			{
+				this.items.splice(n, 1);
+				break;
+			}
+		}
+	}
+	
+	if (this.visible)
+		this.updateItems();
+};
+
+/*
+* contextMenu.checkItem
+* 
+* 	Marks the identified item as checked, if no param
+* 	 passed, unmarks all items.
+* 
+*/
+Scriptor.ContextMenu.prototype.checkItem = function(identifier)
+{
+	if (typeof(identifier) != 'undefined')
+	{
+		if (typeof(identifier) == 'number')
+		{
+			if (identifier >= 0 && identifier <= this.items.length-1)
+				this._checkedItemNdx = identifier;
+		}
+		else if (typeof(identifier) == 'object')
+		{
+			for (var n=0; n < this.items.length; n++)
+			{
+				if (this.items[n] == identifier)
+				{
+					this._checkedItemNdx = n;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		this._checkedItemNdx = null;
+	}
+	
+	if (this.target)
+	{
+		var itms = this.target.getElementsByTagName('li');
+		// unmark items
+		for (var n=0; n < itms.length; n++)
+		{
+			Scriptor.className.remove(itms[n], 'OptionChecked')
+		}
+		
+		if (typeof(identifier) != 'undefined')
+		{
+			if (typeof(identifier) == 'number')
+			{
+				if (identifier >= 0 && identifier <= this.items.length-1)
+					Scriptor.className.add(itms[identifier], 'OptionChecked');
+			}
+			else if (typeof(identifier) == 'object')
+			{
+				for (var n=0; n < this.items.length; n++)
+				{
+					if (this.items[n] == identifier)
+					{
+						Scriptor.className.add(itms[n], 'OptionChecked');
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+Scriptor.ContextMenu.prototype.checkMenu = function()
+{
+	if (this._checkMenuBind)
+		Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+		
+	// always hide after click?
+	this.hide();
+	
+};/*
 *
 * Scriptor Panel
 *
@@ -6637,7 +6684,7 @@ Scriptor.Panel = function(opts) {
 	{
 		this[prop] = cmp[prop];
 	}
-	this.CMP_SIGNATURE = "Scriptor.ui.Panel"
+	this.CMP_SIGNATURE = "Scriptor.ui.Panel";
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -6675,7 +6722,7 @@ Scriptor.TabContainer = function(opts) {
 	{
 		this[prop] = cmp[prop];
 	}
-	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer"
+	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer";
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -6709,6 +6756,8 @@ Scriptor.TabContainer = function(opts) {
 		className : 'jsPageContainer'
 	});
 	this.addChild(this._pageContainer);
+	
+	this._tabsContextMenu = new Scriptor.ContextMenu();
 	
 	this._canHaveChildren = false;
 	this._tabs = [];
@@ -6756,6 +6805,7 @@ Scriptor.TabContainer = function(opts) {
 				if (!extraTabReached)
 				{
 					this._tabList._extraTabs = n;
+					this._updateExtraTabsContextMenu();
 					extraTabReached = true;
 				}
 				
@@ -6965,7 +7015,14 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		Scriptor.className.remove(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		
 		if (this._tabs[ndx])
+		{
 			this._selectedTabId = this._tabs[ndx].paneId;
+			
+			if (ndx >= this._tabList._extraTabs)
+				this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
+			else
+				this._tabsContextMenu.checkItem();
+		}
 		
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		this._pageContainer.activate(this._selectedTabId);
@@ -7131,6 +7188,48 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	return false;
 };
 
+Scriptor.TabContainer.prototype._updateExtraTabsContextMenu = function()
+{
+	var optsLength = this._tabs.length - this._tabList._extraTabs;
+	
+	if (this._tabsContextMenu.items.length != optsLength)
+	{
+		if (this._tabsContextMenu.items.length > optsLength)	// remove extra options
+		{
+			while (this._tabsContextMenu.items.length > optsLength)
+				this._tabsContextMenu.removeItem(0);
+		}
+		else	// add new options
+		{
+			for (var n = 0; n < optsLength - this._tabsContextMenu.items.length; n++)
+			{
+				var tabNdx = this._tabList._extraTabs+n;
+				this._tabsContextMenu.addItem({
+					label : this._tabs[tabNdx].title,
+					onclick : Scriptor.bindAsEventListener(function(e, tabNdx, xtraTabs) {
+						this.selectTab(tabNdx);
+					}, this, tabNdx, this._tabList._extraTabs)
+				}, 0);
+			}
+		}
+		
+		var ndx = null;
+		for (var n = 0; n < this._tabs.length; n++)
+		{
+			if (this._tabs[n].paneId == this._selectedTabId)
+			{
+				ndx = n;
+				break;
+			}
+		}
+		
+		if (ndx >= this._tabList._extraTabs)
+			this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
+		else
+			this._tabsContextMenu.checkItem();
+	}
+};
+
 // private tab container inner components
 /* This is the component that represents the list of tabs in the TabContainer */
 var TabListObj = function(opts) {
@@ -7176,13 +7275,13 @@ var TabListObj = function(opts) {
 	Scriptor.className.add(this.cmpTarget, 'jsTabListInner');
 	
 	// add "more" dropdown button onclick event
-	Scriptor.event.attach(moreSpan, 'onclick', Scriptor.bindAsEventListener(this._onDropdownClick, this));
+	Scriptor.event.attach(moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this));
 };
 
-TabListObj.prototype._onDropdownClick = function(e) {
+TabListObj.prototype.onDropdownClick = function(e) {
 	if (!e) e = window.event;
 	
-	// TODO: show the context menu with extra options
+	this.parent._tabsContextMenu.show(e);
 	
 	Scriptor.event.cancel(e, true);
 	return false;

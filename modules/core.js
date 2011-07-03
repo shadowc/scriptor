@@ -1,6 +1,15 @@
 
 // define the Scriptor object
 var Scriptor = {
+	version : {
+		major : 2,
+		minor : 0,
+		instance : "alpha",
+		toString : function() {
+			return this.major + "." + this.minor + " " + this.instance;
+		}
+	},
+	
 	// prototype bind
 	bind : function(func, obj/*, staticArg1, staticArg2... */) {
 		if (arguments.length > 2)
@@ -195,6 +204,9 @@ var Scriptor = {
 		},
 	
 		cancel : function(e, alsoStopPropagation) {
+			if (!e)
+				return;
+			
 			if (typeof(alsoStopPropagation) == 'undefined')
 				alsoStopPropagation = true;
 				
@@ -450,6 +462,15 @@ var Scriptor = {
 		}
 	},
 	
+	body : function() {
+		if (!_body)
+		{
+			_body = document.getElementsByTagName('body')[0];
+		}
+		
+		return _body;
+	},
+	
 	/*
 	* Scriptor.invalidate
 	*
@@ -550,6 +571,67 @@ var Scriptor = {
 				inv.firstChild.style.left = ((browserWindowWidth / 2) - 100) + 'px';
 				inv.firstChild.style.top = ((browserWindowHeight / 2) - 15) + 'px';
 			}
+		}
+	},
+	
+	/* some usefull html element functions */
+	element : {
+		// get top, bottom, left, right values according to the component's
+		// padding
+		getInnerBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var innerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-top'));
+			var innerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-bottom'));
+			var innerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-left'));
+			var innerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-right'));
+			
+			if (!isNaN(innerTop))
+				box.top = innerTop;
+			if (!isNaN(innerBottom))
+				box.bottom = innerBottom;
+			if (!isNaN(innerLeft))
+				box.left = innerLeft;
+			if (!isNaN(innerRight))
+				box.right = innerRight;
+			
+			var borderTop = parseInt(Scriptor.className.getComputedProperty(elem, 'border-top-width'));
+			var borderBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'border-bottom-width'))
+			var borderLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'border-left-width'))
+			var borderRight = parseInt(Scriptor.className.getComputedProperty(elem, 'border-right-width'))
+			
+			if (!isNaN(borderTop))
+				box.top += borderTop;
+			if (!isNaN(borderBottom))
+				box.bottom += borderBottom;
+			if (!isNaN(borderLeft))
+				box.left += borderLeft;
+			if (!isNaN(borderRight))
+				box.right += borderRight;
+				
+			return box;
+		},
+			
+		// get top, bottom, left, right values according to the component's
+		// margin
+		getOuterBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var outerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-top'));
+			var outerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-bottom'));
+			var outerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-left'));
+			var outerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-right'));
+			
+			if (!isNaN(outerTop))
+				box.top = outerTop;
+			if (!isNaN(outerBottom))
+				box.bottom = outerBottom;
+			if (!isNaN(outerLeft))
+				box.left = outerLeft;
+			if (!isNaN(outerRight))
+				box.right = outerRight;
+				
+			return box;
 		}
 	},
 	
@@ -950,5 +1032,7 @@ var __getNextHtmlId = function() {
 
 var browserWindowHeight = 0;
 var browserWindowWidth = 0;
+
+var _body = null;
 
 Scriptor.cookie.init();
