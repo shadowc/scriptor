@@ -6045,9 +6045,15 @@ var Component = {
 				if (newSize)
 				{
 					if (newSize.width)
+					{
 						this.width = newSize.width;
+						this._percentWidth = null;
+					}
 					if (newSize.height)
+					{
 						this.height = newSize.height;
+						this._percentHeight = null;
+					}
 					
 					this.__updatePosition();
 					
