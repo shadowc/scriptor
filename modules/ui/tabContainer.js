@@ -314,10 +314,10 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		{
 			this._selectedTabId = this._tabs[ndx].paneId;
 			
-			if (ndx >= this._tabList._extraTabs)
-				this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
-			else
-				this._tabsContextMenu.checkItem();
+			for (var n=0; n < this._tabsContextMenu.items.length; n++)
+			{
+				this._tabsContextMenu.checkItem(n, (n == ndx-this._tabList._extraTabs));
+			}
 		}
 		
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
@@ -519,10 +519,11 @@ Scriptor.TabContainer.prototype._updateExtraTabsContextMenu = function()
 			}
 		}
 		
-		if (ndx >= this._tabList._extraTabs)
-			this._tabsContextMenu.checkItem(ndx-this._tabList._extraTabs);
-		else
-			this._tabsContextMenu.checkItem();
+		for (var n=0; n < this._tabsContextMenu.items.length; n++)
+		{
+			this._tabsContextMenu.checkItem(n, (n == ndx-this._tabList._extraTabs));
+		}
+		
 	}
 };
 

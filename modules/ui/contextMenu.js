@@ -52,15 +52,17 @@ Scriptor.ContextMenu = function(opts)
 	
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	
+	// create component
 	this.create();
 	Scriptor.className.add(this.target, "jsContextMenu");
+	this.target.innerHTML = '<ul id="'+this.divId+'_ul"></ul>';
 	Scriptor.body().appendChild(this.target);
+	this.ul = document.getElementById(this.divId+'_ul');
 	
 	// reset original width since we will leave this property to the widest option
 	this._origWidth = null;
 	
 	this.items = [];
-	this._checkedItemNdx = null;
 	for (var n=0; n < localOpts.items.length; n++)
 		this.addItem(this.items[n]);
 	
@@ -107,7 +109,7 @@ Scriptor.ContextMenu = function(opts)
 		
 		this.y = y;
 		this.x = x;
-		this.updateItems();
+		this.updateSize();
 		
 		if (this._checkMenuBind)
 			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
@@ -121,14 +123,10 @@ Scriptor.ContextMenu = function(opts)
 	}
 };
 
-Scriptor.ContextMenu.prototype.updateItems = function()
+Scriptor.ContextMenu.prototype.updateSize = function()
 {
-	var target = this.target;
-	target.innerHTML = '';
-	
-	var cTemplate = '<ul id="'+this.divId+'_ul">';
-	
-	for (var n=0; n < this.items.length; n++)
+		
+	/*for (var n=0; n < this.items.length; n++)
 	{
 		var item = this.items[n];
 		if (item.label == 'sep')
@@ -142,26 +140,22 @@ Scriptor.ContextMenu.prototype.updateItems = function()
 				cTemplate += ' class="' + item['class'] + '"';
 			cTemplate += '>' + item.label + '</a></li>';
 		}
-	}
+	}*/
 	
-	cTemplate += '</ul>';
-	target.innerHTML = cTemplate;
-	
-	var ul = document.getElementById(this.divId+"_ul");
-	var ubox = Scriptor.element.getOuterBox(ul);
+	var ubox = Scriptor.element.getOuterBox(this.ul);
 	var ibox = this.__getInnerBox();
 	
-	this.width = ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
-	this.height = ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
+	this.width = this.ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
+	this.height = this.ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
 	this.__updatePosition();
 	
-	for (var n=0; n < this.items.length; n++)
+	/*for (var n=0; n < this.items.length; n++)
 	{
 		if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
 		{
 			Scriptor.event.attach(document.getElementById(this.divId+'_itm_' + n), 'onclick', this.items[n].onclick);
 		}
-	}
+	}*/
 };
 
 /*
@@ -179,17 +173,60 @@ Scriptor.ContextMenu.prototype.addItem = function(opts, ndx)
 {
 	var localOpts = {
 		label : 'sep',
-		onclick : null
+		onclick : null,
+		checked : false
 	};
 	Scriptor.mixin(localOpts, opts);
 	
 	if (!isNaN(Number(ndx)) && ndx >= 0 && ndx < this.items.length)
+	{
 		this.items.splice(ndx, 0, localOpts);
+	}
 	else
+	{
+		ndx = this.items.length;
 		this.items.push(localOpts);
+	}
 		
-	if (this.visible)
-		this.updateItems();
+	if (this.target)
+	{
+		
+		var li = document.createElement('li');
+		var cTemplate = '';
+		var item = localOpts;
+		
+		if (item.label == 'sep')
+		{
+			li.className = "contextMenuSep";
+		}
+		else
+		{
+			if (item.checked)
+				li.className = "OptionChecked";
+				
+			cTemplate += '<a href="#" id="'+this.divId+'_itm_' + ndx + '"';
+			if (item['class'])
+				cTemplate += ' class="' + item['class'] + '"';
+			cTemplate += '>' + item.label + '</a>';
+		}
+		li.innerHTML = cTemplate;
+		
+		if (ndx == this.items.length-1)
+		{
+			this.ul.appendChild(li);
+		}
+		else
+		{
+			this.ul.insertBefore(li, this.ul.getElementsByTagName('li')[ndx]);
+		}
+		
+		if (item.label != 'sep' && typeof(item.onclick) == 'function')
+		{
+			Scriptor.event.attach(document.getElementById(this.divId+'_itm_' + ndx), 'onclick', item.onclick);
+		}
+		
+		this.updateSize();
+	}
 };
 	
 /*
@@ -204,7 +241,11 @@ Scriptor.ContextMenu.prototype.removeItem = function(identifier)
 	if (typeof(identifier) == 'number')
 	{
 		if (identifier >= 0 && identifier <= this.items.length-1)
+		{
 			this.items.splice(identifier, 1);
+			if (this.target)
+				this.ul.removeChild(this.ul.getElementsByTagName('li')[identifier]);
+		}
 	}
 	else if (typeof(identifier) == 'object')
 	{
@@ -213,13 +254,15 @@ Scriptor.ContextMenu.prototype.removeItem = function(identifier)
 			if (this.items[n] == identifier)
 			{
 				this.items.splice(n, 1);
+				if (this.target)
+					this.ul.removeChild(this.ul.getElementsByTagName('li')[n]);
 				break;
 			}
 		}
 	}
 	
-	if (this.visible)
-		this.updateItems();
+	if (this.target)
+		this.updateSize();
 };
 
 /*
@@ -229,58 +272,34 @@ Scriptor.ContextMenu.prototype.removeItem = function(identifier)
 * 	 passed, unmarks all items.
 * 
 */
-Scriptor.ContextMenu.prototype.checkItem = function(identifier)
+Scriptor.ContextMenu.prototype.checkItem = function(identifier, checked)
 {
-	if (typeof(identifier) != 'undefined')
-	{
-		if (typeof(identifier) == 'number')
-		{
-			if (identifier >= 0 && identifier <= this.items.length-1)
-				this._checkedItemNdx = identifier;
-		}
-		else if (typeof(identifier) == 'object')
-		{
-			for (var n=0; n < this.items.length; n++)
-			{
-				if (this.items[n] == identifier)
-				{
-					this._checkedItemNdx = n;
-					break;
-				}
-			}
-		}
-	}
-	else
-	{
-		this._checkedItemNdx = null;
-	}
+	if (typeof(identifier) == 'undefined')
+		return;
 	
-	if (this.target)
-	{
-		var itms = this.target.getElementsByTagName('li');
-		// unmark items
-		for (var n=0; n < itms.length; n++)
-		{
-			Scriptor.className.remove(itms[n], 'OptionChecked')
-		}
+	if (typeof(checked) == 'undefined')
+		checked = false;
 		
-		if (typeof(identifier) != 'undefined')
+	if (typeof(identifier) == 'number')
+	{
+		if (identifier >= 0 && identifier <= this.items.length-1)
 		{
-			if (typeof(identifier) == 'number')
+			this.items[identifier].checked = checked ? true : false;
+			if (this.target)
+				Scriptor.className[(checked ? "add" : "remove")](this.ul.getElementsByTagName('li')[identifier], "OptionChecked");
+			
+		}
+	}
+	else if (typeof(identifier) == 'object')
+	{
+		for (var n=0; n < this.items.length; n++)
+		{
+			if (this.items[n] == identifier)
 			{
-				if (identifier >= 0 && identifier <= this.items.length-1)
-					Scriptor.className.add(itms[identifier], 'OptionChecked');
-			}
-			else if (typeof(identifier) == 'object')
-			{
-				for (var n=0; n < this.items.length; n++)
-				{
-					if (this.items[n] == identifier)
-					{
-						Scriptor.className.add(itms[n], 'OptionChecked');
-						break;
-					}
-				}
+				this.items[n].checked = checked ? true : false;
+				if (this.target)
+					Scriptor.className[(checked ? "add" : "remove")](this.ul.getElementsByTagName('li')[n], "OptionChecked");
+				break;
 			}
 		}
 	}
