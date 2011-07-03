@@ -6420,8 +6420,6 @@ Scriptor.ContextMenu = function(opts)
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
-	Scriptor.event.registerCustomEvent(this, 'onselect');
-	
 	// create component
 	this.create();
 	Scriptor.className.add(this.target, "jsContextMenu");
@@ -6824,7 +6822,6 @@ Scriptor.TabContainer = function(opts) {
 				if (!extraTabReached)
 				{
 					this._tabList._extraTabs = n;
-					this._updateExtraTabsContextMenu();
 					extraTabReached = true;
 				}
 				
@@ -6843,6 +6840,8 @@ Scriptor.TabContainer = function(opts) {
 				
 			this._tabList._extraTabs = this._tabs.length;
 		}
+		
+		this._updateExtraTabsContextMenu();
 		
 	};
 

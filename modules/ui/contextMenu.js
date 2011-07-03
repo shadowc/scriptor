@@ -50,8 +50,6 @@ Scriptor.ContextMenu = function(opts)
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
-	Scriptor.event.registerCustomEvent(this, 'onselect');
-	
 	// create component
 	this.create();
 	Scriptor.className.add(this.target, "jsContextMenu");

@@ -101,7 +101,6 @@ Scriptor.TabContainer = function(opts) {
 				if (!extraTabReached)
 				{
 					this._tabList._extraTabs = n;
-					this._updateExtraTabsContextMenu();
 					extraTabReached = true;
 				}
 				
@@ -120,6 +119,8 @@ Scriptor.TabContainer = function(opts) {
 				
 			this._tabList._extraTabs = this._tabs.length;
 		}
+		
+		this._updateExtraTabsContextMenu();
 		
 	};
 
