@@ -5554,8 +5554,33 @@ Scriptor.DataView = function(opts) {
 		
 		if (this._cached)
 		{
+			// calculate toolbars height
+			var innerBox = this.__getInnerBox();
+			var offsetHeight = innerBox.top + innerBox.bottom;
+			
+			if (this._cached.pagination_header)
+			{
+				var outerBox = Scriptor.element.getOuterBox(this._cached.pagination_header);
+				//var innerBox = Scriptor.element.getInnerBox(this._cached.pagination_header);
+				offsetHeight += this._cached.pagination_header.offsetHeight + outerBox.top + outerBox.bottom;
+			}
+			
+			if (this._cached.header)
+			{
+				var outerBox = Scriptor.element.getOuterBox(this._cached.header);
+				//var innerBox = Scriptor.element.getInnerBox(this._cached.header);
+				offsetHeight += this._cached.header.offsetHeight + outerBox.top + outerBox.bottom;
+			}
+			
+			if (this._cached.footer)
+			{
+				var outerBox = Scriptor.element.getOuterBox(this._cached.footer);
+				//var innerBox = Scriptor.element.getInnerBox(this._cached.footer);
+				offsetHeight += this._cached.footer.offsetHeight + outerBox.top + outerBox.bottom;
+			}
+			
 			// TODO: real resizing
-			this._cached.outer_body.style.height = (this.height - 40) + 'px';
+			this._cached.outer_body.style.height = (this.height - offsetHeight) + 'px';
 		}
 	};
 };
@@ -5570,7 +5595,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	
 	// Create table paginating header
 	if (this.paginating) {
-		dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar"><ul><li>';
+		dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar" id="'+this.divId+'_paginationHeader"><ul><li>';
 		dvTemplate += '<label class="dataViewPaginationPages">' + this.lang.pageStart + (this.curPage + 1) +
 							this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 		dvTemplate += '</label></li><li>';
@@ -5621,11 +5646,11 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		}
 	}*/
 	
-	// add field list menu
-	dvTemplate += '<li id="' + this.div + '_optionsMenuBtn" class="dataViewHeaderMenu">';
-	dvTemplate += '<a href="#"> </a></li>';
+	dvTemplate += '</ul>';
 	
-	dvTemplate += '</ul></div>';
+	// add field list menu
+	dvTemplate += '<span id="' + this.div + '_optionsMenuBtn" class="dataViewHeaderMenu">';
+	dvTemplate += '<a href="#"> </a></span></div>';
 	
 	// Create body
 	var bodyHeight = 0;
@@ -5667,17 +5692,40 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	
 };
 
+/*
+*
+* Internal function to cache some dom elements used in resizing
+* 
+*/
 Scriptor.DataView.prototype._checkCache = function() {
 	if (!this._cached && document.getElementById(this.divId+'_columnsHeader'))
 	{
 		// cache elements
 		this._cached = {
+			pagination_header : document.getElementById(this.divId+'_paginationHeader'),
 			header : document.getElementById(this.divId+'_columnsHeader'),
 			outer_body : document.getElementById(this.divId+'_outerBody'),
 			body : document.getElementById(this.divId+'_body'),
 			footer : document.getElementById(this.divId+'_footer')
 		};
 	}
+};
+
+/*
+* dataView.getTotalPages()
+*  When paginating, this tells the total number of pages in the object
+*/
+Scriptor.DataView.prototype.getTotalPages = function() {
+	var totalPages = 0;
+	var rowLength = this.totalRows ? this.totalRows : this.rows.length;
+		
+	var n=0;
+	while (n < rowLength) {
+		n += this.rowsPerPage;
+		totalPages++;
+	}
+	
+	return totalPages;
 };// JavaScript Document
 /*
 * dataLangs

@@ -214,13 +214,59 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 }
 .dataViewToolbar {
   overflow:hidden;
+  position:relative;
   width:100%;
   height:20px;
 }
-.dataViewPaginationHeader { background:transparent; }
-.dataViewHeader, .dataViewFooter { background:#c9c9c9; }
+.dataViewToolbar ul {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+.dataViewToolbar ul li {
+  float:left;
+  margin:0;
+  height:16px;
+  padding:2px;
+  font-size:12px;
+}
+.dataViewToolbar ul li.dataViewCheckBoxHeader { width:16px; }
+.dataViewToolbar ul li.dataViewSep {
+  width:2px;
+  background:transparent url(images/table-header-sep.png) no-repeat top left;
+}
+.dataViewPaginationHeader {
+  background:transparent;
+  border-bottom:1px solid #b0b0b0;
+}
+.dataViewHeader {
+  background:#c9c9c9 url(images/table-header-back.jpg) repeat-x;
+  border-bottom:1px solid #b0b0b0;
+}
+.dataViewFooter {
+  background:#c9c9c9 url(images/table-footer-back.jpg) repeat-x;
+  border-top:1px solid #b0b0b0;
+}
 .dataViewOuterBody {
   overflow:auto;
   width:100%;
+  background:transparent url(images/table-rows-back.png) repeat-x;
 }
 .dataViewBody { overflow:hidden; }
+.dataViewHeaderMenu {
+  position:absolute;
+  display:block;
+  width:20px;
+  height:20px;
+  top:0px;
+  right:2px;
+  background:transparent url(images/table-header-sep.png) no-repeat top left;
+}
+.dataViewHeaderMenu a {
+  display:block;
+  width:16px;
+  height:16px;
+  margin:3px 0 0 4px;
+  background:transparent url(images/table-options.png) no-repeat center center;
+}
+.dataViewHeaderMenu a:hover { background-color:#bee4f4; }
