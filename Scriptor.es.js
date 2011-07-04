@@ -5355,13 +5355,6 @@ var Component = {
 			parent : null,
 			hasFocus : false,
 			
-			componentOffset : {
-				parentX : 0,
-				parentY : 0,
-				windowX : 0,
-				windowY : 0
-			},
-			
 			// basic functions
 			// List of functions to be optionally overriden by children
 			showImplementation : function() {},
@@ -5406,6 +5399,9 @@ var Component = {
 						
 					this.hasFocus = false;
 					Scriptor.className.remove(this.target, 'jsComponentFocused');
+					
+					for (var n=0; n < this.components.length; n++)
+						this.components[n].blur();
 				}
 			},
 			
