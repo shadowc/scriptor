@@ -55,6 +55,8 @@ Scriptor.ContextMenu = function(opts)
 	Scriptor.body().appendChild(this.target);
 	this.ul = document.getElementById(this.divId+'_ul');
 	
+	this.onDOMAdded();
+	
 	// reset original width since we will leave this property to the widest option
 	this._origWidth = null;
 	
@@ -116,42 +118,18 @@ Scriptor.ContextMenu = function(opts)
 		
 		Scriptor.event.cancel(e);
 		return false;
-	}
+	};
+	
 };
 
 Scriptor.ContextMenu.prototype.updateSize = function()
-{
-		
-	/*for (var n=0; n < this.items.length; n++)
-	{
-		var item = this.items[n];
-		if (item.label == 'sep')
-		{
-			cTemplate += '<li class="contextMenuSep"></li>';
-		}
-		else
-		{
-			cTemplate += '<li' + (n == this._checkedItemNdx ? ' class="OptionChecked"' : '') + '><a href="#" id="'+this.divId+'_itm_' + n + '"';
-			if (item['class'])
-				cTemplate += ' class="' + item['class'] + '"';
-			cTemplate += '>' + item.label + '</a></li>';
-		}
-	}*/
-	
+{	
 	var ubox = Scriptor.element.getOuterBox(this.ul);
 	var ibox = this.__getInnerBox();
 	
 	this.width = this.ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
 	this.height = this.ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
 	this.__updatePosition();
-	
-	/*for (var n=0; n < this.items.length; n++)
-	{
-		if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
-		{
-			Scriptor.event.attach(document.getElementById(this.divId+'_itm_' + n), 'onclick', this.items[n].onclick);
-		}
-	}*/
 };
 
 /*

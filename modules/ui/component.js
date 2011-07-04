@@ -55,6 +55,7 @@ var Component = {
 			lastResizeTimeStamp : null,
 			
 			created : false,
+			inDOM : false,
 			visible : false,
 			x : localOpts.x,
 			y : localOpts.y,
@@ -76,6 +77,8 @@ var Component = {
 			
 			// basic functions
 			// List of functions to be optionally overriden by children
+			DOMAddedImplementation : function() {},	// when component added to DOM and starts responding to document.getElementById
+			DOMRemovedImplementation : function() {},	// if we relocate a component we need to re-initialize its event handlers?
 			showImplementation : function() {},
 			resizeImplementation : function() {},
 			focusImplementation : function() {},
@@ -234,6 +237,8 @@ var Component = {
 					Scriptor.event.fire(this, 'oncreate');
 					
 					this.created = true;
+					if (document.getElementById(this.divId))
+						this.onDOMAdded();
 				}
 			},
 			
@@ -296,6 +301,8 @@ var Component = {
 					}
 					
 					this.created = false;
+					this.onDOMRemoved();
+					
 					Scriptor.ComponentRegistry.destroy(this);
 				}
 			},
@@ -673,6 +680,10 @@ var Component = {
 							else
 								ref.show();
 						}
+						
+						if (this.inDOM)
+							ref.onDOMAdded();
+						
 						this.resize();
 						return true;
 					}
@@ -694,14 +705,34 @@ var Component = {
 							this.components.splice(n, 1);
 							Scriptor.className.remove(ref.target, 'jsComponentChild');
 							ref.parent = null;
-							this.resize();
 							
+							ref.onDOMRemoved();
+							
+							this.resize();
 							return true;
 						}
 					}
 				}
 				
 				return false;
+			},
+			
+			onDOMAdded : function() {
+				this.inDOM = true;
+				
+				this.DOMAddedImplementation();
+				
+				for (var n=0; n < this.components.length; n++)
+					this.components[n].onDOMAdded();
+			},
+			
+			onDOMRemoved : function() {
+				this.inDOM = false;
+				
+				this.DOMRemovedImplementation();
+				
+				for (var n=0; n < this.components.length; n++)
+					this.components[n].onDOMRemoved();
 			},
 			
 			__updatePosition : function() {

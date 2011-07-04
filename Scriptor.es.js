@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 0,
-		instance : "alpha 2",
+		instance : "alpha 3",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -3246,6 +3246,7 @@ var Component = {
 			lastResizeTimeStamp : null,
 			
 			created : false,
+			inDOM : false,
 			visible : false,
 			x : localOpts.x,
 			y : localOpts.y,
@@ -3267,6 +3268,8 @@ var Component = {
 			
 			// basic functions
 			// List of functions to be optionally overriden by children
+			DOMAddedImplementation : function() {},	// when component added to DOM and starts responding to document.getElementById
+			DOMRemovedImplementation : function() {},	// if we relocate a component we need to re-initialize its event handlers?
 			showImplementation : function() {},
 			resizeImplementation : function() {},
 			focusImplementation : function() {},
@@ -3425,6 +3428,8 @@ var Component = {
 					Scriptor.event.fire(this, 'oncreate');
 					
 					this.created = true;
+					if (document.getElementById(this.divId))
+						this.onDOMAdded();
 				}
 			},
 			
@@ -3487,6 +3492,8 @@ var Component = {
 					}
 					
 					this.created = false;
+					this.onDOMRemoved();
+					
 					Scriptor.ComponentRegistry.destroy(this);
 				}
 			},
@@ -3864,6 +3871,10 @@ var Component = {
 							else
 								ref.show();
 						}
+						
+						if (this.inDOM)
+							ref.onDOMAdded();
+						
 						this.resize();
 						return true;
 					}
@@ -3885,14 +3896,34 @@ var Component = {
 							this.components.splice(n, 1);
 							Scriptor.className.remove(ref.target, 'jsComponentChild');
 							ref.parent = null;
-							this.resize();
 							
+							ref.onDOMRemoved();
+							
+							this.resize();
 							return true;
 						}
 					}
 				}
 				
 				return false;
+			},
+			
+			onDOMAdded : function() {
+				this.inDOM = true;
+				
+				this.DOMAddedImplementation();
+				
+				for (var n=0; n < this.components.length; n++)
+					this.components[n].onDOMAdded();
+			},
+			
+			onDOMRemoved : function() {
+				this.inDOM = false;
+				
+				this.DOMRemovedImplementation();
+				
+				for (var n=0; n < this.components.length; n++)
+					this.components[n].onDOMRemoved();
 			},
 			
 			__updatePosition : function() {
@@ -4335,6 +4366,8 @@ Scriptor.ContextMenu = function(opts)
 	Scriptor.body().appendChild(this.target);
 	this.ul = document.getElementById(this.divId+'_ul');
 	
+	this.onDOMAdded();
+	
 	// reset original width since we will leave this property to the widest option
 	this._origWidth = null;
 	
@@ -4396,42 +4429,18 @@ Scriptor.ContextMenu = function(opts)
 		
 		Scriptor.event.cancel(e);
 		return false;
-	}
+	};
+	
 };
 
 Scriptor.ContextMenu.prototype.updateSize = function()
-{
-		
-	/*for (var n=0; n < this.items.length; n++)
-	{
-		var item = this.items[n];
-		if (item.label == 'sep')
-		{
-			cTemplate += '<li class="contextMenuSep"></li>';
-		}
-		else
-		{
-			cTemplate += '<li' + (n == this._checkedItemNdx ? ' class="OptionChecked"' : '') + '><a href="#" id="'+this.divId+'_itm_' + n + '"';
-			if (item['class'])
-				cTemplate += ' class="' + item['class'] + '"';
-			cTemplate += '>' + item.label + '</a></li>';
-		}
-	}*/
-	
+{	
 	var ubox = Scriptor.element.getOuterBox(this.ul);
 	var ibox = this.__getInnerBox();
 	
 	this.width = this.ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
 	this.height = this.ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
 	this.__updatePosition();
-	
-	/*for (var n=0; n < this.items.length; n++)
-	{
-		if (this.items[n].label != 'sep' && typeof(this.items[n].onclick) == 'function')
-		{
-			Scriptor.event.attach(document.getElementById(this.divId+'_itm_' + n), 'onclick', this.items[n].onclick);
-		}
-	}*/
 };
 
 /*
@@ -4757,6 +4766,12 @@ Scriptor.TabContainer = function(opts) {
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
+		return;
+	}
+	
 	var localOpts = {
 		title : '',
 		paneId : panel.divId,
@@ -4826,6 +4841,12 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
+		return;
+	}
+	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
 	
@@ -4889,6 +4910,12 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 };
 
 Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
+		return false;
+	}
+	
 	if (arguments.length == 1)	// not a click event
 	{
 		ref = e;
@@ -5008,6 +5035,12 @@ Scriptor.TabContainer.prototype.setTitle = function(ref, title) {
 };
 
 Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before calling to setClosable!");
+		return;
+	}
+	
 	var ndx = null;
 	
 	// identify tab
@@ -5058,6 +5091,12 @@ Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
 };
 
 Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
+		return false;
+	}
+	
 	if (arguments.length == 1)	// not a click event
 	{
 		ref = e;
@@ -5561,26 +5600,24 @@ Scriptor.DataView = function(opts) {
 			if (this._cached.pagination_header)
 			{
 				var outerBox = Scriptor.element.getOuterBox(this._cached.pagination_header);
-				//var innerBox = Scriptor.element.getInnerBox(this._cached.pagination_header);
 				offsetHeight += this._cached.pagination_header.offsetHeight + outerBox.top + outerBox.bottom;
 			}
 			
 			if (this._cached.header)
 			{
 				var outerBox = Scriptor.element.getOuterBox(this._cached.header);
-				//var innerBox = Scriptor.element.getInnerBox(this._cached.header);
 				offsetHeight += this._cached.header.offsetHeight + outerBox.top + outerBox.bottom;
 			}
 			
 			if (this._cached.footer)
 			{
 				var outerBox = Scriptor.element.getOuterBox(this._cached.footer);
-				//var innerBox = Scriptor.element.getInnerBox(this._cached.footer);
 				offsetHeight += this._cached.footer.offsetHeight + outerBox.top + outerBox.bottom;
 			}
 			
-			// TODO: real resizing
 			this._cached.outer_body.style.height = (this.height - offsetHeight) + 'px';
+			
+			// TODO: resize columns?
 		}
 	};
 };
@@ -5672,24 +5709,24 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	
 	//assign some events
 	/*if (this.multiselect) 
-		Scriptor.event.attach(document.getElementById(this.div + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this));
+		Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this));
 	
 	if (this.paginating) {
-		Scriptor.event.attach(document.getElementById(this.div + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this));
-		Scriptor.event.attach(document.getElementById(this.div + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this));
-		Scriptor.event.attach(document.getElementById(this.div + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this));
-		Scriptor.event.attach(document.getElementById(this.div + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this));
+		Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this));
+		Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this));
+		Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this));
+		Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this));
 	}
 	
 	for (var n=0; n < this.columns.length; n++) {
 		if (this.columns[n].show) {
-			Scriptor.event.attach(document.getElementById(this.div+'_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n));
-			Scriptor.event.attach(document.getElementById(this.div + '_sep' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n));
+			Scriptor.event.attach(document.getElementById(this.divId + '_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n));
+			Scriptor.event.attach(document.getElementById(this.divId + '_sep' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n));
 		}
 	}
 	
-	Scriptor.event.attach(document.getElementById(this.div + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this));*/
-	
+	Scriptor.event.attach(document.getElementById(this.div + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this));
+	*/
 };
 
 /*
@@ -5726,7 +5763,1628 @@ Scriptor.DataView.prototype.getTotalPages = function() {
 	}
 	
 	return totalPages;
-};// JavaScript Document
+};
+
+/*
+* dataView.getNextRowId()
+*   Since every row needs a unique id field, we will assign one automatically if
+*   not provided
+*/
+Scriptor.DataView.prototype.getNextRowId = function() {
+	var found = true;
+	while (found)
+	{
+		found = false;
+		var rowId = this.nextRowId++;
+		for (var n=0; n < this.rows.length; n++)
+		{
+			if (this.rows[n].id == rowId)
+			{
+				found = true;
+				break;
+			}
+		}
+	}
+	
+	return rowId;
+};
+
+/*
+* dataView.createColumn()
+*  Use this function to get a column object instanciated. This function exposes
+*  dataColumn publicly
+*/
+Scriptor.DataView.prototype.createColumn = function(opts) {
+	return new dataColumn(opts);
+};
+
+/*
+* dataView.addColumn()
+*  Adds the passed column instance to the dataView columnCollection. Updates rows information 
+*  if needed with empty objects and if dataView is visible performs a Show() to refresh.
+*/
+Scriptor.DataView.prototype.addColumn = function( column ) {
+	if (this.__findColumn(column.Name) == -1) {
+		this.columns.push(column);
+	
+		if (this.rows.length > 0) {
+			for (var n=0; n < this.rows.length; n++) {
+				this.rows[n][column.Name] = dataTypes[column.Type]();
+			}
+		}
+		
+		if (!this.orderBy && column.show)
+			this.orderBy = column.Name;
+		
+		if (this.visible)
+			this.Show(false);
+	}
+};
+
+/*
+* dataView.__findColumn()
+*  Internal function that returns the index of a column in its collection or -1 if not found.
+*  Pass the column Name property in colName
+*/
+Scriptor.DataView.prototype.__findColumn = function(colName) {
+	for (var n=0; n < this.columns.length; n++) {
+		if (this.columns[n].Name == colName) 
+			return n;
+	}
+	return -1;
+};
+
+/*
+* dataView.deleteColumn()
+*  Deletes the column passed by the identifier parameter. Can be a column (Javascript) Name,
+*  a column index in the collection or an instance of a Column object inside the collection.
+*  will update row information if needed discarting the deleted column.
+*/
+Scriptor.DataView.prototype.deleteColumn = function( identifier ) {
+	var colName = '';
+	
+	if (typeof(identifier) == 'string') {
+		var colNdx = this.__findColumn(identifier);
+		if (colNdx != -1) {
+			colName = this.columns[colNdx].Name;
+			this.columns.splice(colNdx,1);
+		}
+	}
+	
+	if (typeof(identifier) == 'number') {
+		colName = this.columns[identifier].Name;
+		this.columns.splice(identifier,1);
+	}
+	
+	if (typeof(identifier) == 'object') {
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n] == identifier) {
+				colName = this.columns[n].Name;
+				this.columns.splice(n, 1);
+			}
+		}
+	}
+	
+	if (colName) {
+		if (this.rows.length > 0) {
+			for (var n=0; n < this.rows.length; n++) {
+				this.rows[n][colName] = null;
+				delete this.rows[n][colName];
+			}
+		}
+		
+		if (this.orderBy == colName)
+			this.orderBy = this.columns[this.columns.length-1].Name;
+			
+		if (this.visible)
+			this.Show(false);
+	}
+};
+	
+/*
+* dataView.createRow()
+*  Use this function to get a row object instanciated with the column informaion of the
+*  dataView object. You can initialize its values before using dataView.addRow() to
+*  add it to the row list.
+*/
+Scriptor.DataView.prototype.createRow = function(data) {
+	data = data ? data : {};
+
+	if (!data.id)
+		data.id = this.getNextRowId();
+	
+	return new dataRow(this.columns, data);
+};
+
+/*
+* dataView.addRow()
+*  calling addRow() will add rowObj to the rows in the dataView object. If nothing is passed
+*  as an argument, an empty row will be added. If dataView is visible it will call
+*  updateRows to reflect the changes.
+*/
+Scriptor.DataView.prototype.addRow = function(rowObj) {
+	if (!rowObj) 
+		rowObj = this.createRow();
+	else
+		if (!rowObj.id)
+			rowObj.id = this.getNextRowId();
+	
+	this.rows.push(rowObj);
+		
+	if (this.visible) 
+		this.updateRows();
+};
+
+/*
+* dataView.curRow()
+*  returns the currently selected row at any time
+*/
+Scriptor.DataView.prototype.curRow = function() {
+	return this.selectedRow != -1 ? this.rows[this.selectedRow] : null;
+};
+
+/* dataView.curRows()
+*  multiselect: Returns an array of the currently selected rows at any time
+*/
+Scriptor.DataView.prototype.curRows = function() {
+	var rows = [];
+	if (this.multiselect)
+	{
+		for (var n=0; n < this.selectedRows.length; n++)
+			rows.push(this.rows[this.selectedRows[n]]);
+	}
+	
+	return this.multiselect ? rows : this.curRow();
+};
+
+/* dataView.getById()
+* returns a row if found one matching the id, or null
+*/
+Scriptor.DataView.prototype.getById = function(id) {
+	for (var n=0; n < this.rows.length; n++)
+		if (this.rows[n].id == id)
+			return this.rows[n];
+	
+	return null;
+};
+
+/* dataView.searchRow()
+* returns an array of rows matching the value for the columnName given
+*/
+Scriptor.DataView.prototype.searchRows = function(columnName, value) {
+	var ret = [];
+	
+	for (var n=0; n < this.rows.length; n++)
+	{
+		if (this.rows[n][columnName] == value)
+			ret.push(this.rows[n]);
+	}
+	
+	return ret;
+};
+
+/*
+* dataView.insertRow()
+*  Use this the same way as addRow() to inset the row before the indicated row index.
+*  If dataView is visible it will call updateRows() to reflect changes.
+*/
+Scriptor.DataView.prototype.insertRow = function(ndx, rowObj) {
+	if (isNaN(Number(ndx)))
+		return;
+		
+	if (!rowObj)
+		rowObj = this.createRow();
+	else
+		if (!rowObj.id)
+			rowObj.id = this.getNextRowId();
+			
+	this.rows.splice(ndx, 0, rowObj);
+	
+	if (this.selectedRow >= ndx)
+	{
+		this.selectedRow++;
+	}
+	
+	if (this.multiselect)
+		for (var n=0; n < this.selectedRows.length; n++)
+		{
+			if (this.selectedRows >= ndx)
+				this.selectedRows[n]++;
+		}
+	
+	if (this.visible) 
+		this.updateRows();
+};
+
+/*
+* dataView.deleteRow()
+*  This method will delete the row identified by identifier. It can be a row index in the
+*  array of rows (i.e.: dataView.selectedRow when != -1) or an instance of a row object 
+*  in the array. If dataView is visible it will call updateRows to reflect the changes.
+*/
+Scriptor.DataView.prototype.deleteRow = function(identifier) {
+	var rowNdx = -1;
+	
+	if (typeof(identifier) == 'number') {
+		rowNdx = identifier;
+		this.rows.splice(identifier,1);
+	}
+	
+	if (typeof(identifier) == 'object') {
+		for (var n=0; n < this.rows.length; n++) {
+			if (this.rows[n] == identifier) {
+				rowNdx = n;
+				this.rows.splice(n, 1);
+			}
+		}
+	}
+	
+	if (this.selectedRow > this.rows.length -1)
+		this.selectedRow = -1;
+	else if (this.selectedRow >= rowNdx)
+		this.selectedRow--;
+	
+	if (this.multiselect)
+		for (var n=0; n < this.selectedRows.length; n++)
+		{
+			if (this.selectedRows[n] > this.rows.length -1)
+			{
+				this.selectedRows.splice(n, 1);
+				n--;
+			}
+			else if (this.selectedRows[n] >= rowNdx)
+			{
+				this.selectedRows[n]--;
+			}
+		}
+		
+	if (rowNdx != -1 && this.visible) 
+		this.updateRows();
+};
+
+/*
+* dataView.setCellValue();
+* Dynamically updates the value in a cell, performing visual updates if needed
+* returns true on success, false on error
+*/
+Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {	
+	var colNdx = this.__findColumn(columnName);
+	if (colNdx == -1)
+		return false;
+	
+	var rowNdx = null;
+	for (var n=0; n < this.rows.length; n++)
+	{
+		if (this.rows[n].id == rowId)
+		{
+			rowNdx = n;
+			break;
+		}
+	}
+	if (rowNdx === null)
+		return false;
+	
+	this.rows[rowNdx][columnName] = value;
+	
+	if (this.visible && this.columns[colNdx].show) {	// update value
+		var cell = document.getElementById(this.div + '_cell_' + rowId + '_' + colNdx);
+		
+		if (typeof(this.columns[colNdx].Format) == 'function') {
+			var funcRet = this.columns[colNdx].Format(value);
+			cell.innerHTML = '';
+			if (typeof(funcRet) == 'string')
+				cell.innerHTML = funcRet;
+			else
+				cell.appendChild(funcRet);		
+		}
+		else {
+			cell.innerHTML = value;
+		}
+	}
+	
+	return true;
+};
+
+/*
+* dataView.Refresh();
+*  This function will call updateRows to refresh dataView rows if visible
+*  You can use a dataViewConnector object to connect an XML or JSON service to dataView
+*  and this will automatically retrieve information assync every time
+*  you call refresh() method.
+*/
+Scriptor.DataView.prototype.Refresh = function() {
+	var e = Scriptor.event.fire(this, 'onrefresh');
+	if (!e.returnValue)
+		return;
+	
+	if (this.created)
+		this.updateRows();
+};
+
+/*
+* dataView.setLoading(val)
+*   If val is true, show loading spinner, else show the actual rows,
+*   usefull for assync updates
+*/
+Scriptor.DataView.prototype.setLoading = function(val) {
+	var body = document.getElementById(this.div + '_body');
+	
+	body.style.display = val ? 'none' : '';
+	body.parentNode.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
+	
+};
+
+/*
+* dataView.setMessage(msg)
+*	Set a message (usefull for error messages) and hide all rows in a dataView
+* 	If msg is set to false or not present, it will restore dataView to normal
+*/
+Scriptor.DataView.prototype.setMessage = function(msg) {
+	// false, null, or msg not present resets dataView to normal
+	if (msg === false || msg === null || typeof(msg) != "string")
+	{
+		if (document.getElementById(this.div + '_message'))
+			document.getElementById(this.div + '_message').parentNode.removeChild(document.getElementById(this.div + '_message'));
+			
+		document.getElementById(this.div + '_body').style.display = '';
+	}
+	else	// if string passed, we show a message
+	{
+		document.getElementById(this.div + '_body').style.display = 'none';
+		var msgDiv;
+		if (!document.getElementById(this.div + '_message'))
+		{
+			msgDiv = document.createElement('div');
+			msgDiv.id = this.div + '_message';
+			msgDiv.className = 'dataViewMessageDiv';
+			document.getElementById(this.div + '_body').parentNode.appendChild(msgDiv);
+		}
+		else
+		{
+			msgDiv = document.getElementById(this.div + '_message');
+		}
+		msgDiv.innerHTML = msg;
+	}
+};
+
+/*
+* dataView.clearSelection()
+*
+*   Use programatically to clear all selections in the dataView
+*/
+Scriptor.DataView.prototype.clearSelection = function()
+{
+	this.selectedRow = -1;
+	this.selectedRows = [];
+	
+	document.getElementById(this.div + '_selectAll').checked = false;
+	this.updateRows();
+};
+
+/*
+* __selectAll()
+*  This function executes when clicking on a dataView header checkmox in multiselect and selects all rows.
+*/
+Scriptor.DataView.prototype.__selectAll = function(e) {
+	if (!e) e = window.event;
+	
+	if (!this.enabled)
+	{
+		Scriptor.event.cancel(e);
+		return;
+	}
+	
+	var elem = document.getElementById(this.div + '_selectAll');
+	
+	if (this.rows.length) {
+		if (elem.checked) {
+			this.selectedRow = this.rows.length -1;
+			this.selectedRows = [];
+			
+			for (var n=0; n < this.rows.length; n++)
+				this.selectedRows.push(n);
+				
+			this.updateRows();
+		}
+		else {
+			this.selectedRow = -1;
+			this.selectedRows = [];
+			
+			this.updateRows();
+		}
+	}
+	else {
+		elem.checked = false;
+	}
+};
+
+/*
+* __goToPage()
+*  This function executes when changing the page on a paginated dataView
+*/
+Scriptor.DataView.prototype.__goToPage = function (e) {
+	if (!this.enabled)
+		return;
+		
+	var page = document.getElementById(this.div + '_pageInput').value;
+	
+	var totalPages = this.getTotalPages();
+	
+	if (isNaN(Number(page))) {
+		alert('Invalid page number.');
+		return;
+	}
+	else {
+		if (page < 1 || Number(page) > totalPages) {
+			alert('Invalid page number.');
+			return;
+		}
+		else {
+			this.curPage = Number(page) -1;
+			this.selectedRow = -1;
+			this.selectedRows = [];
+			
+			this.Show(true);
+		}
+		
+		document.getElementById(this.div + '_pageInput').focus();
+	}
+};
+
+/*
+* __checkGoToPage()
+*  This function executes to capture <enter> key press on the dataView page input
+*/
+Scriptor.DataView.prototype.__checkGoToPage = function (e) {
+	if (!e) e = window.event;
+	
+	if (e.keyCode == 13) {
+		this.__goToPage(e)
+	}
+};
+
+/*
+* __goToPagePrev
+*  This function executes when clicked on the "previous" link
+*/
+Scriptor.DataView.prototype.__goToPagePrev = function (e) {
+	if (!e) e = window.event;
+	
+	if (!this.enabled)
+	{
+		Scriptor.event.cancel(e);
+		return false;
+	}
+	
+	if (this.curPage > 0) {
+		this.curPage--;
+		this.selectedRow = -1;
+		this.selectedRows = [];
+			
+		this.Show(true);
+	}
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/*
+* __goToPageNext
+*  This function executes when clicked on the "next" link
+*/
+Scriptor.DataView.prototype.__goToPageNext = function (e) {
+	if (!e) e = window.event;
+	
+	if (!this.enabled)
+	{
+		Scriptor.event.cancel(e);
+		return false;
+	}
+	
+	var totalPages = this.getTotalPages();
+	
+	if (this.curPage < totalPages -1) {
+		this.curPage++;
+		this.selectedRow = -1;
+		this.selectedRows = [];
+			
+		this.Show(true);
+	}
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/*
+*  dataView.updateRows()
+*   When [dataView.visible = true] which is a result of calling dataView.Show(), you can then call
+*   dataView.updateRows() directly to update row information only without spending additional
+*   resources on the dataView frame rendering.
+*/
+Scriptor.DataView.prototype.updateRows = function() {
+	if (!this.visible) {
+		Scriptor.error.report( "Can't update rows on non visible dataView object.");
+		return;
+	}
+	
+	var targetTable = document.getElementById(this.div + '_body');
+	
+	if (!this._oldScrollTop)
+		this._oldScrollTop = targetTable.parentNode.scrollTop;
+		
+	var totalHeight = 0;
+	var rTemplate = '';
+	
+	for (var n=0; n < this.rows.length; n++) {		
+		
+		var rowId = this.rows[n].id;
+		var firstCol = true;
+		rTemplate += '<ul id="' + this.div + '_row_' + rowId + '">';
+		
+		if (this.multiselect) {
+			var check = false;
+			rTemplate += '<li style="width: ' + (this.style.multiSelectColumnWidth + this.style.sepWidth -3) + 'px;" class="dataViewMultiselectCell';
+			if (!this.multiselect) {
+				if (this.selectedRow == n) {
+					rTemplate += ' selectedRow';
+					check = true;
+				}
+			}
+			else {
+				for (var a=0; a < this.selectedRows.length; a++) {
+					if (this.selectedRows[a] == n) {
+						rTemplate += ' selectedRow';
+						check = true;
+						break;
+					}
+				}
+			}
+			
+			rTemplate += '">';
+			rTemplate += '<input type="checkbox" id="' + this.div + '_selectRow_' + rowId + '" class="dataViewCheckBox" ';
+			if (check)
+				rTemplate += 'checked="checked" ';
+			rTemplate += '/></li>';
+		}
+		
+		for (var a=0; a < this.columns.length; a++) {
+			if (this.columns[a].show) {
+				
+				var colWidth = (this.columns[a].Width - this.style.cellHorizontalPadding - 2);
+				if (firstCol && !this.multiselect) {
+					colWidth -= 1;
+					firstCol = false;
+				}
+				else {
+					colWidth += 1;
+				}
+				
+				rTemplate += '<li class="dataView' + this.columns[a].Type;
+				
+				if (!this.multiselect) {
+					if (this.selectedRow == n) {
+						rTemplate += ' selectedRow';
+						check = true;
+					}
+				}
+				else {
+					for (var i=0; i < this.selectedRows.length; i++) {
+						if (this.selectedRows[i] == n) {
+							rTemplate += ' selectedRow';
+							check = true;
+							break;
+						}
+					}
+				}
+						
+				rTemplate += '" id="' + this.div + '_cell_' + rowId + '_' + a + '" style="width: ' + colWidth + 'px;"';
+				if (this.columns[a].showToolTip) 
+					rTemplate += ' title="' + this.rows[n][this.columns[a].Name] + '"';
+				rTemplate += '>';
+				
+				if (typeof(this.columns[a].Format) == 'function') {
+					var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
+					if (typeof(funcRet) == 'string')
+						rTemplate += funcRet;
+					
+				}
+				else {
+					rTemplate += this.rows[n][this.columns[a].Name];
+				}
+				
+				rTemplate += '</li>';
+			}
+		}
+		
+		rTemplate += '</ul>';
+		totalHeight += this.style.rowHeight + this.style.cellVerticalPadding;
+		
+	}	
+	
+	targetTable.innerHTML = rTemplate;
+	
+	// assign onclick events and search for complex formatted cells
+	for (var n=0; n < this.rows.length; n++) {
+		var rowId = this.rows[n].id;
+		
+		if (this.multiselect)
+			Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + rowId), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
+			
+		for (var a=0; a < this.columns.length; a++) {
+			if (this.columns[a].show) {
+				Scriptor.event.attach(document.getElementById(this.div + '_cell_' + rowId + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
+				
+				if (typeof(this.columns[a].Format) == 'function') {
+					var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
+					if (typeof(funcRet) != 'string')
+						document.getElementById(this.div + '_cell_' + rowId + '_' + a).appendChild(funcRet);
+				}
+			}
+		}
+	}
+	
+	if (this.selectedRow >= this.rows.length)
+		this.selectedRow = -1;
+		
+	for (var n=0; n < this.selectedRows.length; n++) {
+		if (this.selectedRows[n] >= this.rows.length) {
+			this.selectedRows.splice(n, 1);
+			n--;
+		}	
+	}
+	
+	targetTable.style.height = totalHeight + 'px';
+	
+	// update scrolling
+	if (this.selectedRow != -1) {
+		var windowMin = this._oldScrollTop ? this._oldScrollTop : 0;
+		var windowHeight = parseInt(targetTable.parentNode.style.height);
+		var step = (this.style.rowHeight + this.style.cellVerticalPadding) * this.selectedRow;
+		var windowMax = windowMin + windowHeight;
+		
+		if (step < windowMin || step > (windowMax - (this.style.rowHeight + this.style.cellVerticalPadding))) {
+			targetTable.parentNode.scrollTop = step;
+		}
+		else {
+			targetTable.parentNode.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
+		}
+	}
+	else {
+		targetTable.parentNode.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
+	}
+		
+	this.__refreshFooter();
+	
+	Scriptor.event.fire(this, 'oncontentupdated');
+};
+
+/*
+* dataView.__refreshFooter()
+*   Internal function. Refreshes the footer text.
+*/
+Scriptor.DataView.prototype.__refreshFooter = function() {
+	if (!this.visible) {
+		Scriptor.error.report( "Can't update rows on non visible dataView object.");
+		return;
+	}
+	
+	var targetDiv = document.getElementById(this.div + '_footer');
+	
+	var fTemplate = '<ul><li class="first">';
+	
+	if (!this.paginating) {
+		if (this.rows.length == 0) {
+			fTemplate += this.lang.noRows;
+		}
+		else {
+			if (this.rows.length == 1)
+				fTemplate += '1 ' + ' ' + this.lang.row;
+			else
+				fTemplate += this.rows.length + ' ' + this.lang.rows;
+		}
+	}
+	else {
+		if (this.rows.length == 0) {
+			fTemplate += this.lang.noRows;
+		}
+		else {
+			var firstRow = (this.rowsPerPage * this.curPage);
+			var lastRow = (firstRow + this.rowsPerPage) > this.totalRows ? this.totalRows : (firstRow + this.rowsPerPage);
+			fTemplate += (firstRow+1) + ' - ' + lastRow + ' ' + this.lang.of + ' ' + this.totalRows + ' ' + this.lang.rows;
+		}
+	}
+	fTemplate += '</li></ul>';
+	
+	targetDiv.innerHTML = fTemplate;
+};
+
+/*
+* __setOrder()
+*  This functions executes when clicking on a dataView column name and sets row order.
+*  Pass divId the id property of the HTMLElement asociated with the dataView object and
+*  colName the javascript Name of the column in which order must be performed. Ordering way
+*  will be switched upon subsecuent calls to __setOrder()
+*/
+Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
+	if (!e) e = window.event;
+	
+	if (!this.enabled)
+	{
+		Scriptor.event.cancel(e);
+		return false;
+	}
+	
+	var colName = this.columns[colNdx].Name;
+	
+	if (colNdx != -1) {		
+		if (this.orderBy != colName) {
+			this.orderBy = colName;
+			this.orderWay = 'ASC';
+		}
+		else {
+			if (this.orderWay == 'ASC')
+				this.orderWay = 'DESC';
+			else
+				this.orderWay = 'ASC';
+		}
+		
+		if (!this.paginating) {
+			this.__sort(0);
+			
+			if (this.visible) {
+				this.Show(false);
+				this.updateRows();
+			}
+		}
+		else {
+			if (this.visible) {
+				this.Show(true);
+			}
+		}
+	}
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/*
+* __selectRow()
+*  This function executes when clicking on a dataView row and selects that row.
+*/
+Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
+	if (!e) e = window.event;
+	
+	if (!this.visible || !this.enabled)
+	{
+		Scriptor.event.cancel(e, true);
+		return false;
+	}
+	
+	e.selectedRow = this.selectedRow;
+	if (this.multiselect)
+		e.selectedRows = this.selectedRows;
+		
+	if (this.selectedRow == rowNdx)
+	{
+		e.unselecting = rowNdx;
+	}
+	else
+	{
+		if (this.multiselect)
+		{
+			var found = false;
+			for (var n=0; n < this.selectedRows.length; n++)
+			{
+				if (this.selectedRows[n] == rowNdx)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				e.unselecting = rowNdx;
+			else
+				e.selecting = rowNdx;
+		}
+		else
+		{
+			e.selecting = rowNdx;
+		}
+	}
+	
+	e = Scriptor.event.fire(this, 'onselect', e);
+	
+	if (e.returnValue == false)
+	{
+		Scriptor.event.cancel(e, true);
+		return false;
+	}
+	
+	var colStyles = [];
+	if (this.multiselect)	// add dummy style for the first cell
+		colStyles.push('MultiselectCell');
+	
+	for (var n=0; n < this.columns.length; n++)
+		if (this.columns[n].show)
+			colStyles.push(this.columns[n].Type);
+		 
+	var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
+	
+	if (rowNdx != -1) {
+		if (!this.multiselect) {
+			if (this.selectedRow != -1) {
+				for (n=0; n < rows[this.selectedRow].childNodes.length; n++) 
+					rows[this.selectedRow].childNodes[n].className = 'dataView' + colStyles[n];
+			}
+		}
+		else {
+			for (var a = 0; a < this.selectedRows.length; a++) {
+				for (n=0; n < rows[this.selectedRows[a]].childNodes.length; n++) {
+					if (n==0)
+						rows[this.selectedRows[a]].childNodes[n].firstChild.checked = false;
+					rows[this.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n];
+				}
+			}
+		}
+		
+		if (this.selectedRow == rowNdx && !this.multiselect) {
+			this.selectedRow = -1;
+		}
+		else {
+			if (!this.multiselect) {
+				this.selectedRow = rowNdx;
+				for (n=0; n < rows[rowNdx].childNodes.length; n++) 
+					rows[rowNdx].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
+			}
+			else {
+				
+				if (!e.ctrlKey && !e.shiftKey) {
+					if (this.selectedRow == rowNdx) {
+						this.selectedRow = -1;
+						this.selectedRows = [];
+					}
+					else {
+						this.selectedRow = rowNdx;					
+						this.selectedRows = [rowNdx];
+					}
+				}
+				
+				else {
+					if (e.ctrlKey) {
+						var found = false;
+						for (var n=0; n < this.selectedRows.length; n++) {
+							if (this.selectedRows[n] == rowNdx) {
+								this.selectedRows.splice(n, 1);
+								if (this.selectedRows.length)
+									this.selectedRow = this.selectedRows[this.selectedRows.length -1];
+								else
+									this.selectedRow = -1;
+								found = true;
+							}
+						}
+						
+						if (!found) {
+							this.selectedRow = rowNdx;
+							this.selectedRows.push(rowNdx);
+						}
+					}
+					
+					else if (e.shiftKey) {
+						if (this.selectedRows.length) {
+							this.selectedRows.length = 1;
+							if (this.selectedRows[0] == rowNdx) {
+								this.selectedRows = [];
+								this.selectedRow = -1;
+							}
+							else {
+								this.selectedRow = rowNdx;
+								for (var n=this.selectedRows[0]; (rowNdx > this.selectedRows[0] ? n <= rowNdx : n >= rowNdx ); (rowNdx > this.selectedRows[0] ? n++ : n-- )) {
+									if (n != this.selectedRows[0])
+										this.selectedRows.push(n);
+								}
+							}
+						}
+						else {
+							this.selectedRows.push(rowNdx);
+							this.selectedRow = rowNdx;
+						}
+					}
+				}
+				
+				for (var a = 0; a < this.selectedRows.length; a++) {
+					for (n=0; n < rows[this.selectedRows[a]].childNodes.length; n++) {
+						if (n==0)
+							rows[this.selectedRows[a]].childNodes[n].firstChild.checked = true;
+						rows[this.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
+					}
+				}
+			}
+		}
+	}
+	
+	/*Scriptor.event.cancel(e);*/
+	return false;
+};
+
+/*
+* __markRow()
+*  This function executes when clicking on a dataView row checkmox in multiselect and selects that row.
+*/
+Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
+	if (!e) e = window.event;
+	
+	if (!this.visible || !this.enabled)
+	{
+		Scriptor.event.cancel(e, true);
+		return false;
+	}
+	
+	e.selectedRow = this.selectedRow;
+	if (this.multiselect)
+		e.selectedRows = this.selectedRows;
+		
+	e.selecting = rowNdx;
+	e = Scriptor.event.fire(this, 'onselect', e);
+	
+	if (e.returnValue == false)
+	{
+		Scriptor.event.cancel(e, true);
+		return false;
+	}
+	
+	var colStyles = [];
+	colStyles.push('MultiselectCell');	// first cell is multiselect checkbox
+	for (var n=0; n < this.columns.length; n++)
+		if (this.columns[n].show)
+			colStyles.push(this.columns[n].Type);
+	
+	var rowId = this.rows[rowNdx].id;
+	
+	elem = document.getElementById(this.div + '_selectRow_' + rowId);
+	if (elem.checked) {	// add row to selected rows list
+		this.selectedRows.push(rowNdx)
+		this.selectedRow = rowNdx;
+				
+		var row = document.getElementById(this.div + '_row_' + rowId);
+		for (var a = 0; a < row.childNodes.length; a++) 
+			row.childNodes[a].className = 'dataView' + colStyles[a] + ' selectedRow';
+		
+	}
+	else {		// remove row from selected rows list
+		for (var n=0; n < this.selectedRows.length; n++) {
+			if (this.selectedRows[n] == rowNdx) {
+				this.selectedRows.splice(n, 1);
+				if (this.selectedRows.length) 
+					this.selectedRow = this.selectedRows[this.selectedRows.length-1];
+				else 
+					this.selectedRow = -1;
+			
+				var row = document.getElementById(this.div + '_row_' + rowId);
+				for (var a = 0; a < row.childNodes.length; a++) {
+					row.childNodes[a].className = 'dataView' + colStyles[a];
+				}
+				break;
+			}
+		}
+	}
+	
+	return true;
+};
+
+/*
+*  dataView.updateOptionsMenu()
+*   When [dataView.visible = true] which is a result of calling dataView.Show(), you can then call
+*   dataView.updateOptiosMenu() directly to update the options menu only without spending additional
+*   resources on the dataView frame rendering. This is usefull when changing the property
+*   dataView.optionsMenuWidth to apply these changes.
+*/
+Scriptor.DataView.prototype.updateOptionsMenu = function() {
+	this.optionsMenu.items = [];
+	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
+		if (!e) e = window.event;
+		
+		this.Refresh();
+		this.optionsMenu.Hide();
+		
+		Scriptor.event.cancel(e);
+		return false;
+	}, this)});
+	this.optionsMenu.addItem({label : 'sep'});
+	
+	for (var n=0; n < this.columns.length; n++) {
+		var className = ''
+		if (this.columns[n].show)
+			className = 'dataViewOptionChecked';
+		this.optionsMenu.addItem({label : this.columns[n].displayName, 'class' : className, onclick : Scriptor.bindAsEventListener(this.toggleColumn, this, n)});
+	}
+};
+
+/* showOptionsMenu
+*  This function shows the option menu of a dataView object. For internal use only
+*/
+Scriptor.DataView.prototype.showOptionsMenu = function(e) {
+	if (!e) e = window.event;
+	
+	this.updateOptionsMenu();
+	this.optionsMenu.Show(e);
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/*
+* toggleColumn
+*   Toggles a column on or off. OptionsMenu feature. Use dataColumn.show property along with
+*   dataView.Show(false) instead to change column configuration manually.
+*/
+Scriptor.DataView.prototype.toggleColumn = function(e, colNdx) {
+	if (!e) e = window.event;
+	
+	if (this.columns[colNdx].show) {
+		this.columns[colNdx].show = false;
+	}
+	else {
+		this.columns[colNdx].show = true;
+	}
+	
+	this.Show(false);
+	this.updateRows();
+	this.optionsMenu.Hide();
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/*
+* dataView.forceWidth()
+*  Use it to force the data viewport to a specific width. Will set the object width to
+*  the specified value and proportionally adjust the columns if needed to fill the horizontal area
+*  Use dataView.Show function instead, to force a width change
+*/
+Scriptor.DataView.prototype.forceWidth = function(w) {
+	if (isNaN(Number(w)))
+		return;
+	
+	var minWidth = this.__calculateMinWidth();
+	if (w < minWidth)
+		w = minWidth;
+	
+	this.Width = w;
+	var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth + this.__calculateTotalWidth();
+	
+	while (totalWidth > this.Width) {
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n].show) {
+				totalWidth -= 1;
+				this.columns[n].Width -= 1;
+			}
+		}
+	}
+};
+
+/*
+* Internal use only
+*/
+Scriptor.DataView.prototype.__calculateMinWidth = function()
+{
+	var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
+	for (var n=0; n < this.columns.length; n++) {
+		minWidth += this.style.cellHorizontalPadding + this.style.sepWidth;
+	}
+	if (this.multiselect)
+		minWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+	
+	return minWidth;
+};
+
+/*
+* Internal use only
+*/
+Scriptor.DataView.prototype.__calculateTotalWidth = function()
+{
+	var totalWidth = 0;
+	
+	for (var n=0; n < this.columns.length; n++) {
+		if (this.columns[n].show) 
+			totalWidth += this.columns[n].Width;
+	}
+	
+	if (this.multiselect) 
+		totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+	
+	return totalWidth ;
+};
+
+/*
+* dataView.__sort()
+*  This function performs sorting of rows depending on the sortBy and sortWay properties
+*  For internal use only. Use global function __setOrder instead.
+*/
+Scriptor.DataView.prototype.__sort = function(start) {
+	var n, tempRow, swap;	
+	
+	if (!this.orderBy)
+		return;
+		
+	for (n = start+1; n < this.rows.length; n++) {
+		var swap = false;
+		var	func = this.columns[this.__findColumn(this.orderBy)].Comparator;
+		
+		if (this.orderWay == 'ASC') {
+			
+			swap = (typeof(func) == 'function') ?
+				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy]) > 0 : 
+				(this.rows[start][this.orderBy] > this.rows[n][this.orderBy]);
+		}
+		else {
+			swap = (typeof(func) == 'function') ?
+				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy] < 0) :
+				(this.rows[start][this.orderBy] < this.rows[n][this.orderBy]);
+		}
+		
+		if (swap) {
+			tempRow = this.rows[start];
+			this.rows[start] = this.rows[n];
+			this.rows[n] = tempRow;
+			
+			if (this.selectedRow == start) {
+				this.selectedRow = n;				
+			}
+			else {
+				if (this.selectedRow == n) {
+					this.selectedRow = start;					
+				}
+			}
+			
+			for (var a=0; a < this.selectedRows.length; a++) {
+				if (this.selectedRows[a] == start)
+					this.selectedRows[a] = n;
+				else
+					if (this.selectedRows[a] == n)
+						this.selectedRows[a] = start;
+			}
+		}
+	}
+	
+	if (start < this.rows.length -2)
+		this.__sort( start +1 );
+};
+
+/*
+*  dataView.colum_exists()
+*   Internal function that returns true if a column with its Name property equals to str exists
+*/
+Scriptor.DataView.prototype.colum_exists = function(str) {
+	for (var n=0; n < this.columns.length; n++) {
+		if (this.columns[n].Name == str)
+			return true;
+	}
+	return false;
+};
+
+/*
+* dataView.__getColumnSqlName(colName)
+*  Internal function that returns the column sqlName upon its Name property (colName).
+*/
+Scriptor.DataView.prototype.__getColumnSqlName = function(colName) {
+	for (var n=0; n < this.columns.length; n++) {
+		if (this.columns[n].Name == colName) 
+			return this.columns[n].sqlName;
+	}
+	return false;
+};
+
+/* activateResizing
+*  This function will search for a valid dataView id and mark it for column resizing
+*/
+Scriptor.DataView.prototype.activateResizing = function(e, colNdx) {
+	if (!e) e = window.event;
+	
+	if (!this.enabled) {
+		Scriptor.event.cancel(e);
+		return false;
+	}
+	
+	var targetTable = document.getElementById(this.div+'_columnsHeader');
+	
+	// calculate the resized column
+	this.resColumnId = colNdx;
+	
+	// set x cache value for resizing
+	var x;
+
+	if (typeof(e.pageX) == 'number') {
+		x = e.pageX;
+	}
+	else {
+		if (typeof(e.clientX) == 'number') {
+			x = (e.clientX + document.documentElement.scrollLeft);
+		}
+		else {
+			x = 0;
+		}
+	}
+	
+	this.resizingFrom = this.columns[colNdx].Width;
+	this.resizingXCache = x;
+	
+	Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bindAsEventListener(this.doResizing, this));
+	Scriptor.event.attach(document, 'mouseup', this._mouseUpBind = Scriptor.bindAsEventListener(this.deactivateResizing, this));
+	
+	Scriptor.event.cancel(e);
+	return false;
+};
+
+/* performResizing
+* This function deactivates resizing status and performs complete redrawing
+*/
+Scriptor.DataView.prototype.deactivateResizing = function(e) {
+	if (!e) e = window.event;
+	
+	Scriptor.event.detach(document, 'mousemove', this._mouseMoveBind);
+	Scriptor.event.detach(document, 'mouseup', this._mouseUpBind);
+	
+	var ce = {};
+	ce.columnId = this.resColumnId;
+	ce.resizingFrom = this.resizingFrom;
+	ce.resizedTo = this.columns[this.resColumnId].Width;
+	
+	Scriptor.event.fire(this, 'oncolumnresize', ce);
+	
+	this.resColumnId = null;
+	this.resizingXCache = 0;
+};
+
+/* doResizing
+*  This function calculates the resizing upon mouse movement
+*/
+Scriptor.DataView.prototype.doResizing = function(e) {
+	if (!e) e = window.event;
+	// get delta x
+	var x;
+
+	if (typeof(e.pageX) == 'number') {
+		x = e.pageX;
+	}
+	else {
+		if (typeof(e.clientX) == 'number') {
+			x = (e.clientX + document.documentElement.scrollLeft);
+		}
+		else {
+			x = 0;
+		}
+	}
+	
+	var deltaX = Math.abs(this.resizingXCache - x);
+	var growing = (this.resizingXCache < x) ? true : false;
+	
+	this.resizingXCache = x;
+	// get the minimum width for a column;
+	var minWidth = this.style.cellHorizontalPadding + this.style.sepWidth;
+	var colNdx = 0;
+	var actualColNdx = this.resColumnId;
+	
+	// calculate colNdx (the HTML element in the ul index)
+	for (var n=0; n < actualColNdx; n++)
+	{
+		if (this.columns[n].show)
+			colNdx++;
+	}
+	
+	// get the next column in case resizing is needed
+	var nextActualColNdx = actualColNdx;
+	for (n = actualColNdx+1; n < this.columns.length; n++) {
+		if (this.columns[n].show) {
+			nextActualColNdx = n;
+			break;
+		}
+	}
+	
+	// getting a smaller column is easier (?)
+	var changedSize = false;
+	var changedNextColSize = false;
+	
+	if (!growing) {
+		// see if col can be shorter than it is
+		if ((this.columns[actualColNdx].Width - deltaX) > minWidth) {
+			this.columns[actualColNdx].Width -= deltaX;
+			changedSize = true;
+		}
+	}
+	else {
+		// see if there is space for col to grow
+		var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth + this.__calculateTotalWidth();
+		
+		if ((totalWidth + deltaX) < this.Width) {	// there is space to grow
+			this.columns[actualColNdx].Width += deltaX;
+			changedSize = true;
+		}
+		else {	// no space
+			if (nextActualColNdx != actualColNdx) {	// not the last col shrink next col
+				if ((this.columns[nextActualColNdx].Width - deltaX) > minWidth) {
+					this.columns[actualColNdx].Width += deltaX;
+					this.columns[nextActualColNdx].Width -= deltaX;
+					changedSize = true;
+					changedNextColSize = true;
+				}
+			}
+		}
+	}
+	
+	// update dataView HTML header
+	var htmlHeader = document.getElementById(this.div+'_columnsHeader');
+	if (htmlHeader) {
+		var cols = htmlHeader.firstChild.getElementsByTagName('li');
+		var offset = 0;
+		if (this.multiselect)
+			offset = 2;
+		var ndx = offset + (colNdx*2);
+		
+		cols[ndx].style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px'; 
+		if ((this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) > 0) 
+			cols[ndx].firstChild.style.width = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
+		else 
+			cols[ndx].firstChild.style.width = '0px';
+		
+		if (changedNextColSize) {
+			ndx += 2;
+			
+			cols[ndx].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth) + 'px';
+			if ((this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) > 0) 
+				cols[ndx].firstChild.style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding - this.style.sepWidth - this.style.sortWidth) + 'px';
+			else 
+				cols[ndx].firstChild.style.width = '0px';
+		}
+	}
+		
+	// update row cells
+	var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
+	
+	// calculate total width of columns in table
+	document.getElementById(this.div+'_body').style.width = this.__calculateTotalWidth()+'px';	
+	
+	for (var n=0; n < rows.length; n++)
+	{
+		var cols = rows[n].getElementsByTagName('li');
+		var offset = 0;
+		if (this.multiselect)
+			offset = 1;
+		
+		var colWidth = (this.columns[actualColNdx].Width - this.style.cellHorizontalPadding - 2);
+		if (colNdx == 0 && !this.multiselect) {
+			colWidth -= 1;
+		}
+		else {
+			colWidth += 1;
+		}
+		
+		cols[offset+(colNdx)].style.width = colWidth + 'px';
+		
+		if (changedNextColSize) {
+			cols[offset+(colNdx)+1].style.width = (this.columns[nextActualColNdx].Width - this.style.cellHorizontalPadding -1) + 'px';
+		}
+	}
+};
+
+/*
+* dataViewConnector
+* 	Connector object that will connect a dataView with an api call, so every time
+* 	you call dataView.Refresh() it will call its api to truly refresh
+* 	the object in real time
+*
+* 	constructor parameters:
+* 	dataView: A reference to a dataView object
+* 	api: A String containig the path to the api file
+* 	type: either json or xml, the format of the api file
+*	parameters: query string to be passed on each call to api
+*
+* 	Examples for Api files
+* 	XML:
+* 	<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>
+* 	<root success="1" errormessage="" totalrows="2">
+* 	   <row>
+* 	   	<column name="id">1</column>
+* 	   	<column name="uername">user1</column>
+* 	   </row>
+* 	   <row>
+* 	   	<column name="id">2</column>
+* 	   	<column name="username">user2</column>
+* 	   </row>
+* 	</root>
+*
+* 	JSON:
+* 	{ "success" : 1, "errormessage" : "", "totalrows" : 2, "rows" : [
+*		{ "id" : 1, "username" : "user1" },
+*		{ "id" : 2, "username" : "user2" }
+*    ]}
+*
+*/
+if (Scriptor.DataConnectors === undefined)
+	Scriptor.DataConnectors = {};
+	
+Scriptor.DataConnectors.DataViewConnector = function(opts) {
+	var localOpts = {
+		dataView : null,
+		api : null,
+		method : 'POST',
+		type : 'json',
+		parameters : ''
+	};
+	
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!localOpts.dataView)
+	{
+		Scriptor.error.report('Must provide dataView reference to dataViewConnector object.');
+		return;
+	}
+	
+	if (typeof(localOpts.api) != 'string' || localOpts.api == '')
+	{
+		Scriptor.error.report('Invalid Api string.');
+		return;
+	}
+	
+	this.api = localOpts.api;
+	this.dataView = localOpts.dataView;
+	this.parameters = localOpts.parameters;
+	
+	this.type = 'json';
+	if (localOpts.type)
+		switch (localOpts.type.toLowerCase())
+		{
+			case ('xml'):
+				this.type = 'xml';
+				break;
+			case ('json'):
+			default:
+				this.type = 'json';
+				break;
+		}
+		
+	this.method = 'POST';
+	if (typeof(localOpts.method) == 'string')
+		this.method = localOpts.method.toUpperCase() == 'POST' ? 'POST' : 'GET';
+		
+	// event attaching and httpRequest setup
+	Scriptor.event.attach(this.dataView, 'onrefresh', Scriptor.bind(this._onRefresh, this));
+	
+	this.httpRequest = new Scriptor.httpRequest({
+		ApiCall : this.api,
+		method : this.method,
+		Type : this.type,
+		onError : Scriptor.bind(this._onError, this),
+		onLoad : Scriptor.bind(this._onLoad, this)
+	});
+};
+
+Scriptor.DataConnectors.DataViewConnector.prototype = {
+	_onRefresh : function(e) {
+		this.dataView.setLoading(true);
+		this.dataView.__refreshFooter();
+		
+		var params = 'orderby=' + this.dataView.orderBy + '&orderway=' + this.dataView.orderWay;
+		if (this.dataView.paginating)
+			params += '&limit=' + (this.dataView.rowsPerPage * this.dataView.curPage) + ',' + ((this.dataView.rowsPerPage * this.dataView.curPage) + this.dataView.rowsPerPage);
+		
+		if (this.parameters)
+			params += '&' + this.parameters;
+			
+		this.httpRequest.send(params);
+		
+		Scriptor.event.cancel(e);
+	},
+	
+	_onLoad : function(data) {
+		this.dataView.setLoading(false);
+		
+		if (this.type == 'xml')	// xml parsing
+		{
+			var root = data.getElementsByTagName('root').item(0);
+	
+			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
+			//   upgrade addRow, deleteRow to avoid using updateRows
+			// fake visible = false so we call updateRows only once
+			var oldVisible = this.dataView.visible;
+			this.dataView.visible = false;
+			this.dataView.rows.length = 0;
+			
+			if (root.getAttribute('success') == '1')
+			{
+				var totRows = Number(root.getAttribute('totalrows'));
+				if (!isNaN(totRows))
+				{
+					this.dataView.totalRows = totRows;
+					if (this.dataView.paginating)
+						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+				}
+				var rows = root.getElementsByTagName('row');
+		
+				for (var n=0; n < rows.length; n++)
+				{
+					var tempR = {};
+					var cols = rows[n].getElementsByTagName('column');
+					
+					for (var a=0; a < cols.length; a++)
+					{
+						var colName = cols[a].getAttribute('name');
+						if (colName && cols[a].firstChild)
+						{
+							var cType = this.dataView.__findColumn(colName) != -1 ?
+								this.dataView.columns[this.dataView.__findColumn(colName)].Type :
+								'alpha';
+							tempR[colName] = dataTypes[cType](cols[a].firstChild.data);
+						}
+					}
+					
+					this.dataView.addRow(this.dataView.createRow(tempR));
+				}
+			}
+			else
+			{
+				this.dataView.setMessage(root.getAttribute('errormessage'));
+			}
+			
+			if (oldVisible)
+			{
+				this.dataView.visible = oldVisible;
+				this.dataView.updateRows();
+			}
+		}
+		else	// json
+		{
+			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
+			//   upgrade addRow, deleteRow to avoid using updateRows
+			// fake visible = false so we call updateRows only once
+			var oldVisible = this.dataView.visible;
+			this.dataView.visible = false;
+			this.dataView.rows.length = 0;
+			
+			if (data.success)
+			{
+				var totRows = Number(data.totalrows);
+				if (!isNaN(totRows))
+				{
+					this.dataView.totalRows = totRows;
+					if (this.dataView.paginating)
+						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+				}
+				
+				for (var n=0; n < data.rows.length; n++)
+				{
+					var tempR = {};
+					
+					for (var colName in data.rows[n])
+					{
+						var cType = this.dataView.__findColumn(colName) != -1 ?
+							this.dataView.columns[this.dataView.__findColumn(colName)].Type :
+							'alpha';
+						tempR[colName] = dataTypes[cType](data.rows[n][colName]);	
+					}
+					
+					this.dataView.addRow(this.dataView.createRow(tempR));
+				}
+			}
+			else
+			{
+				this.dataView.setMessage(data.errormessage);
+			}
+			
+			if (oldVisible)
+			{
+				this.dataView.visible = oldVisible;
+				this.dataView.updateRows();
+			}
+		}
+	},
+	
+	_onError : function(status)
+	{
+		this.dataView.setLoading(false);
+		this.dataView.setMessage('Error: Unable to load dataView object (HTTP status: ' + status + ')');
+	}
+};
+// JavaScript Document
 /*
 * dataLangs
 * This object contains the strings that have to be output by dataView in different languages.

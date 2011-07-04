@@ -128,6 +128,12 @@ Scriptor.TabContainer = function(opts) {
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
+		return;
+	}
+	
 	var localOpts = {
 		title : '',
 		paneId : panel.divId,
@@ -197,6 +203,12 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
+		return;
+	}
+	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
 	
@@ -260,6 +272,12 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 };
 
 Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
+		return false;
+	}
+	
 	if (arguments.length == 1)	// not a click event
 	{
 		ref = e;
@@ -379,6 +397,12 @@ Scriptor.TabContainer.prototype.setTitle = function(ref, title) {
 };
 
 Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before calling to setClosable!");
+		return;
+	}
+	
 	var ndx = null;
 	
 	// identify tab
@@ -429,6 +453,12 @@ Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
 };
 
 Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
+		return false;
+	}
+	
 	if (arguments.length == 1)	// not a click event
 	{
 		ref = e;

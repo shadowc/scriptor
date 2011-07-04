@@ -36,7 +36,6 @@
 				style : "height: 60px; margin-bottom: 5px;"
 			});
 			TopComponent.setContent(document.getElementsByTagName('h1')[0]);
-			TopComponent.cmpTarget.style.overflow = 'auto';
 			
 			LeftComponent = new Scriptor.TabContainer({
 				region : "left",
@@ -44,13 +43,6 @@
 				resizable : true,
 				style : "width: 300px; margin-right: 5px;"
 			});
-			
-			/*RightComponent = new Scriptor.Panel({
-				region : "right",
-				id : "container_right",
-				resizable : true,
-				style : "width: 120px; margin-left: 5px;"
-			});*/
 			
 			BottomComponent = new Scriptor.Panel({
 				region : "bottom",
@@ -62,7 +54,6 @@
 			TestComponent.addChild(ChildComponent);
 			TestComponent.addChild(TopComponent);
 			TestComponent.addChild(LeftComponent);
-			//TestComponent.addChild(RightComponent);
 			TestComponent.addChild(BottomComponent);
 			
 			BottomComponent.setContent("<p>Copyright notice here</p>");
