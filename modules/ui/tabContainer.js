@@ -39,6 +39,7 @@ Scriptor.TabContainer = function(opts) {
 	this.create();
 	Scriptor.className.add(this.target, "jsTabContainer");
 	
+	// component template
 	this._tabList = new TabListObj({
 		id : this.divId + '_tabList',
 		region : "top",

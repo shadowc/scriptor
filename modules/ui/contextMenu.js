@@ -1,8 +1,6 @@
 /* JavaScript Document
 *
-*
 * Global context menu system for the Scriptor framework
-*
 *
 * This object is part of the scriptor framework
 */

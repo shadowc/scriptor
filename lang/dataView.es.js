@@ -6,7 +6,7 @@
 *  (does not include error messages which are in English)
 */
 
-dataView.prototype.lang = { 
+Scriptor.DataView.prototype.lang = { 
   'noRows' : 'No hay filas para mostrar.',
   'rows' : 'filas.',
   'row' : 'fila.',
@@ -18,4 +18,3 @@ dataView.prototype.lang = {
   'pageNext' : 'Siguiente >>',
   'refresh' : 'Actualizar',
   'of' : 'de' };
-				  

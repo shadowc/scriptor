@@ -90,9 +90,8 @@ div.jsContextMenu ul li.OptionChecked a:hover { font-weight: bold; background: #
 .calendarView div.calendarViewAdvanced p a.calendarAccept { background: URL('images/btn-accept.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a.calendarCancel { background: URL('images/btn-cancel.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a:hover { color: #333333; }/* CSS Document */
-.dataViewMain { border: 1px solid #9e9e9e; padding: 3px; background: #ebebeb; color: #333333; }
 
-.dataViewPaginationHeader { font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; background: URL('images/bar-middle.jpg') repeat-x; height: 25px; overflow: hidden; }
+/*.dataViewPaginationHeader { font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; background: URL('images/bar-middle.jpg') repeat-x; height: 25px; overflow: hidden; }
 .dataViewPaginationHeader ul { list-style-type: none; background: URL('images/bar-right.jpg') no-repeat top right; height: 25px; overflow: hidden; }
 .dataViewPaginationHeader ul li { float: left; }
 .dataViewPaginationHeader ul li label.dataViewPaginationPages { float: left; height: 21px; background: URL('images/bar-left.jpg') no-repeat top left; padding: 4px 10px 0 10px; }
@@ -136,7 +135,7 @@ div.jsContextMenu ul li.OptionChecked a:hover { font-weight: bold; background: #
 .dataViewFooter ul li { float: left; height: 19px; padding: 6px 5px 0 5px; }
 .dataViewFooter ul li.first { background: URL('images/bar-left.jpg') no-repeat bottom left; }
 
-.dataViewLoading { border: 1px solid #57a4b5; background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
+.dataViewLoading { border: 1px solid #57a4b5; background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }*/
 /* CSS Document */
 
 .galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; color: #333333; }

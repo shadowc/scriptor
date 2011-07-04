@@ -47,6 +47,7 @@ var Component = {
 			invalidator : null,
 			canHaveChildren : localOpts.canHaveChildren,
 			hasInvalidator : localOpts.hasInvalidator,
+			enabled : true,
 			splitters : {},
 			resizingRegion : "",
 			resizeStartingPosition : 0,
@@ -935,18 +936,21 @@ var Component = {
 			},
 			
 			invalidate : function() {
-				if (this.invalidator)
+				if (this.invalidator && this.enabled)
 				{
+					this.enabled = false;
 					this.invalidator.style.display = 'block';
 				}
 			},
 			
 			revalidate : function() {
-				if (this.invalidator)
+				if (this.invalidator && !this.enabled)
 				{
+					this.enabled = true;
 					this.invalidator.style.display = 'none';
 				}
 			}
+			
 		};
 		
 		var availableRegions = ["center", "left", "top", "bottom", "right"];
