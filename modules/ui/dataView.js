@@ -229,7 +229,7 @@ Scriptor.DataView = function(opts) {
 	
 	this._cached = null;
 	this.create();
-	Scriptor.className.add(this.target, "jsDataView");
+	Scriptor.className.add(this.target, "dataViewMain");
 	
 	// component template 
 	this.renderTemplate();
@@ -265,7 +265,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	
 	// Create table paginating header
 	if (this.paginating) {
-		dvTemplate += '<div class="dataViewPaginationHeader"><ul><li>';
+		dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar"><ul><li>';
 		dvTemplate += '<label class="dataViewPaginationPages">' + this.lang.pageStart + (this.curPage + 1) +
 							this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 		dvTemplate += '</label></li><li>';
@@ -278,12 +278,13 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	}
 	
 	// Create table header
-	dvTemplate += '<div class="dataViewHeader" id="'+this.divId+'_columnsHeader">';
+	dvTemplate += '<div class="dataViewHeader dataViewToolbar" id="'+this.divId+'_columnsHeader">';
 	dvTemplate += '<ul style="height: ' + this.style.headerHeight + 'px;" id="'+this.divId+'_columnsUl">';
 	
 	if (this.multiselect) {
 		dvTemplate += '<li class="dataViewCheckBoxHeader">';
 		dvTemplate += '<input type="checkbox" id="' + this.divId + '_selectAll" class="dataViewCheckBox" /></li>';
+		dvTemplate += '<li class="dataViewSep"></li>';
 	}
 	
 	// TODO: add/remove columns dynamically
@@ -333,7 +334,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	dvTemplate += '</div>';
 	
 	// Create footer
-	dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter"></div>';
+	dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
 	
 	this.cmpTarget.innerHTML = dvTemplate;
 	

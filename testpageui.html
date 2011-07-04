@@ -31,7 +31,6 @@
 			
 			TopComponent = new Scriptor.Panel({
 				region : "top",
-				resizable : true,
 				id : "container_top",
 				style : "height: 60px; margin-bottom: 5px;"
 			});
@@ -75,7 +74,10 @@
 			LeftComponent._tabs[0].pane.setContent('Tab 1 contents');
 			LeftComponent._tabs[1].pane.setContent('Tab 2 contents');
 			LeftComponent._tabs[2].pane.setContent('If you close this tab I will be destroyed!');
+			
+			document.getElementById('scr_version').innerHTML = Scriptor.version;
 		});
+		
 	</script>
 	
 	<style type="text/css">
@@ -87,13 +89,13 @@
 			height: 100%;
 		}
 		
-		h1 { font-weight: normal; font-size: 24px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 20px; }
+		h1 { font-weight: normal; font-size: 20px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 10px 20px; }
 		p { font-family: Arial, Helvetica, sans-serif; size: 12px; margin: 5px 20px; padding: 0; }
 	</style>
 	</head>
 	
 	<body class="scriptor">
-		<h1>Scriptor Ui Test</h1>
+		<h1>Scriptor <span id="scr_version"></span> Ui Test</h1>
 	
 		<div id="container">
 			

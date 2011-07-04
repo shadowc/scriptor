@@ -207,3 +207,20 @@ span.jsTabListDropdown {
 }
 span.jsTabListDropdown:hover { background-color:#bee4f4; }
 span.jsTabListDropdownHidden { visibility:hidden; }
+.dataViewMain {
+  overflow:hidden;
+  background:#ffffff;
+  border:1px solid #888888;
+}
+.dataViewToolbar {
+  overflow:hidden;
+  width:100%;
+  height:20px;
+}
+.dataViewPaginationHeader { background:transparent; }
+.dataViewHeader, .dataViewFooter { background:#c9c9c9; }
+.dataViewOuterBody {
+  overflow:auto;
+  width:100%;
+}
+.dataViewBody { overflow:hidden; }
