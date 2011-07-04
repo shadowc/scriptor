@@ -1,0 +1,72 @@
+div.jsComponent {
+	display: block;
+	visibility: visible;
+	position: relative;
+	overflow: hidden;
+	color: @componentForeColor;
+}
+
+div.jsComponent.jsComponentHidden {
+	visibility: hidden;
+}
+
+div.jsComponent.jsComponentChild {
+	position: absolute;
+	top: 0; left: 0;
+}
+
+div.jsComponentInvalidator {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background: #FFFFFF;
+	.opacity(0.8);	
+}
+
+div.jsComponent.jsComponentFocused {
+	border-color: @panelBorderColorFocus !important;
+}
+
+div.jsTargetComponent {
+	position: relative;
+	top: 0; left: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+div.jsPanel {
+	border: none;
+	background: @panelBgColor;
+}
+
+div.jsPanel.jsComponentChild {
+	background: @panelChildBgColor;
+	border: 1px solid @panelBorderColor;
+}
+
+div.jsComponent div.jsSplitter {
+	position: absolute;
+	border: none;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+}
+
+div.jsComponent div.jsSplitter:hover {
+	background: @componentHoverColor;
+}
+
+div.jsComponent div.jsSplitterHorizontal {
+	height: 5px;
+	cursor: n-resize;
+}
+
+div.jsComponent div.jsSplitterVertical {
+	width: 5px;
+	cursor: e-resize;
+}

@@ -4,13 +4,13 @@ div.jsTabContainer div.jsTabList {
 }
 
 div.jsTabContainer div.jsTabListInner {
-	border-bottom: 1px solid #888888;
+	border-bottom: 1px solid @panelBorderColorFocus;
 	height: 23px;
 	overflow: visible;
 }
 
 div.jsTabContainer div.jsPageContainer {
-	border: 1px solid #888888;
+	border: 1px solid @panelBorderColorFocus;
 	border-top: none;
 	padding: 5px;
 }
@@ -20,26 +20,26 @@ div.jsTabLabel {
 	float: left;
 	bottom: 0;
 	top: 2px;
-	background: #FFFFFF url(../../images/tab-unsel-back.png) top repeat-x;
+	background: @panelBgColor url(../../images/tab-unsel-back.png) top repeat-x;
 	padding: 2px 6px;
 	height: 16px;
-	color: #666666;
+	color: @tabUnselColor;
 	cursor: pointer;
 	font-size: 12px;
 	margin-right: 1px;
 	border: 1px solid #888888;
-	border-radius: 4px 4px 0 0; 
+	.fullBorderRadius(4px;4px;0;0);
 	border-bottom: none;
 	font-weight: bold; 
 }
 
 div.jsTabLabel.jsTabSelected {
-	background: #FFFFFF url(../../images/tab-sel-back.png) top repeat-x;
+	background: @panelBgColor url(../../images/tab-sel-back.png) top repeat-x;
 	bottom: -1px;
 	height: 17px;
 	padding-top: 4px;
 	top: 0;
-	color: #333333;
+	color: @tabSelColor;
 }
 
 div.jsTabLabel.jsTabClosable {
@@ -80,11 +80,11 @@ span.jsTabListDropdown {
 	margin-right: 2px;
 	width: 12px;
 	height: 23px;
-	background: #FFFFFF url(../../images/drop-down.png) -2px 5px no-repeat;
+	background: @panelBgColor url(../../images/drop-down.png) -2px 5px no-repeat;
 }
 
 span.jsTabListDropdown:hover {
-	background-color: #BEE4F4;
+	background-color: @componentHoverColor;
 }
 
 span.jsTabListDropdownHidden {

@@ -1,268 +1,209 @@
-/* core.css
-*
-*  Here we define some global css rules that are intended to override
-*  common page specific rules that might affect scriptor components
-*/
 .scriptor {
-	margin: 0;
-	padding: 0;
-	font-family: "Arial", Helvetica, sans-serif;
-	color: #333333;
+  margin:0;
+  padding:0;
+  font-family:"Arial", Helvetica, sans-serif;
+  color:#333333;
 }
-
 #scriptor_invalidator {
-	position: absolute;
-	z-index: 10000;
-	background-color: #FFFFFF;
-	top: 0;
-	left: 0;
+  position:absolute;
+  z-index:10000;
+  background-color:#ffffff;
+  top:0;
+  left:0;
 }
-
 #scriptor_invalidator .msg {
-	margin: auto;
-	width: 200px;
-	height: 30px;
-	position: absolute;
-	z-index: 10001;
-	background: url('images/ajax-loader.gif') no-repeat 5px center #0E4A62;
-	padding: 5px 5px 5px 30px; 
-	border : 4px solid #FFFFFF;
-	overflow: hidden;
-	font-family: "Arial", Helvetica, sans-serif;
-	font-size: 12px;
-	color: #FFFFFF;
+  margin:auto;
+  width:200px;
+  height:30px;
+  position:absolute;
+  z-index:10001;
+  background:url('images/ajax-loader.gif') no-repeat 5px center #0e4a62;
+  padding:5px 5px 5px 30px;
+  border:4px solid #ffffff;
+  overflow:hidden;
+  font-family:"Arial", Helvetica, sans-serif;
+  font-size:12px;
+  color:#ffffff;
 }
-/* CSS Document */
-
-div.jsComponent.jsContextMenu { margin: 0; border: 1px solid #9e9e9e; border-radius: 4px; box-shadow: 1px 1px 5px #CCCCCC;
-	background: #fbfbfb; padding: 3px; position: absolute; }
-
-div.jsContextMenu ul { list-style-type: none; margin: 0; padding: 0; }
-div.jsContextMenu ul li { height: 20px; overflow: hidden; margin: 0; padding: 0; }
-div.jsContextMenu ul li a { display: block; height: 17px; padding: 3px 10px 0 20px;
-	font-size: 12px; color: #343434; text-decoration: none; }
-
-div.jsContextMenu ul li a:hover { text-decoration: none; color: #FFFFFF; background: #2165aa; border-radius: 2px; }
-div.jsContextMenu ul li.contextMenuSep { height: 2px; border-bottom: 1px solid #9e9e9e; margin-bottom: 1px; line-height: 2px; }
-
-div.jsContextMenu ul li.OptionChecked a { font-weight: bold; background: #fbfbfb url(images/check.png) no-repeat 2px center; }
-div.jsContextMenu ul li.OptionChecked a:hover { font-weight: bold; background: #2165aa url(images/check.png) no-repeat 2px center; }
-/* CSS Document */
-
-.calendarView { border: 1px solid #036188; width: 245px; background: #FFFFFF; color: #333333; }
-.calendarView * { margin: 0 !important; padding: 0 !important; }
-
-.calendarView .calendarViewHeader { width: 245px; height: 20px; overflow: hidden; border-bottom: 1px solid #036188; background: #E9E9E9; color: #333333; }
-.calendarView .calendarViewHeader ul { list-style-type: none; width: 245px; height: 20px; overflow: hidden; }
-.calendarView .calendarViewHeader ul li { float: left; }
-.calendarView .calendarViewHeader ul li a.calendarViewPrev { float: left; width: 20px; height: 20px; background: URL('images/prev.jpg') no-repeat 2px 2px; }
-.calendarView .calendarViewHeader ul li a.calendarAdvanced {float: left; width: 20px; height: 20px; background: URL('images/advanced.jpg') no-repeat 2px 2px;}
-.calendarView .calendarViewHeader ul li p.calendarViewMonth { width: 185px; padding: 2px 0 0 0 !important; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; font-weight: bold; text-align: center; color: #333333; }
-.calendarView .calendarViewHeader ul li a.calendarViewNext { float: left; width: 20px; height: 20px; background: URL('images/next.jpg') no-repeat 2px 2px; }
-
-.calendarView table.calendarViewBody { width: 245px; border-collapse: collapse; }
-.calendarView table.calendarViewBody th { padding: 2px !important; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; font-weight: bold; background: #E6F0F6; border-bottom: 1px solid #036188; width: 30px; text-align: center;}
-.calendarView table.calendarViewBody td { width: 34px; height: 29px; border-left: 1px solid #036188; border-bottom: 1px solid #036188; }
-.calendarView table.calendarViewBody td a { display: block; width: 30px; height: 25px; padding: 2px !important; font-family: "Arial", Helvetica, sans-serif; font-size: 11px; color: #177fb4; text-decoration: none; }
-.calendarView table.calendarViewBody td a:hover { background: #E6F0F6; color: #3a96c5; text-decoration: underline; }
-
-.calendarView table.calendarViewBody td a.calendarDisabled { color: #AAAAAA; cursor: default; }
-.calendarView table.calendarViewBody td a.calendarDisabled:hover { color: #AAAAAA; background: none; text-decoration: none; cursor: default; }
-
-.calendarView table.calendarViewBody td a.calendarToday { color: #CC0000 !important; font-weight: bold; }
-.calendarView table.calendarViewBody td a.calendarMarked { background: #CCAAAA; }
-
-.calendarView table.calendarViewBody td a.calendarSelected { background: #3A96C5; color: #FFFFFF; }
-
-.calendarView .calendarViewFooter { width: 245px; height: 20px; overflow: hidden; background: #E9E9E9; }
-.calendarView .calendarViewFooter p a.calendarGoHome { width: 20px; height: 20px; float: left; background: URL('images/home.jpg') no-repeat 2px 2px; margin: -2px 0 0 2px !important; display: inline; }
-.calendarView .calendarViewFooter p { padding: 2px 0 0 0 !important; text-align: center; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #434343; font-weight: bold; }
-
-.calendarView div.calendarViewAdvanced { width: 245px; overflow: hidden; }
-.calendarView div.calendarViewAdvanced p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #000000; overflow: hidden; margin: 4px !important; clear: left; }
-.calendarView div.calendarViewAdvanced p label,
-.calendarView div.calendarViewAdvanced p input,
-.calendarView div.calendarViewAdvanced p select { color: #333333; padding: 1px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
-.calendarView div.calendarViewAdvanced p label { float: left; padding: 2px 0 0 0 !important; width: 40px; }
-.calendarView div.calendarViewAdvanced p input { border: 1px solid #036188; width: 50px; padding: 1px; }
-.calendarView div.calendarViewAdvanced p select { border: 1px solid #036188; padding: 1px; }
-.calendarView div.calendarViewAdvanced p a { width: 56px; height: 18px; padding: 2px 0 0 24px !important; font-size: 12px; float: left; display: inline; margin: 5px 0 0 5px !important; color: #0e5970; text-align: left; cursor: pointer; }
-.calendarView div.calendarViewAdvanced p a.calendarAccept { background: URL('images/btn-accept.jpg') no-repeat; }
-.calendarView div.calendarViewAdvanced p a.calendarCancel { background: URL('images/btn-cancel.jpg') no-repeat; }
-.calendarView div.calendarViewAdvanced p a:hover { color: #333333; }/* CSS Document */
-
-/*.dataViewPaginationHeader { font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; background: URL('images/bar-middle.jpg') repeat-x; height: 25px; overflow: hidden; }
-.dataViewPaginationHeader ul { list-style-type: none; background: URL('images/bar-right.jpg') no-repeat top right; height: 25px; overflow: hidden; }
-.dataViewPaginationHeader ul li { float: left; }
-.dataViewPaginationHeader ul li label.dataViewPaginationPages { float: left; height: 21px; background: URL('images/bar-left.jpg') no-repeat top left; padding: 4px 10px 0 10px; }
-.dataViewPaginationHeader ul li a { float: left; width: 16px; height: 16px; padding: 0 4px 0 4px; margin: 3px 0 0 0; }
-.dataViewPaginationHeader ul li a.dataViewPrevBtn { background: URL('images/prev-button.jpg') no-repeat center; border-left: 1px solid #09404c; }
-.dataViewPaginationHeader ul li a.dataViewNextBtn { background: URL('images/next-button.jpg') no-repeat center; border-right: 1px solid #09404c; }
-.dataViewPaginationHeader ul li label.dataViewPaginationGotoPage { float: left; height: 21px; padding: 4px 7px 0 10px; }
-.dataViewPaginationHeader ul li input.dataViewPaginationInput { height: 15px; padding: 1px; border: 1px solid #727272; width: 30px; float: left; margin: 3px 0 0 0; padding: 0 4px 0 0; font-size: 10px; font-family: "Arial", Helvetica, sans-serif; color: #333333; }
-.dataViewPaginationHeader ul li input.dataViewPageButton { font-family: "Arial", Helvetica, sans-serif; height: 17px; padding: 0 1px; width: auto; float: left; margin: 3px 0 0 5px; display: inline; font-size: 9px; color: #333333; }
-
-.dataViewHeader { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #072026; height: 25px; overflow: hidden; background: URL('images/fields-middle.jpg') repeat-x; }
-.dataViewHeader ul { list-style-type: none; height: 25px; overflow: hidden; background: URL('images/fields-left.jpg') no-repeat top left; }
-.dataViewHeader ul li { height: 25px; text-align: left; overflow: hidden; float: left; cursor: default; padding: 0 5px; }
-.dataViewHeader ul li a { height: 17px; font-family: "Arial", Helvetica, sans-serif; font-size: 12px; font-weight: normal; color: #072026; text-decoration: none; float: left; padding: 4px 14px 0 5px; overflow: hidden; }
-.dataViewHeader ul li a.dataViewSortAsc { font-weight: bold; background: URL('images/sort-asc.jpg') no-repeat right 7px; }
-.dataViewHeader ul li a.dataViewSortDesc { font-weight: bold; background: URL('images/sort-desc.jpg') no-repeat right 7px; }
-.dataViewHeader ul li a:hover { text-decoration: underline; }	
-.dataViewHeader ul li.dataViewFieldSep { width: 5px; background: URL('images/fields-sep.jpg') no-repeat top right; cursor: e-resize; padding: 0; }
-.dataViewHeader ul li.noPointer { cursor: default !important; }
-.dataViewHeader ul li.dataViewFieldList { float: right; padding: 0; }
-.dataViewHeader ul li.dataViewFieldList a { width: 25px; height: 25px; background: URL('images/fields-button.jpg') no-repeat; }
-
-.dataViewCheckBox { margin: 5px 0 0 0; }
-.dataViewBody .dataViewCheckBox { margin: 0; }
-
-.dataViewOuterBody { border: 1px solid #57a4b5; background: #FFFFFF; }
-.dataViewOuterBody div.dataViewMessageDiv { font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
-
-.dataViewBody { background: #FFFFFF; }
-.dataViewBody ul { list-style-type: none; height: 19px; overflow: hidden; border-bottom: 1px solid #AAAAAA; border-right: 1px solid #AAAAAA; }
-.dataViewBody ul li { height: 17px; float: left;  cursor: default; border-right: 1px solid #AAAAAA;  
-	font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #000000; text-align: left; padding: 2px 5px 0 5px; overflow: hidden; }
-
-.dataViewBody ul li.dataViewnum { text-align: right; }
-.dataViewBody ul li.dataViewdate { text-align: right; }
-.dataViewBody ul li.selectedRow { background: #114478; border-right: 1px solid #114478; color: #FFFFFF;}
-
-.dataViewFooter { height: 25px; background: URL('images/bar-middle.jpg') repeat-x bottom; 
-	font-family: "Verdana", Arial, sans-serif; font-size: 11px; color: #09404c; overflow: hidden; }
-.dataViewFooter ul { list-style-type: none; height: 25px; overflow: hidden; background: URL('images/bar-right.jpg') no-repeat bottom right; }
-.dataViewFooter ul li { float: left; height: 19px; padding: 6px 5px 0 5px; }
-.dataViewFooter ul li.first { background: URL('images/bar-left.jpg') no-repeat bottom left; }
-
-.dataViewLoading { border: 1px solid #57a4b5; background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }*/
-/* CSS Document */
-
-.galleryView { border: 1px solid #036188; background: #FFFFFF; overflow: auto; color: #333333; }
-.galleryViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
-.galleryViewLoading div, .galleryViewMessage div { display : none !important; }
-.galleryViewMessage p { margin: 10px; text-align: center; font-family: "Verdana", Arial, sans-serif; font-size: 11px; }
-.galleryView div { float: left; display: inline; margin: 5px; }
-.galleryView div img { cursor: pointer; display: block; border: 2px solid #ffffff; }
-.galleryView div p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; text-align: center; color: #333333; }
-.galleryView div.gvSelectedImage img { border: 2px solid #000000; }
-.galleryView div.gvSelectedImage p { font-weight: bold; }/* CSS Document */
-
-.treeView { margin: 0; padding: 0; border: 1px solid #036188; background: #FFFFFF; overflow: auto; }
-.treeViewLoading { background: #EEEEEE URL('images/ajax-loader.gif') no-repeat center center; }
-
-.treeView div.treeViewMessageDiv { margin: 10px; font-family: "Verdana", Arial, sans-serif; font-size: 11px; text-align: center;}
-.treeView ul { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; padding: 3px; list-style-type: none; overflow: hidden; clear: left; margin: 0; }
-.treeView ul ul { margin-left: 15px; padding: 0; display: none; }
-.treeView ul li { margin: 0; clear: left; overflow: hidden; }
-.treeView ul li a { font-family: "Arial", Helvetica, sans-serif; font-size: 12px; color: #343434; text-decoration: none; display: block; height: 16px; padding: 2px 4px; border: 1px solid #FFFFFF; float: left; background: transparent; }
-.treeView ul li a.treeViewSingleNode { margin-left: 15px; }
-.treeView ul li a.treeViewExpandableNode { width: 15px; height: 18px; background: URL('images/plus.gif') no-repeat 2px 5px; padding: 0; border: none; }
-.treeView ul li a.treeViewCollapsableNode { width: 15px; height: 18px; background: URL('images/minus.gif') no-repeat 2px 5px; padding: 0; border: none; }
-
-.treeView ul li a.treeViewSelectedNode { background: #E6F0F6; border: 1px solid #036188; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }div.jsComponent { display: block; visibility: visible; position: relative; overflow: hidden; }
-div.jsComponent.jsComponentHidden { visibility: hidden; }
-div.jsComponent.jsComponentChild { position: absolute; top: 0; left: 0; }
-div.jsComponentInvalidator { position: absolute; z-index: 1000; width: 100%; height: 100%; top: 0; left: 0; background: #FFFFFF; 
-	opacity: 0.8; -moz-opacity: 0.8; }
-div.jsComponent.jsComponentFocused { border-color: #888888 !important; }
-div.jsTargetComponent { position: relative; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
-
-div.jsPanel { border: none; background: #FFFFFF; }
-div.jsPanel.jsComponentChild { background: #FAFAFF; border: 1px solid #AAAAAA; }
-
-div.jsComponent div.jsSplitter { position: absolute; border: none; overflow: hidden; margin: 0; padding: 0; background: transparent; }
-div.jsComponent div.jsSplitter:hover { background: #BEE4F4; }
-div.jsComponent div.jsSplitterHorizontal { height: 5px; cursor: n-resize; }
-div.jsComponent div.jsSplitterVertical { width: 5px; cursor: e-resize; }/* CSS Document */
-div.jsTabContainer div.jsTabList {
-	height: 24px;
+div.jsComponent {
+  display:block;
+  visibility:visible;
+  position:relative;
+  overflow:hidden;
+  color:#333333;
 }
-
+div.jsComponent.jsComponentHidden { visibility:hidden; }
+div.jsComponent.jsComponentChild {
+  position:absolute;
+  top:0;
+  left:0;
+}
+div.jsComponentInvalidator {
+  position:absolute;
+  z-index:1000;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  background:#ffffff;
+  opacity:0.8;
+  -moz-opacity:0.8;
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=@op*100)";
+  filter:alpha(opacity=80);
+}
+div.jsComponent.jsComponentFocused { border-color:#888888 !important; }
+div.jsTargetComponent {
+  position:relative;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+div.jsPanel {
+  border:none;
+  background:#ffffff;
+}
+div.jsPanel.jsComponentChild {
+  background:#fafaff;
+  border:1px solid #aaaaaa;
+}
+div.jsComponent div.jsSplitter {
+  position:absolute;
+  border:none;
+  overflow:hidden;
+  margin:0;
+  padding:0;
+  background:transparent;
+}
+div.jsComponent div.jsSplitter:hover { background:#bee4f4; }
+div.jsComponent div.jsSplitterHorizontal {
+  height:5px;
+  cursor:n-resize;
+}
+div.jsComponent div.jsSplitterVertical {
+  width:5px;
+  cursor:e-resize;
+}
+div.jsComponent.jsContextMenu {
+  margin:0;
+  border:1px solid #888888;
+  border-radius:4px;
+  -webkit-border-radius:4px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:4px;
+  -webkit-box-shadow:1px 1px 5px #cccccc;
+  -moz-box-shadow:1px 1px 5px #cccccc;
+  box-shadow:1px 1px 5px #cccccc;
+  background:#fbfbfb;
+  padding:3px;
+  position:absolute;
+}
+div.jsContextMenu ul {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+div.jsContextMenu ul li {
+  height:20px;
+  overflow:hidden;
+  margin:0;
+  padding:0;
+}
+div.jsContextMenu ul li a {
+  display:block;
+  height:17px;
+  padding:3px 10px 0 20px;
+  font-size:12px;
+  color:#333333;
+  text-decoration:none;
+}
+div.jsContextMenu ul li a:hover {
+  text-decoration:none;
+  color:#ffffff;
+  background:#2165aa;
+  border-radius:2px;
+  -webkit-border-radius:2px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:2px;
+}
+div.jsContextMenu ul li.contextMenuSep {
+  height:2px;
+  border-bottom:1px solid #888888;
+  margin-bottom:1px;
+  line-height:2px;
+}
+div.jsContextMenu ul li.OptionChecked a {
+  font-weight:bold;
+  background:#fbfbfb url(images/check.png) no-repeat 2px center;
+}
+div.jsContextMenu ul li.OptionChecked a:hover {
+  font-weight:bold;
+  background:#2165aa url(images/check.png) no-repeat 2px center;
+}
+div.jsTabContainer div.jsTabList { height:24px; }
 div.jsTabContainer div.jsTabListInner {
-	border-bottom: 1px solid #888888;
-	height: 23px;
-	overflow: visible;
+  border-bottom:1px solid #888888;
+  height:23px;
+  overflow:visible;
 }
-
 div.jsTabContainer div.jsPageContainer {
-	border: 1px solid #888888;
-	border-top: none;
-	padding: 5px;
+  border:1px solid #888888;
+  border-top:none;
+  padding:5px;
 }
-
 div.jsTabLabel {
-	position: relative;
-	float: left;
-	bottom: 0;
-	top: 2px;
-	background: #FFFFFF url(../../images/tab-unsel-back.png) top repeat-x;
-	padding: 2px 6px;
-	height: 16px;
-	color: #666666;
-	cursor: pointer;
-	font-size: 12px;
-	margin-right: 1px;
-	border: 1px solid #888888;
-	border-radius: 4px 4px 0 0; 
-	border-bottom: none;
-	font-weight: bold; 
+  position:relative;
+  float:left;
+  bottom:0;
+  top:2px;
+  background:#ffffff url(../../images/tab-unsel-back.png) top repeat-x;
+  padding:2px 6px;
+  height:16px;
+  color:#666666;
+  cursor:pointer;
+  font-size:12px;
+  margin-right:1px;
+  border:1px solid #888888;
+  border-radius:4px 4px 0 0;
+  -webkit-border-radius:4px 4px 0 0;
+  -moz-border-radius:4px 4px 0 0;
+  border-bottom:none;
+  font-weight:bold;
 }
-
 div.jsTabLabel.jsTabSelected {
-	background: #FFFFFF url(../../images/tab-sel-back.png) top repeat-x;
-	bottom: -1px;
-	height: 17px;
-	padding-top: 4px;
-	top: 0;
-	color: #333333;
+  background:#ffffff url(../../images/tab-sel-back.png) top repeat-x;
+  bottom:-1px;
+  height:17px;
+  padding-top:4px;
+  top:0;
+  color:#333333;
 }
-
-div.jsTabLabel.jsTabClosable {
-	padding-right: 20px;
-}
-
+div.jsTabLabel.jsTabClosable { padding-right:20px; }
 div.jsTabPage {
-	border: none !important;
-	background: transparent !important;
+  border:none !important;
+  background:transparent !important;
 }
-
 span.jsTabCloseBtn {
-	display: block;
-	position: absolute;
-	top: 4px;
-	right: 4px; 
-	width: 12px;
-	height: 12px;
-	background: transparent url(../../images/close-btn.png) 0 0 no-repeat;
+  display:block;
+  position:absolute;
+  top:4px;
+  right:4px;
+  width:12px;
+  height:12px;
+  background:transparent url(../../images/close-btn.png) 0 0 no-repeat;
 }
-
-span.jsTabCloseBtn:hover {
-	background: transparent url(../../images/close-btn.png) 0 -12px no-repeat;
-}
-
-div.jsTabSelected span.jsTabCloseBtn {
-	top: 6px;
-}
-
-span.jsTabCloseHidden {
-	display: none !important;
-}
-
+span.jsTabCloseBtn:hover { background:transparent url(../../images/close-btn.png) 0 -12px no-repeat; }
+div.jsTabSelected span.jsTabCloseBtn { top:6px; }
+span.jsTabCloseHidden { display:none !important; }
 span.jsTabListDropdown {
-	position: absolute;
-	top: 0;
-	right: 0;
-	margin-right: 2px;
-	width: 12px;
-	height: 23px;
-	background: #FFFFFF url(../../images/drop-down.png) -2px 5px no-repeat;
+  position:absolute;
+  top:0;
+  right:0;
+  margin-right:2px;
+  width:12px;
+  height:23px;
+  background:#ffffff url(../../images/drop-down.png) -2px 5px no-repeat;
 }
-
-span.jsTabListDropdown:hover {
-	background-color: #BEE4F4;
-}
-
-span.jsTabListDropdownHidden {
-	visibility: hidden;
-}
+span.jsTabListDropdown:hover { background-color:#bee4f4; }
+span.jsTabListDropdownHidden { visibility:hidden; }

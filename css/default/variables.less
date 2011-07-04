@@ -1,0 +1,56 @@
+/* some general purpose variables */
+@componentForeColor: #333333;
+@panelBgColor:	#FFFFFF;
+@panelChildBgColor: #FAFAFF;
+@panelBorderColor: #AAAAAA;
+@panelBorderColorFocus: #888888;
+@componentHoverColor: #BEE4F4;
+
+@tabUnselColor: #666666;
+@tabSelColor: @componentForeColor;
+
+@contextMenuBgColor: #fbfbfb;
+
+@menuUnselForeColor: @componentForeColor;
+@menuUnselBackColor: @contextMenuBgColor;
+@menuSelForeColor: #FFFFFF;
+@menuSelBgColor: #2165aa;
+
+/* cross browser compat rule, functionss */
+.boxShadow(@horizontal: 0px; @vertical: 1px; @blur: 1px; @color: #CCC) {
+	@values: @horizontal @vertical @blur @color;
+	-webkit-box-shadow: @values;
+	-moz-box-shadow: @values;
+	box-shadow: @values;
+}
+
+.insetShadow (@horizontal: 0px; @vertical: 1px; @blur: 1px; @color: #CCC) {
+	@values: @horizontal @vertical @blur @color;
+	-webkit-box-shadow: inset @values;
+	-moz-box-shadow: inset @values;
+	box-shadow: inset @values;
+}
+
+.borderRadius(@radius: 4px)
+{
+	border-radius: @radius;
+	-webkit-border-radius: @radius;
+	-webkit-background-clip: padding-box;
+	-moz-border-radius: @radius;
+}
+
+.fullBorderRadius(@r1; @r2; @r3; @r4)
+{
+	border-radius: @r1 @r2 @r3 @r4;
+	-webkit-border-radius: @r1 @r2 @r3 @r4;
+	-moz-border-radius: @r1 @r2 @r3 @r4;
+}
+
+.opacity(@op:0.5)
+{
+	opacity: @op;
+	-moz-opacity: @op;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=@op*100)";
+	filter: alpha(opacity=@op*100);
+}
+
