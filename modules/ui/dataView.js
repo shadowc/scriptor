@@ -243,6 +243,16 @@ Scriptor.DataView = function(opts) {
 	// end add
 	
 	this.optionsMenu = new Scriptor.ContextMenu();
+	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
+		if (!e) e = window.event;
+		
+		this.Refresh();
+		this.optionsMenu.Hide();
+		
+		Scriptor.event.cancel(e);
+		return false;
+	}, this)});
+	this.optionsMenu.addItem({label : 'sep'});
 	
 	this.resizeImplementation = function() {
 		this._checkCache();
@@ -275,6 +285,38 @@ Scriptor.DataView = function(opts) {
 			
 			// TODO: resize columns?
 		}
+	};
+	
+	this._registeredEvents = [];
+	this.DOMAddedImplementation = function() {
+		//assign some events
+		if (this.multiselect) 
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this)));
+		
+		if (this.paginating) {
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this)));
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this)));
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this)));
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this)));
+		}
+		
+		for (var n=0; n < this.columns.length; n++) {
+			if (this.columns[n].show) {
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n)));
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_sep' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n)));
+			}
+		}
+		
+		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
+		
+		this._checkCache();
+	};
+	
+	this.DOMRemovedImplementation = function() {
+		while (this._registeredEvents.length)
+			Scriptor.event.detach(this._registeredEvents.pop());
+			
+		this._cached = null;
 	};
 };
 
@@ -332,17 +374,17 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 					aClass = 'dataViewSortDesc';
 			}
 			
-			dvTemplate += '<a id="'+ this.div + '_columnHeader_'+n+'" style="width: ' + aWidth + 'px;" href="#"' + (aClass ? ' class="' + aClass + '"' : '') + '>';
+			dvTemplate += '<a id="'+ this.divId + '_columnHeader_'+n+'" style="width: ' + aWidth + 'px;" href="#"' + (aClass ? ' class="' + aClass + '"' : '') + '>';
 			dvTemplate += this.columns[n].displayName + '</a></li>';
 			
-			dvTemplate += '<li id="' + this.div + '_sep' + n + '" style="width: ' + this.style.sepWidth + 'px;" class="dataViewFieldSep"></li>';
+			dvTemplate += '<li id="' + this.divId + '_sep' + n + '" style="width: ' + this.style.sepWidth + 'px;" class="dataViewFieldSep"></li>';
 		}
 	}*/
 	
 	dvTemplate += '</ul>';
 	
 	// add field list menu
-	dvTemplate += '<span id="' + this.div + '_optionsMenuBtn" class="dataViewHeaderMenu">';
+	dvTemplate += '<span id="' + this.divId + '_optionsMenuBtn" class="dataViewHeaderMenu">';
 	dvTemplate += '<a href="#"> </a></span></div>';
 	
 	// Create body
@@ -362,27 +404,6 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	this.cmpTarget.innerHTML = dvTemplate;
 	
 	this._checkCache();
-	
-	//assign some events
-	/*if (this.multiselect) 
-		Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this));
-	
-	if (this.paginating) {
-		Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this));
-		Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this));
-		Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this));
-		Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this));
-	}
-	
-	for (var n=0; n < this.columns.length; n++) {
-		if (this.columns[n].show) {
-			Scriptor.event.attach(document.getElementById(this.divId + '_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n));
-			Scriptor.event.attach(document.getElementById(this.divId + '_sep' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n));
-		}
-	}
-	
-	Scriptor.event.attach(document.getElementById(this.div + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this));
-	*/
 };
 
 /*
@@ -723,7 +744,7 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	this.rows[rowNdx][columnName] = value;
 	
 	if (this.visible && this.columns[colNdx].show) {	// update value
-		var cell = document.getElementById(this.div + '_cell_' + rowId + '_' + colNdx);
+		var cell = document.getElementById(this.divId + '_cell_' + rowId + '_' + colNdx);
 		
 		if (typeof(this.columns[colNdx].Format) == 'function') {
 			var funcRet = this.columns[colNdx].Format(value);
@@ -763,7 +784,7 @@ Scriptor.DataView.prototype.Refresh = function() {
 *   usefull for assync updates
 */
 Scriptor.DataView.prototype.setLoading = function(val) {
-	var body = document.getElementById(this.div + '_body');
+	var body = document.getElementById(this.divId + '_body');
 	
 	body.style.display = val ? 'none' : '';
 	body.parentNode.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
@@ -779,25 +800,25 @@ Scriptor.DataView.prototype.setMessage = function(msg) {
 	// false, null, or msg not present resets dataView to normal
 	if (msg === false || msg === null || typeof(msg) != "string")
 	{
-		if (document.getElementById(this.div + '_message'))
-			document.getElementById(this.div + '_message').parentNode.removeChild(document.getElementById(this.div + '_message'));
+		if (document.getElementById(this.divId + '_message'))
+			document.getElementById(this.divId + '_message').parentNode.removeChild(document.getElementById(this.divId + '_message'));
 			
-		document.getElementById(this.div + '_body').style.display = '';
+		document.getElementById(this.divId + '_body').style.display = '';
 	}
 	else	// if string passed, we show a message
 	{
-		document.getElementById(this.div + '_body').style.display = 'none';
+		document.getElementById(this.divId + '_body').style.display = 'none';
 		var msgDiv;
-		if (!document.getElementById(this.div + '_message'))
+		if (!document.getElementById(this.divId + '_message'))
 		{
 			msgDiv = document.createElement('div');
-			msgDiv.id = this.div + '_message';
+			msgDiv.id = this.divId + '_message';
 			msgDiv.className = 'dataViewMessageDiv';
-			document.getElementById(this.div + '_body').parentNode.appendChild(msgDiv);
+			document.getElementById(this.divId + '_body').parentNode.appendChild(msgDiv);
 		}
 		else
 		{
-			msgDiv = document.getElementById(this.div + '_message');
+			msgDiv = document.getElementById(this.divId + '_message');
 		}
 		msgDiv.innerHTML = msg;
 	}
@@ -813,7 +834,7 @@ Scriptor.DataView.prototype.clearSelection = function()
 	this.selectedRow = -1;
 	this.selectedRows = [];
 	
-	document.getElementById(this.div + '_selectAll').checked = false;
+	document.getElementById(this.divId + '_selectAll').checked = false;
 	this.updateRows();
 };
 
@@ -830,7 +851,7 @@ Scriptor.DataView.prototype.__selectAll = function(e) {
 		return;
 	}
 	
-	var elem = document.getElementById(this.div + '_selectAll');
+	var elem = document.getElementById(this.divId + '_selectAll');
 	
 	if (this.rows.length) {
 		if (elem.checked) {
@@ -862,7 +883,7 @@ Scriptor.DataView.prototype.__goToPage = function (e) {
 	if (!this.enabled)
 		return;
 		
-	var page = document.getElementById(this.div + '_pageInput').value;
+	var page = document.getElementById(this.divId + '_pageInput').value;
 	
 	var totalPages = this.getTotalPages();
 	
@@ -883,7 +904,7 @@ Scriptor.DataView.prototype.__goToPage = function (e) {
 			this.Show(true);
 		}
 		
-		document.getElementById(this.div + '_pageInput').focus();
+		document.getElementById(this.divId + '_pageInput').focus();
 	}
 };
 
@@ -963,7 +984,7 @@ Scriptor.DataView.prototype.updateRows = function() {
 		return;
 	}
 	
-	var targetTable = document.getElementById(this.div + '_body');
+	var targetTable = document.getElementById(this.divId + '_body');
 	
 	if (!this._oldScrollTop)
 		this._oldScrollTop = targetTable.parentNode.scrollTop;
@@ -975,7 +996,7 @@ Scriptor.DataView.prototype.updateRows = function() {
 		
 		var rowId = this.rows[n].id;
 		var firstCol = true;
-		rTemplate += '<ul id="' + this.div + '_row_' + rowId + '">';
+		rTemplate += '<ul id="' + this.divId + '_row_' + rowId + '">';
 		
 		if (this.multiselect) {
 			var check = false;
@@ -997,7 +1018,7 @@ Scriptor.DataView.prototype.updateRows = function() {
 			}
 			
 			rTemplate += '">';
-			rTemplate += '<input type="checkbox" id="' + this.div + '_selectRow_' + rowId + '" class="dataViewCheckBox" ';
+			rTemplate += '<input type="checkbox" id="' + this.divId + '_selectRow_' + rowId + '" class="dataViewCheckBox" ';
 			if (check)
 				rTemplate += 'checked="checked" ';
 			rTemplate += '/></li>';
@@ -1033,7 +1054,7 @@ Scriptor.DataView.prototype.updateRows = function() {
 					}
 				}
 						
-				rTemplate += '" id="' + this.div + '_cell_' + rowId + '_' + a + '" style="width: ' + colWidth + 'px;"';
+				rTemplate += '" id="' + this.divId + '_cell_' + rowId + '_' + a + '" style="width: ' + colWidth + 'px;"';
 				if (this.columns[a].showToolTip) 
 					rTemplate += ' title="' + this.rows[n][this.columns[a].Name] + '"';
 				rTemplate += '>';
@@ -1064,16 +1085,16 @@ Scriptor.DataView.prototype.updateRows = function() {
 		var rowId = this.rows[n].id;
 		
 		if (this.multiselect)
-			Scriptor.event.attach(document.getElementById(this.div + '_selectRow_' + rowId), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
+			Scriptor.event.attach(document.getElementById(this.divId + '_selectRow_' + rowId), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
 			
 		for (var a=0; a < this.columns.length; a++) {
 			if (this.columns[a].show) {
-				Scriptor.event.attach(document.getElementById(this.div + '_cell_' + rowId + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
+				Scriptor.event.attach(document.getElementById(this.divId + '_cell_' + rowId + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
 				
 				if (typeof(this.columns[a].Format) == 'function') {
 					var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
 					if (typeof(funcRet) != 'string')
-						document.getElementById(this.div + '_cell_' + rowId + '_' + a).appendChild(funcRet);
+						document.getElementById(this.divId + '_cell_' + rowId + '_' + a).appendChild(funcRet);
 				}
 			}
 		}
@@ -1124,7 +1145,7 @@ Scriptor.DataView.prototype.__refreshFooter = function() {
 		return;
 	}
 	
-	var targetDiv = document.getElementById(this.div + '_footer');
+	var targetDiv = document.getElementById(this.divId + '_footer');
 	
 	var fTemplate = '<ul><li class="first">';
 	
@@ -1264,7 +1285,7 @@ Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 		if (this.columns[n].show)
 			colStyles.push(this.columns[n].Type);
 		 
-	var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
+	var rows = document.getElementById(this.divId+'_body').getElementsByTagName('ul');
 	
 	if (rowNdx != -1) {
 		if (!this.multiselect) {
@@ -1396,12 +1417,12 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 	
 	var rowId = this.rows[rowNdx].id;
 	
-	elem = document.getElementById(this.div + '_selectRow_' + rowId);
+	elem = document.getElementById(this.divId + '_selectRow_' + rowId);
 	if (elem.checked) {	// add row to selected rows list
 		this.selectedRows.push(rowNdx)
 		this.selectedRow = rowNdx;
 				
-		var row = document.getElementById(this.div + '_row_' + rowId);
+		var row = document.getElementById(this.divId + '_row_' + rowId);
 		for (var a = 0; a < row.childNodes.length; a++) 
 			row.childNodes[a].className = 'dataView' + colStyles[a] + ' selectedRow';
 		
@@ -1415,7 +1436,7 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 				else 
 					this.selectedRow = -1;
 			
-				var row = document.getElementById(this.div + '_row_' + rowId);
+				var row = document.getElementById(this.divId + '_row_' + rowId);
 				for (var a = 0; a < row.childNodes.length; a++) {
 					row.childNodes[a].className = 'dataView' + colStyles[a];
 				}
@@ -1434,26 +1455,16 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 *   resources on the dataView frame rendering. This is usefull when changing the property
 *   dataView.optionsMenuWidth to apply these changes.
 */
-Scriptor.DataView.prototype.updateOptionsMenu = function() {
-	this.optionsMenu.items = [];
-	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
-		if (!e) e = window.event;
-		
-		this.Refresh();
-		this.optionsMenu.Hide();
-		
-		Scriptor.event.cancel(e);
-		return false;
-	}, this)});
-	this.optionsMenu.addItem({label : 'sep'});
+/*Scriptor.DataView.prototype.updateOptionsMenu = function() {
 	
+	// TODO: Move to add/remove column
 	for (var n=0; n < this.columns.length; n++) {
 		var className = ''
 		if (this.columns[n].show)
 			className = 'dataViewOptionChecked';
 		this.optionsMenu.addItem({label : this.columns[n].displayName, 'class' : className, onclick : Scriptor.bindAsEventListener(this.toggleColumn, this, n)});
 	}
-};
+};*/
 
 /* showOptionsMenu
 *  This function shows the option menu of a dataView object. For internal use only
@@ -1461,8 +1472,7 @@ Scriptor.DataView.prototype.updateOptionsMenu = function() {
 Scriptor.DataView.prototype.showOptionsMenu = function(e) {
 	if (!e) e = window.event;
 	
-	this.updateOptionsMenu();
-	this.optionsMenu.Show(e);
+	this.optionsMenu.show(e);
 	
 	Scriptor.event.cancel(e);
 	return false;
@@ -1641,7 +1651,7 @@ Scriptor.DataView.prototype.activateResizing = function(e, colNdx) {
 		return false;
 	}
 	
-	var targetTable = document.getElementById(this.div+'_columnsHeader');
+	var targetTable = document.getElementById(this.divId+'_columnsHeader');
 	
 	// calculate the resized column
 	this.resColumnId = colNdx;
@@ -1768,7 +1778,7 @@ Scriptor.DataView.prototype.doResizing = function(e) {
 	}
 	
 	// update dataView HTML header
-	var htmlHeader = document.getElementById(this.div+'_columnsHeader');
+	var htmlHeader = document.getElementById(this.divId+'_columnsHeader');
 	if (htmlHeader) {
 		var cols = htmlHeader.firstChild.getElementsByTagName('li');
 		var offset = 0;
@@ -1794,10 +1804,10 @@ Scriptor.DataView.prototype.doResizing = function(e) {
 	}
 		
 	// update row cells
-	var rows = document.getElementById(this.div+'_body').getElementsByTagName('ul');
+	var rows = document.getElementById(this.divId+'_body').getElementsByTagName('ul');
 	
 	// calculate total width of columns in table
-	document.getElementById(this.div+'_body').style.width = this.__calculateTotalWidth()+'px';	
+	document.getElementById(this.divId+'_body').style.width = this.__calculateTotalWidth()+'px';	
 	
 	for (var n=0; n < rows.length; n++)
 	{

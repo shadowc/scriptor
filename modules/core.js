@@ -149,9 +149,26 @@ var Scriptor = {
 					htmlElement._customEventStacks[evt].stack.push(funcObj);
 				}
 			}
+			
+			return [htmlElement, evt, funcObj];
 		},
 		
-		detach : function(htmlElement, evt, funcObj) {
+		detach : function(/* array | htmlElement, [ evt, funcObj ] */) {
+			var htmlEleemnt, evt, funcObj;
+			
+			if (typeof(arguments[0]) == 'object' && arguments[0].length)
+			{
+				htmlElement = arguments[0][0];
+				evt = arguments[0][1];
+				funcObj = arguments[0][2];
+			}
+			else
+			{
+				htmlElement = arguments[0];
+				evt = arguments[1];
+				funcObj = arguments[2];
+			}
+			
 			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
 			{
 				if (evt.substr(0,2) == 'on')	// strip the 'on' part
