@@ -27,7 +27,13 @@
 			
 			ChildComponent.addChild(new Scriptor.DataView({
 				id : "child_center",
-				paginating: true
+				paginating : true,
+				columns : [
+					{
+						Name : 'Name',
+						Width: 120
+					}
+				]
 			}));
 			
 			TopComponent = new Scriptor.Panel({

@@ -286,6 +286,7 @@ var Component = {
 					
 				if (this.target) {
 					this.visible = false;
+					this.onDOMRemoved();
 					
 					for (var n=0; n < this.components.length; n++) 
 						this.components[n].destroy();
@@ -301,7 +302,7 @@ var Component = {
 					}
 					
 					this.created = false;
-					this.onDOMRemoved();
+					
 					
 					Scriptor.ComponentRegistry.destroy(this);
 				}
@@ -701,12 +702,12 @@ var Component = {
 					{
 						if (this.components[n] === ref)
 						{
+							ref.onDOMRemoved();
+							
 							ref.target.parentNode.removeChild(ref.target);
 							this.components.splice(n, 1);
 							Scriptor.className.remove(ref.target, 'jsComponentChild');
 							ref.parent = null;
-							
-							ref.onDOMRemoved();
 							
 							this.resize();
 							return true;
