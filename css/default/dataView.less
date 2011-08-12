@@ -33,9 +33,13 @@
 				}
 			}
 			
-			&.dataViewSep {
+			&.dataViewSep, &.dataViewFieldSep {
 				width: 2px;
-				background: transparent url(images/table-header-sep.png) no-repeat top left;
+				background: transparent url(images/table-header-sep.png) no-repeat top center;
+			}
+			
+			&.dataViewFieldSep {
+				cursor: col-resize;
 			}
 		}
 	}
@@ -112,6 +116,31 @@
 .dataViewHeader,  {
 	background: #c9c9c9 url(images/table-header-back.jpg) repeat-x;
 	border-bottom: 1px solid #b0b0b0;
+	
+	ul li a {
+		color: @componentForeColor;
+		text-decoration: none;
+		display: block;
+		padding: 0 18px 0 0;
+	}
+	
+	ul li a.dataViewSortAsc {
+		font-weight: bold;
+		background: url(images/drop-up.png) no-repeat center right;
+	}
+	
+	ul li a.dataViewSortDesc {
+		font-weight: bold;
+		background: url(images/drop-up.png) no-repeat center right;
+	}
+	
+	ul li.dataViewColumn:hover {
+		background: #c9c9c9;
+	}
+	
+	ul li.dataViewColumnHidden {
+		display: none;
+	}
 }
 
 .dataViewFooter {
@@ -127,6 +156,57 @@
 
 .dataViewBody {
 	overflow: hidden;
+	
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		height: 20px;
+		overflow: hidden;
+		border-bottom: 1px dotted @panelBorderColor;
+		
+		:hover, &.dataViewRowOdd:hover {
+			background: #FFFCE8;
+		}
+		
+		&.dataViewRowSelected {
+			background: @menuSelBgColor;
+			color: @menuSelForeColor;
+			
+			* {
+				color: @menuSelForeColor;
+			}
+		}
+		
+		&.dataViewRowOdd {
+			background: #F2F2F2;
+		}
+		
+		li {
+			overflow: hidden;
+			float: left;
+			padding: 2px 6px 2px 3px;
+			font-size: 12px;
+			cursor: default;
+			height: 16px;
+			border-right: 1px dotted @panelBorderColor;
+			
+			&.dataViewCellHidden {
+				display: none;
+			}
+		}
+		
+		li.dataViewMultiselectCell {
+			padding-left: 2px;
+			padding-right: 1px;
+			width: 20px;
+			border-right: none;
+			
+			input {
+				margin: 2px;
+			}
+		}
+	}
 }
 
 .dataViewHeaderMenu {

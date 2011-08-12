@@ -25,16 +25,30 @@
 				
 			}));
 			
-			ChildComponent.addChild(new Scriptor.DataView({
+			myDataView = new Scriptor.DataView({
 				id : "child_center",
 				paginating : true,
 				columns : [
 					{
-						Name : 'Name',
+						Name : 'id',
+						Width : 30,
+						Type : 'num',
+						show : false
+					},
+					{
+						Name : 'FirstName',
+						displayName : "Name",
+						Width: 120
+					},
+					{
+						Name : 'LastName',
+						displayName : "Last Name",
 						Width: 120
 					}
 				]
-			}));
+			});
+			
+			ChildComponent.addChild(myDataView);
 			
 			TopComponent = new Scriptor.Panel({
 				region : "top",
@@ -74,6 +88,10 @@
 			LeftComponent._tabs[2].pane.setContent('If you close this tab I will be destroyed!');
 			
 			document.getElementById('scr_version').innerHTML = Scriptor.version;
+			
+			myDataView.totalRows = 2;
+			myDataView.addRow({'id' : 1, 'FirstName' : 'Matias', 'LastName' : 'Jose'});
+			myDataView.addRow({'id' : 2, 'FirstName' : 'Roberto', 'LastName' : 'Perez'});
 		});
 		
 	</script>
