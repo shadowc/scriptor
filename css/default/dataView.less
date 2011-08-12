@@ -113,34 +113,43 @@
 	
 }
 
-.dataViewHeader,  {
+.dataViewHeader {
 	background: #c9c9c9 url(images/table-header-back.jpg) repeat-x;
 	border-bottom: 1px solid #b0b0b0;
 	
-	ul li a {
-		color: @componentForeColor;
-		text-decoration: none;
-		display: block;
-		padding: 0 18px 0 0;
+	ul {
+		padding: 0 0 0 3px;
+		
+		li a {
+			color: @componentForeColor;
+			text-decoration: none;
+			display: block;
+			padding: 0 18px 0 0;
+		}
+		
+		li a.dataViewSortAsc {
+			font-weight: bold;
+			background: url(images/drop-up.png) no-repeat center right;
+		}
+		
+		li a.dataViewSortDesc {
+			font-weight: bold;
+			background: url(images/drop-down.png) no-repeat center right;
+		}
+		
+		li.dataViewColumn:hover {
+			background: #c9c9c9;
+		}
+		
+		li.dataViewColumnHidden {
+			display: none;
+		}
 	}
 	
-	ul li a.dataViewSortAsc {
-		font-weight: bold;
-		background: url(images/drop-up.png) no-repeat center right;
+	&.dataViewMultiselect ul {
+		padding: 0;
 	}
 	
-	ul li a.dataViewSortDesc {
-		font-weight: bold;
-		background: url(images/drop-down.png) no-repeat center right;
-	}
-	
-	ul li.dataViewColumn:hover {
-		background: #c9c9c9;
-	}
-	
-	ul li.dataViewColumnHidden {
-		display: none;
-	}
 }
 
 .dataViewFooter {
@@ -185,7 +194,7 @@
 		li {
 			overflow: hidden;
 			float: left;
-			padding: 2px 6px 2px 3px;
+			padding: 2px 7px 2px 2px;
 			font-size: 12px;
 			cursor: default;
 			height: 16px;
@@ -194,6 +203,13 @@
 			&.dataViewCellHidden {
 				display: none;
 			}
+		}
+		
+	}
+	
+	&.dataViewMultiselect ul {
+		li {
+			padding: 2px 6px 2px 3px;
 		}
 		
 		li.dataViewMultiselectCell {

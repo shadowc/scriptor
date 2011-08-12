@@ -294,6 +294,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   background:#c9c9c9 url(images/table-header-back.jpg) repeat-x;
   border-bottom:1px solid #b0b0b0;
 }
+.dataViewHeader ul { padding:0 0 0 3px; }
 .dataViewHeader ul li a {
   color:#333333;
   text-decoration:none;
@@ -310,6 +311,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 }
 .dataViewHeader ul li.dataViewColumn:hover { background:#c9c9c9; }
 .dataViewHeader ul li.dataViewColumnHidden { display:none; }
+.dataViewHeader.dataViewMultiselect ul { padding:0; }
 .dataViewFooter {
   background:#c9c9c9 url(images/table-footer-back.jpg) repeat-x;
   border-top:1px solid #b0b0b0;
@@ -338,20 +340,21 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 .dataViewBody ul li {
   overflow:hidden;
   float:left;
-  padding:2px 6px 2px 3px;
+  padding:2px 7px 2px 2px;
   font-size:12px;
   cursor:default;
   height:16px;
   border-right:1px dotted #aaaaaa;
 }
 .dataViewBody ul li.dataViewCellHidden { display:none; }
-.dataViewBody ul li.dataViewMultiselectCell {
+.dataViewBody.dataViewMultiselect ul li { padding:2px 6px 2px 3px; }
+.dataViewBody.dataViewMultiselect ul li.dataViewMultiselectCell {
   padding-left:2px;
   padding-right:1px;
   width:20px;
   border-right:none;
 }
-.dataViewBody ul li.dataViewMultiselectCell input { margin:2px; }
+.dataViewBody.dataViewMultiselect ul li.dataViewMultiselectCell input { margin:2px; }
 .dataViewHeaderMenu {
   position:absolute;
   display:block;

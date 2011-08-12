@@ -5663,14 +5663,9 @@ Scriptor.DataView = function(opts) {
 		for (var n=0; n < this.columns.length; n++)
 			this._addColumnToUI(this.columns[n], n);
 		
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show) {
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_columnHeader_'+n), 'click', Scriptor.bindAsEventListener(this.__setOrder, this, n)));
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_sep_' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n)));
-			}
-		}
-		
 		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
+		this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
+		this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
 		this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
 		
 		this.updateRows(true);
@@ -5710,7 +5705,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	}
 	
 	// Create table header
-	dvTemplate += '<div class="dataViewHeader dataViewToolbar" id="'+this.divId+'_columnsHeader">';
+	dvTemplate += '<div class="dataViewHeader' + (this.multiselect ? ' dataViewMultiselect' : '') + ' dataViewToolbar" id="'+this.divId+'_columnsHeader">';
 	dvTemplate += '<ul id="'+this.divId+'_columnsUl">';
 	
 	if (this.multiselect) {
@@ -5732,7 +5727,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		bodyHeight = (this.height - 40);
 		
 	dvTemplate += '<div id="'+this.divId+'_outerBody" class="dataViewOuterBody">';
-	dvTemplate += '<div class="dataViewBody" id="'+this.divId+'_body"></div>';
+	dvTemplate += '<div class="dataViewBody' + (this.multiselect ? ' dataViewMultiselect' : '') + '" id="'+this.divId+'_body"></div>';
 	dvTemplate += '</div>';
 	
 	// Create footer
@@ -5967,7 +5962,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 	
 	this.optionsMenu.addItem({
 		label : column.Name,
-		onclick : Scriptor.bind(this.toggleColumn, this, ndx),
+		onclick : Scriptor.bindAsEventListener(function(e, ndx) {this.toggleColumn(ndx);}, this, ndx),
 		checked : column.show
 	}, ndx+2);
 	
@@ -6047,7 +6042,6 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 			newCheckboxTpl += 'checked="checked" ';
 		newCheckboxTpl += '/></li>';
 		newLi.innerHTML = newCheckboxTpl;
-		
 			
 		newUl.appendChild(newLi);
 	}
@@ -6466,12 +6460,6 @@ Scriptor.DataView.prototype.clearSelection = function()
 Scriptor.DataView.prototype.__selectAll = function(e) {
 	if (!e) e = window.event;
 	
-	if (!this.enabled)
-	{
-		Scriptor.event.cancel(e);
-		return;
-	}
-	
 	var elem = document.getElementById(this.divId + '_selectAll');
 	
 	if (this.rows.length) {
@@ -6515,7 +6503,32 @@ Scriptor.DataView.prototype._UISelectAll = function(check) {
 *  Internal use only, to reflect actual selection patern in DOM
 */
 Scriptor.DataView.prototype._UIUpdateSelection = function() {
-	// TODO
+	var rows = this._cached.rows_body.getElementsByTagName('ul');
+	
+	for (var n=0; n < rows.length; n++)
+	{
+		var selected = false;
+		if (!this.multiselect)
+		{
+			if (this.selectedRow == n)
+				selected = true;
+		}
+		else
+		{
+			for (var a=0; a < this.selectedRows.length; a++)
+			{
+				if (this.selectedRows[a] == n)
+				{
+					selected = true;
+					break;
+				}
+			}
+		}
+		
+		if (this.multiselect)
+			rows[n].childNodes[0].firstChild.checked = selected;
+		Scriptor.className[(selected ? "add" : "remove")](rows[n], "dataViewRowSelected");
+	}
 };
 
 /*
@@ -6760,28 +6773,11 @@ Scriptor.DataView.prototype.__refreshFooter = function() {
 *  This functions executes when clicking on a dataView column name and sets row order.
 *  Ordering way will be switched upon subsecuent calls to __setOrder()
 */
-Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
+Scriptor.DataView.prototype.__setOrder = function (colNdx) {
 	if (!this.inDOM)
 	{
 		Scriptor.error.report("Cant sort a DataView not in DOM");
-		Scriptor.event.cancel(e);
-		return false;
-	}
-	
-	if (arguments.length == 1)
-	{
-		colNdx = e;
-		e = {};
-	}
-	else
-	{
-		if (!e) e = window.event || {};
-	}
-	
-	if (!this.enabled)
-	{
-		Scriptor.event.cancel(e);
-		return false;
+		return;
 	}
 	
 	var colName = this.columns[colNdx].Name;
@@ -6820,17 +6816,88 @@ Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
 		}
 	}
 	
-	Scriptor.event.cancel(e);
-	return false;
+	return;
 };
 
 /*
-* __selectRow()
+* _onRowBodyClicked()
 *  This function executes when clicking on dataView row body and checks how to proceed
 *  depending on the target (selectRow, or markRow)
 */
 Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
+	if (!e) e = window.event;
 	
+	var target = e.target || e.srcElement;
+	
+	var multiselectId = this.divId + "_selectRow_";
+	
+	if (target.nodeName.toLowerCase() == 'input' && target.id.substr(0, multiselectId.length) == multiselectId)
+	{
+		var rowId = target.id.substr(target.id.lastIndexOf('_')+1);
+		for (var n=0; n < this.rows.length; n++)
+		{
+			if (this.rows[n].id == rowId)
+			{
+				this.__markRow(e, n);
+				break;
+			}
+		}
+	}
+	else
+	{
+		while (target.nodeName.toLowerCase() != 'ul')
+		{
+			if (target == this._cached.rows_body)	// click out of range
+				return;
+			
+			target = target.parentNode;
+		}
+		
+		var rowId = target.id.substr(target.id.lastIndexOf('_')+1);
+		for (var n=0; n < this.rows.length; n++)
+		{
+			if (this.rows[n].id == rowId)
+			{
+				this.__selectRow(e, n);
+				break;
+			}
+		}
+	}
+};
+
+/*
+* _onHeaderColumnClicked()
+*  This function executes when clicking on dataView row body and checks how to proceed
+*  depending on the target (selectRow, or markRow)
+*/
+Scriptor.DataView.prototype._onHeaderColumnClicked = function(e) {
+	if (!e) e = window.event;
+	
+	var target = e.target || e.srcElement;
+	
+	if (target.nodeName.toLowerCase() == 'a')
+	{
+		colNdx = Number(target.id.substr(target.id.lastIndexOf('_')+1));
+		if (!isNaN(colNdx))
+		{
+			this.__setOrder(colNdx);
+		}
+	}
+	
+};
+
+
+/*
+* _onHeaderColumnMousedown()
+*  This function executes when clicking on dataView row body and checks how to proceed
+*  depending on the target (selectRow, or markRow)
+*/
+Scriptor.DataView.prototype._onHeaderColumnMousedown = function(e) {
+	/*for (var n=0; n < this.columns.length; n++) {
+		
+		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_sep_' + n), 'mousedown', Scriptor.bindAsEventListener(this.activateResizing, this, n)));
+	}*/
+
 };
 
 /*
@@ -6839,12 +6906,6 @@ Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
 */
 Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 	if (!e) e = window.event;
-	
-	if (!this.visible || !this.enabled)
-	{
-		Scriptor.event.cancel(e, true);
-		return false;
-	}
 	
 	e.selectedRow = this.selectedRow;
 	if (this.multiselect)
@@ -6885,31 +6946,19 @@ Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 		Scriptor.event.cancel(e, true);
 		return false;
 	}
-	
-	var colStyles = [];
-	if (this.multiselect)	// add dummy style for the first cell
-		colStyles.push('MultiselectCell');
-	
-	for (var n=0; n < this.columns.length; n++)
-		if (this.columns[n].show)
-			colStyles.push(this.columns[n].Type);
 		 
-	var rows = document.getElementById(this.divId+'_body').getElementsByTagName('ul');
+	var rows = this._cached.rows_body.getElementsByTagName('ul');
 	
 	if (rowNdx != -1) {
 		if (!this.multiselect) {
 			if (this.selectedRow != -1) {
-				for (n=0; n < rows[this.selectedRow].childNodes.length; n++) 
-					rows[this.selectedRow].childNodes[n].className = 'dataView' + colStyles[n];
+				Scriptor.className.remove(rows[this.selectedRow], "dataViewRowSelected");
 			}
 		}
 		else {
 			for (var a = 0; a < this.selectedRows.length; a++) {
-				for (n=0; n < rows[this.selectedRows[a]].childNodes.length; n++) {
-					if (n==0)
-						rows[this.selectedRows[a]].childNodes[n].firstChild.checked = false;
-					rows[this.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n];
-				}
+				rows[this.selectedRows[a]].childNodes[0].firstChild.checked = false;
+				Scriptor.className.remove(rows[this.selectedRows[a]], "dataViewRowSelected");
 			}
 		}
 		
@@ -6919,8 +6968,7 @@ Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 		else {
 			if (!this.multiselect) {
 				this.selectedRow = rowNdx;
-				for (n=0; n < rows[rowNdx].childNodes.length; n++) 
-					rows[rowNdx].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
+				Scriptor.className.add(rows[rowNdx], "dataViewRowSelected");
 			}
 			else {
 				
@@ -6978,11 +7026,8 @@ Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 				}
 				
 				for (var a = 0; a < this.selectedRows.length; a++) {
-					for (n=0; n < rows[this.selectedRows[a]].childNodes.length; n++) {
-						if (n==0)
-							rows[this.selectedRows[a]].childNodes[n].firstChild.checked = true;
-						rows[this.selectedRows[a]].childNodes[n].className = 'dataView' + colStyles[n] + ' selectedRow';
-					}
+					rows[this.selectedRows[a]].childNodes[0].firstChild.checked = true;
+					Scriptor.className.add(rows[this.selectedRows[a]], "dataViewRowSelected");
 				}
 			}
 		}
@@ -6999,12 +7044,6 @@ Scriptor.DataView.prototype.__selectRow = function (e, rowNdx) {
 Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 	if (!e) e = window.event;
 	
-	if (!this.visible || !this.enabled)
-	{
-		Scriptor.event.cancel(e, true);
-		return false;
-	}
-	
 	e.selectedRow = this.selectedRow;
 	if (this.multiselect)
 		e.selectedRows = this.selectedRows;
@@ -7018,12 +7057,6 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 		return false;
 	}
 	
-	var colStyles = [];
-	colStyles.push('MultiselectCell');	// first cell is multiselect checkbox
-	for (var n=0; n < this.columns.length; n++)
-		if (this.columns[n].show)
-			colStyles.push(this.columns[n].Type);
-	
 	var rowId = this.rows[rowNdx].id;
 	
 	elem = document.getElementById(this.divId + '_selectRow_' + rowId);
@@ -7032,8 +7065,7 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 		this.selectedRow = rowNdx;
 				
 		var row = document.getElementById(this.divId + '_row_' + rowId);
-		for (var a = 0; a < row.childNodes.length; a++) 
-			row.childNodes[a].className = 'dataView' + colStyles[a] + ' selectedRow';
+		Scriptor.className.add(row, "dataViewRowSelected");
 		
 	}
 	else {		// remove row from selected rows list
@@ -7046,9 +7078,7 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 					this.selectedRow = -1;
 			
 				var row = document.getElementById(this.divId + '_row_' + rowId);
-				for (var a = 0; a < row.childNodes.length; a++) {
-					row.childNodes[a].className = 'dataView' + colStyles[a];
-				}
+				Scriptor.className.remove(row, "dataViewRowSelected");
 				break;
 			}
 		}
@@ -7096,8 +7126,10 @@ Scriptor.DataView.prototype.toggleColumn = function(colNdx) {
 	for (var n=0; n < rows.length; n++)
 	{
 		baseNdx = this.multiselect ? 1 : 0;
-		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](rows[n].childNodes[baseNdx + colNdx], "dataViewRowHidden");
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](rows[n].childNodes[baseNdx + colNdx], "dataViewCellHidden");
 	}
+	
+	this.optionsMenu.checkItem(colNdx+2, this.columns[colNdx].show);
 };
 
 /*
