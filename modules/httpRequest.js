@@ -19,7 +19,7 @@
 *  example (this is automatically provided by httprequest):
 *  	[ ['Content-Type', 'text/plain'] ]
 */
-httpRequest = Scriptor.httpRequest = function(opts) {
+Scriptor.httpRequest = function(opts) {
 	var localOpts = {
 		ApiCall : null,
 		method : 'POST',
@@ -85,7 +85,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	this.createRequest();
 };
 
-httpRequest.prototype = {
+Scriptor.httpRequest.prototype = {
 	/* httpRequest.createRequest 
 	*
 	*  Creates the http_request internal object. For internal use only

@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 0,
-		instance : "alpha 3",
+		instance : "alpha 4",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -2465,7 +2465,7 @@ galleryViewConnector.prototype = {
 *  example (this is automatically provided by httprequest):
 *  	[ ['Content-Type', 'text/plain'] ]
 */
-httpRequest = Scriptor.httpRequest = function(opts) {
+Scriptor.httpRequest = function(opts) {
 	var localOpts = {
 		ApiCall : null,
 		method : 'POST',
@@ -2531,7 +2531,7 @@ httpRequest = Scriptor.httpRequest = function(opts) {
 	this.createRequest();
 };
 
-httpRequest.prototype = {
+Scriptor.httpRequest.prototype = {
 	/* httpRequest.createRequest 
 	*
 	*  Creates the http_request internal object. For internal use only
@@ -2630,7 +2630,7 @@ httpRequest.prototype = {
 * httpRequest language pack Spanish
 */
 
-httpRequest.prototype.lang = {
+Scriptor.httpRequest.prototype.lang = {
 	errors : { createRequestError : 'Error creando objeto Ajax!',
 		requestHandleError : 'Se ha producido un error al enviar un objeto Ajax.\nPor favor, inténtelo nuevamente más tarde.' }
 };// JavaScript Document
