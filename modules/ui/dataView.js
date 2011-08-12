@@ -307,7 +307,9 @@ Scriptor.DataView = function(opts) {
 		}
 		
 		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
+		this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
 		
+		this.updateRows(true);
 	};
 	
 	this.DOMRemovedImplementation = function() {
@@ -332,7 +334,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	// Create table paginating header
 	if (this.paginating) {
 		dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar" id="'+this.divId+'_paginationHeader"><ul><li class="first">';
-		dvTemplate += '<label class="dataViewPaginationPages">' + this.lang.pageStart + (this.curPage + 1) +
+		dvTemplate += '<label class="dataViewPaginationPages" id="'+this.divId+'_paginationLabel">' + this.lang.pageStart + (this.curPage + 1) +
 							this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 		dvTemplate += '</label></li><li>';
 		dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
@@ -392,7 +394,6 @@ Scriptor.DataView.prototype._checkCache = function() {
 			headerUl : document.getElementById(this.divId+'_columnsUl'),
 			outer_body : document.getElementById(this.divId+'_outerBody'),
 			rows_body : document.getElementById(this.divId+'_body'),
-			body : document.getElementById(this.divId+'_body'),
 			footer : document.getElementById(this.divId+'_footer')
 		};
 	}
@@ -591,7 +592,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 		if (ndx >= 0 && (baseNdx + (ndx*2)) < columns.length)
 		{
 			this._cached.headerUl.insertBefore(li, columns[baseNdx + (ndx*2)]);
-			this._cached.headerUl.insertBEfore(li2, colunms[baseNdx + (ndx*2)+1]);
+			this._cached.headerUl.insertBefore(li2, columns[baseNdx + (ndx*2)+1]);
 		}
 		else
 		{
@@ -604,7 +605,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 		label : column.Name,
 		onclick : Scriptor.bind(this.toggleColumn, this, ndx),
 		checked : column.show
-	});
+	}, ndx+2);
 	
 	if (this.rows.length) {
 		for (var n=0; n < this.rows.length; n++)
@@ -624,14 +625,13 @@ Scriptor.DataView.prototype._removeColumnFromUI = function(ndx) {
 	
 	if (ndx >= 0 && (baseNdx + (ndx*2)) < columns.length)
 	{
-		this._cached.headerUl.removeChild(columns[ndx]);
-		this._cached.headerUl.removeChild(columns[ndx+1]);
+		this._cached.headerUl.removeChild(columns[baseNdx+(ndx*2)]);
+		this._cached.headerUl.removeChild(columns[baseNdx+(ndx*2)]);
 	}
 	
 	this.optionsMenu.removeItem(ndx+2);
 	
 	if (this.rows.length) {
-		var rowsUls = this._cached.rows_body.getElementsByTagName('ul');
 		for (var n=0; n < this.rows.length; n++)
 		{
 			this._removeCellFromUI(this.rows[n].id, ndx);
@@ -784,14 +784,15 @@ Scriptor.DataView.prototype._addCellToUI = function(rowId, colName, ndx) {
 *  Internal use only, to dynamically add/remove cells on UI
 */
 Scriptor.DataView.prototype._removeCellFromUI = function(rowId, ndx) {
+	var baseNdx = this.multiselect ? 1 : 0;
 	var rowsUl = document.getElementById(this.divId + "_row_" + rowId);
 	if (rowsUl)	// just make sure the row is there
 	{
 		var cells = rowsUl.getElementsByTagName('li');
 		
-		if (ndx > 0 && ndx < cells.length)
+		if (ndx > 0 && (baseNdx+ndx) < cells.length)
 		{
-			rowsUl.removeChild(cells[ndx]);
+			rowsUl.removeChild(cells[baseNdx+ndx]);
 		}
 	}
 };
@@ -854,9 +855,7 @@ Scriptor.DataView.prototype.addRow = function(rowObj, ndx) {
 				this.selectedRows[n]++;
 		}
 		
-	// TODO: Refresh selection changes
-	/*if (this.visible) 
-		this.updateRows();*/
+	this._UIUpdateSelection();
 };
 
 /*
@@ -910,9 +909,7 @@ Scriptor.DataView.prototype.deleteRow = function(identifier) {
 			}
 		}
 	
-	// TODO: reflect selection changes
-	/*if (rowNdx != -1 && this.visible) 
-		this.updateRows();*/
+	this._UIUpdateSelection();
 };
 
 /*
@@ -1022,7 +1019,7 @@ Scriptor.DataView.prototype.refresh = function() {
 	if (!e.returnValue)
 		return;
 	
-	if (this.created)
+	if (this.inDOM)
 		this.updateRows();
 };
 
@@ -1032,10 +1029,14 @@ Scriptor.DataView.prototype.refresh = function() {
 *   usefull for assync updates
 */
 Scriptor.DataView.prototype.setLoading = function(val) {
-	var body = document.getElementById(this.divId + '_body');
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("Cant message on DataView not in DOM");
+		return;
+	}
 	
-	body.style.display = val ? 'none' : '';
-	body.parentNode.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
+	this._cached.rows_body.style.display = val ? 'none' : '';
+	this._cached.outer_body.className = val ? 'dataViewLoading' : 'dataViewOuterBody';
 	
 };
 
@@ -1045,24 +1046,30 @@ Scriptor.DataView.prototype.setLoading = function(val) {
 * 	If msg is set to false or not present, it will restore dataView to normal
 */
 Scriptor.DataView.prototype.setMessage = function(msg) {
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("Cant message on DataView not in DOM");
+		return;
+	}
+	
 	// false, null, or msg not present resets dataView to normal
 	if (msg === false || msg === null || typeof(msg) != "string")
 	{
 		if (document.getElementById(this.divId + '_message'))
-			document.getElementById(this.divId + '_message').parentNode.removeChild(document.getElementById(this.divId + '_message'));
+			this._cached.outer_body.removeChild(document.getElementById(this.divId + '_message'));
 			
-		document.getElementById(this.divId + '_body').style.display = '';
+		this._cached.rows_body.style.display = '';
 	}
 	else	// if string passed, we show a message
 	{
-		document.getElementById(this.divId + '_body').style.display = 'none';
+		this._cached.rows_body.style.display = 'none';
 		var msgDiv;
 		if (!document.getElementById(this.divId + '_message'))
 		{
 			msgDiv = document.createElement('div');
 			msgDiv.id = this.divId + '_message';
 			msgDiv.className = 'dataViewMessageDiv';
-			document.getElementById(this.divId + '_body').parentNode.appendChild(msgDiv);
+			this._cached.outer_body.appendChild(msgDiv);
 		}
 		else
 		{
@@ -1083,8 +1090,9 @@ Scriptor.DataView.prototype.clearSelection = function()
 	this.selectedRows = [];
 	
 	document.getElementById(this.divId + '_selectAll').checked = false;
-	// TODO: refresh selection change
-	// this.updateRows();
+	
+	if (this.inDOM)
+		this._UISelectAll(false);
 };
 
 /*
@@ -1110,20 +1118,40 @@ Scriptor.DataView.prototype.__selectAll = function(e) {
 			for (var n=0; n < this.rows.length; n++)
 				this.selectedRows.push(n);
 				
-			// TODO: reflect selection change
-			//this.updateRows();
+			this._UISelectAll(true);
 		}
 		else {
 			this.selectedRow = -1;
 			this.selectedRows = [];
 			
-			// TODO: reflect selection change
-			//this.updateRows();
+			this._UISelectAll(false);
 		}
 	}
 	else {
 		elem.checked = false;
 	}
+};
+
+/*
+* DataView._UISelectAll()
+*  Internal use only, performs a select all/none on UI
+*/
+Scriptor.DataView.prototype._UISelectAll = function(check) {
+	var rows = this._cached.rows_body.getElementsByTagName('ul');
+	
+	for (var n=0; n < rows.length; n++)
+	{
+		Scriptor.className[(check ? "add" : "remove")](rows[n], "dataViewRowSelected");
+		rows[n].firstChild.firstChild.checked = check;
+	}
+};
+
+/*
+* DataView._UIUpdateSelection()
+*  Internal use only, to reflect actual selection patern in DOM
+*/
+Scriptor.DataView.prototype._UIUpdateSelection = function() {
+	// TODO
 };
 
 /*
@@ -1152,8 +1180,7 @@ Scriptor.DataView.prototype.__goToPage = function (e) {
 			this.selectedRow = -1;
 			this.selectedRows = [];
 			
-			// TODO: ?
-			//this.Show(true);
+			this.updateRows(true);
 		}
 		
 		document.getElementById(this.divId + '_pageInput').focus();
@@ -1190,8 +1217,7 @@ Scriptor.DataView.prototype.__goToPagePrev = function (e) {
 		this.selectedRow = -1;
 		this.selectedRows = [];
 			
-		// TODO: ?
-		//this.Show(true);
+		this.updateRows(true);
 	}
 	
 	Scriptor.event.cancel(e);
@@ -1218,8 +1244,7 @@ Scriptor.DataView.prototype.__goToPageNext = function (e) {
 		this.selectedRow = -1;
 		this.selectedRows = [];
 			
-		// TODO: ?
-		//this.Show(true);
+		this.updateRows(true);
 	}
 	
 	Scriptor.event.cancel(e);
@@ -1244,96 +1269,31 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 	if (!this._oldScrollTop)
 		this._oldScrollTop = this._cached.outer_body.scrollTop;
 		
+	if (clear)	// remove all rows, we're starting over!
+		this._cached.rows_body.innerHTML = '';
 	
+	// remove all rows that were deleted in memory
+	var actualRows = this._cached.rows_body.getElementsByTagName('ul');
+	for (var n=0; n < actualRows.length; n++)
+	{
+		var rowId = actualRows[n].id.substr(actualRows[n].id.lastIndexOf('_')+1);
+		if (!this.getById(rowId))	// row does not exist!
+		{
+			this._cached.rows_body.removeChild(actualRows[n]);
+			n--;
+		}
+	}
+	
+	// add rows that don't exist!
 	for (var n=0; n < this.rows.length; n++) {		
-		
-		var rowId = this.rows[n].id;
-		var firstCol = true;
-		rTemplate += '<ul id="' + this.divId + '_row_' + rowId + '">';
-		
-		if (this.multiselect) {
-			var check = false;
-			rTemplate += '<li style="width: ' + (this.style.multiSelectColumnWidth + this.style.sepWidth -3) + 'px;" class="dataViewMultiselectCell';
-			if (!this.multiselect) {
-				if (this.selectedRow == n) {
-					rTemplate += ' selectedRow';
-					check = true;
-				}
-			}
-			else {
-				for (var a=0; a < this.selectedRows.length; a++) {
-					if (this.selectedRows[a] == n) {
-						rTemplate += ' selectedRow';
-						check = true;
-						break;
-					}
-				}
-			}
-			
-			rTemplate += '">';
-			rTemplate += '<input type="checkbox" id="' + this.divId + '_selectRow_' + rowId + '" class="dataViewCheckBox" ';
-			if (check)
-				rTemplate += 'checked="checked" ';
-			rTemplate += '/></li>';
+		if (!document.getElementById(this.divId+"_row_"+this.rows[n].id))
+		{
+			this._addRowToUI(n);
 		}
-		
-		for (var a=0; a < this.columns.length; a++) {
-			if (this.columns[a].show) {
-				
-				var colWidth = (this.columns[a].Width - this.style.cellHorizontalPadding - 2);
-				if (firstCol && !this.multiselect) {
-					colWidth -= 1;
-					firstCol = false;
-				}
-				else {
-					colWidth += 1;
-				}
-				
-				rTemplate += '<li class="dataView' + this.columns[a].Type;
-				
-				if (!this.multiselect) {
-					if (this.selectedRow == n) {
-						rTemplate += ' selectedRow';
-						check = true;
-					}
-				}
-				else {
-					for (var i=0; i < this.selectedRows.length; i++) {
-						if (this.selectedRows[i] == n) {
-							rTemplate += ' selectedRow';
-							check = true;
-							break;
-						}
-					}
-				}
-						
-				rTemplate += '" id="' + this.divId + '_cell_' + rowId + '_' + a + '" style="width: ' + colWidth + 'px;"';
-				if (this.columns[a].showToolTip) 
-					rTemplate += ' title="' + this.rows[n][this.columns[a].Name] + '"';
-				rTemplate += '>';
-				
-				if (typeof(this.columns[a].Format) == 'function') {
-					var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
-					if (typeof(funcRet) == 'string')
-						rTemplate += funcRet;
-					
-				}
-				else {
-					rTemplate += this.rows[n][this.columns[a].Name];
-				}
-				
-				rTemplate += '</li>';
-			}
-		}
-		
-		rTemplate += '</ul>';
-		
-		
 	}	
 	
-	
 	// assign onclick events and search for complex formatted cells
-	for (var n=0; n < this.rows.length; n++) {
+	/*for (var n=0; n < this.rows.length; n++) {
 		var rowId = this.rows[n].id;
 		
 		if (this.multiselect)
@@ -1350,7 +1310,7 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 				}
 			}
 		}
-	}
+	}*/
 	
 	if (this.selectedRow >= this.rows.length)
 		this.selectedRow = -1;
@@ -1362,8 +1322,11 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 		}	
 	}
 	
-	// update scrolling
-	if (this.selectedRow != -1) {
+	if (!clear)
+		this._UIUpdateSelection();
+	
+	// TODO: update scrolling
+	/*if (this.selectedRow != -1) {
 		var windowMin = this._oldScrollTop ? this._oldScrollTop : 0;
 		var windowHeight = parseInt(targetTable.parentNode.style.height);
 		var step = (this.style.rowHeight + this.style.cellVerticalPadding) * this.selectedRow;
@@ -1378,7 +1341,7 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 	}
 	else {
 		targetTable.parentNode.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
-	}
+	}*/
 	
 	
 	this.__refreshFooter();
@@ -1410,7 +1373,9 @@ Scriptor.DataView.prototype.__refreshFooter = function() {
 		}
 	}
 	else {
-		document.getElementById(this.divId + '_totalPagesHandler').innerHTML = this.getTotalPages();
+		
+		document.getElementById(this.divId+'_paginationLabel').innerHTML = this.lang.pageStart + (this.curPage + 1) +
+			this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 		
 		if (this.rows.length == 0) {
 			fTemplate += this.lang.noRows;
@@ -1429,12 +1394,25 @@ Scriptor.DataView.prototype.__refreshFooter = function() {
 /*
 * __setOrder()
 *  This functions executes when clicking on a dataView column name and sets row order.
-*  Pass divId the id property of the HTMLElement asociated with the dataView object and
-*  colName the javascript Name of the column in which order must be performed. Ordering way
-*  will be switched upon subsecuent calls to __setOrder()
+*  Ordering way will be switched upon subsecuent calls to __setOrder()
 */
 Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
-	if (!e) e = window.event;
+	if (!this.inDOM)
+	{
+		Scriptor.error.report("Cant sort a DataView not in DOM");
+		Scriptor.event.cancel(e);
+		return false;
+	}
+	
+	if (arguments.length == 1)
+	{
+		colNdx = e;
+		e = {};
+	}
+	else
+	{
+		if (!e) e = window.event || {};
+	}
 	
 	if (!this.enabled)
 	{
@@ -1444,7 +1422,13 @@ Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
 	
 	var colName = this.columns[colNdx].Name;
 	
-	if (colNdx != -1) {		
+	if (colNdx >= 0 && colNdx < this.columns.length) {
+		var baseNdx = this.multiselect ? 2 : 0;
+		var columns = this._cached.headerUl.getElementsByTagName('li');
+		
+		var oldColNdx = this.__findColumn(this.orderBy);	
+		Scriptor.className.remove(columns[baseNdx+(oldColNdx*2)].firstChild, (this.orderWay == 'ASC' ? "dataViewSortAsc" : "dataViewSortDesc"));
+			
 		if (this.orderBy != colName) {
 			this.orderBy = colName;
 			this.orderWay = 'ASC';
@@ -1456,16 +1440,17 @@ Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
 				this.orderWay = 'ASC';
 		}
 		
+		Scriptor.className.add(columns[baseNdx+(colNdx*2)].firstChild, (this.orderWay == 'ASC' ? "dataViewSortAsc" : "dataViewSortDesc"));
+		
 		if (!this.paginating) {
 			this.__sort(0);
 			
-			if (this.visible) {
-				this.Show(false);
-				this.updateRows();
+			if (this.inDOM) {
+				this.updateRows(true);
 			}
 		}
 		else {
-			if (this.visible) {
+			if (this.inDOM) {
 				this.refresh();
 			}
 		}
@@ -1473,6 +1458,15 @@ Scriptor.DataView.prototype.__setOrder = function (e, colNdx) {
 	
 	Scriptor.event.cancel(e);
 	return false;
+};
+
+/*
+* __selectRow()
+*  This function executes when clicking on dataView row body and checks how to proceed
+*  depending on the target (selectRow, or markRow)
+*/
+Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
+	
 };
 
 /*
@@ -1699,24 +1693,6 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 	return true;
 };
 
-/*
-*  dataView.updateOptionsMenu()
-*   When [dataView.visible = true] which is a result of calling dataView.Show(), you can then call
-*   dataView.updateOptiosMenu() directly to update the options menu only without spending additional
-*   resources on the dataView frame rendering. This is usefull when changing the property
-*   dataView.optionsMenuWidth to apply these changes.
-*/
-/*Scriptor.DataView.prototype.updateOptionsMenu = function() {
-	
-	// TODO: Move to add/remove column
-	for (var n=0; n < this.columns.length; n++) {
-		var className = ''
-		if (this.columns[n].show)
-			className = 'dataViewOptionChecked';
-		this.optionsMenu.addItem({label : this.columns[n].displayName, 'class' : className, onclick : Scriptor.bindAsEventListener(this.toggleColumn, this, n)});
-	}
-};*/
-
 /* showOptionsMenu
 *  This function shows the option menu of a dataView object. For internal use only
 */
@@ -1734,8 +1710,7 @@ Scriptor.DataView.prototype.showOptionsMenu = function(e) {
 *   Toggles a column on or off. OptionsMenu feature. Use dataColumn.show property along with
 *   dataView.Show(false) instead to change column configuration manually.
 */
-Scriptor.DataView.prototype.toggleColumn = function(e, colNdx) {
-	if (!e) e = window.event;
+Scriptor.DataView.prototype.toggleColumn = function(colNdx) {
 	
 	if (this.columns[colNdx].show) {
 		this.columns[colNdx].show = false;
@@ -1744,12 +1719,21 @@ Scriptor.DataView.prototype.toggleColumn = function(e, colNdx) {
 		this.columns[colNdx].show = true;
 	}
 	
-	this.Show(false);
-	this.updateRows();
-	this.optionsMenu.Hide();
+	var baseNdx = this.multiselect ? 2 : 0;
+	var columns = this._cached.headerUl.getElementsByTagName('li');
 	
-	Scriptor.event.cancel(e);
-	return false;
+	if (colNdx >= 0 && ((baseNdx + (colNdx*2) + 1) < columns.length))
+	{
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+colNdx], "dataViewColumnHidden");
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+colNdx+1], "dataViewColumnHidden");
+	}
+	
+	var rows = this._cached.rows_body.getElementsByTagName('ul');
+	for (var n=0; n < rows.length; n++)
+	{
+		baseNdx = this.multiselect ? 1 : 0;
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](rows[n].childNodes[baseNdx + colNdx], "dataViewRowHidden");
+	}
 };
 
 /*
@@ -1759,7 +1743,8 @@ Scriptor.DataView.prototype.toggleColumn = function(e, colNdx) {
 *  Use dataView.Show function instead, to force a width change
 */
 Scriptor.DataView.prototype.forceWidth = function(w) {
-	if (isNaN(Number(w)))
+	// TODO: Deprecated?
+	/*if (isNaN(Number(w)))
 		return;
 	
 	var minWidth = this.__calculateMinWidth();
@@ -1776,7 +1761,7 @@ Scriptor.DataView.prototype.forceWidth = function(w) {
 				this.columns[n].Width -= 1;
 			}
 		}
-	}
+	}*/
 };
 
 /*
@@ -1784,14 +1769,15 @@ Scriptor.DataView.prototype.forceWidth = function(w) {
 */
 Scriptor.DataView.prototype.__calculateMinWidth = function()
 {
-	var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
+	// TODO: Deprecated?
+	/*var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
 	for (var n=0; n < this.columns.length; n++) {
 		minWidth += this.style.cellHorizontalPadding + this.style.sepWidth;
 	}
 	if (this.multiselect)
 		minWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
 	
-	return minWidth;
+	return minWidth;*/
 };
 
 /*
@@ -1799,7 +1785,8 @@ Scriptor.DataView.prototype.__calculateMinWidth = function()
 */
 Scriptor.DataView.prototype.__calculateTotalWidth = function()
 {
-	var totalWidth = 0;
+	// TODO: deprecated?
+	/*var totalWidth = 0;
 	
 	for (var n=0; n < this.columns.length; n++) {
 		if (this.columns[n].show) 
@@ -1809,7 +1796,7 @@ Scriptor.DataView.prototype.__calculateTotalWidth = function()
 	if (this.multiselect) 
 		totalWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
 	
-	return totalWidth ;
+	return totalWidth ;*/
 };
 
 /*
@@ -2202,9 +2189,8 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
 			//   upgrade addRow, deleteRow to avoid using updateRows
 			// fake visible = false so we call updateRows only once
-			var oldVisible = this.dataView.visible;
-			this.dataView.visible = false;
 			this.dataView.rows.length = 0;
+			this.dataView.updateRows(true);
 			
 			if (root.getAttribute('success') == '1')
 			{
@@ -2242,20 +2228,14 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				this.dataView.setMessage(root.getAttribute('errormessage'));
 			}
 			
-			if (oldVisible)
-			{
-				this.dataView.visible = oldVisible;
-				this.dataView.updateRows();
-			}
 		}
 		else	// json
 		{
 			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
 			//   upgrade addRow, deleteRow to avoid using updateRows
 			// fake visible = false so we call updateRows only once
-			var oldVisible = this.dataView.visible;
-			this.dataView.visible = false;
 			this.dataView.rows.length = 0;
+			this.dataView.updateRows(true);
 			
 			if (data.success)
 			{
@@ -2287,11 +2267,6 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				this.dataView.setMessage(data.errormessage);
 			}
 			
-			if (oldVisible)
-			{
-				this.dataView.visible = oldVisible;
-				this.dataView.updateRows();
-			}
 		}
 	},
 	

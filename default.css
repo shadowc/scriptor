@@ -306,7 +306,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 }
 .dataViewHeader ul li a.dataViewSortDesc {
   font-weight:bold;
-  background:url(images/drop-up.png) no-repeat center right;
+  background:url(images/drop-down.png) no-repeat center right;
 }
 .dataViewHeader ul li.dataViewColumn:hover { background:#c9c9c9; }
 .dataViewHeader ul li.dataViewColumnHidden { display:none; }
@@ -329,11 +329,11 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   border-bottom:1px dotted #aaaaaa;
 }
 .dataViewBody ul:hover, .dataViewBody ul.dataViewRowOdd:hover { background:#fffce8; }
-.dataViewBody ul.dataViewRowSelected {
+.dataViewBody ul.dataViewRowSelected, .dataViewBody ul.dataViewRowOdd.dataViewRowSelected {
   background:#2165aa;
   color:#ffffff;
 }
-.dataViewBody ul.dataViewRowSelected * { color:#ffffff; }
+.dataViewBody ul.dataViewRowSelected *, .dataViewBody ul.dataViewRowOdd.dataViewRowSelected * { color:#ffffff; }
 .dataViewBody ul.dataViewRowOdd { background:#f2f2f2; }
 .dataViewBody ul li {
   overflow:hidden;

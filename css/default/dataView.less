@@ -131,7 +131,7 @@
 	
 	ul li a.dataViewSortDesc {
 		font-weight: bold;
-		background: url(images/drop-up.png) no-repeat center right;
+		background: url(images/drop-down.png) no-repeat center right;
 	}
 	
 	ul li.dataViewColumn:hover {
@@ -169,7 +169,7 @@
 			background: #FFFCE8;
 		}
 		
-		&.dataViewRowSelected {
+		&.dataViewRowSelected, &.dataViewRowOdd.dataViewRowSelected {
 			background: @menuSelBgColor;
 			color: @menuSelForeColor;
 			

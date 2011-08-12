@@ -1110,11 +1110,13 @@ Scriptor.ComponentRegistry = {
 	},
 	
 	onWindowResized : function(e) {
-		for (var n=0; n < this._registry.length; n++)
-		{
-			if (!this._registry[n].cmp.parent)
-				this._registry[n].cmp.resize();
-		}
+		setTimeout(Scriptor.bind(function() {
+			for (var n=0; n < this._registry.length; n++)
+			{
+				if (!this._registry[n].cmp.parent)
+					this._registry[n].cmp.resize();
+			}
+		}, this), 1);
 	}
 };
 
