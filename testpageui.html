@@ -26,28 +26,56 @@
 			}));
 			
 			myDataView = new Scriptor.DataView({
-				id : "child_center",
-				multiselect : true,
-				paginating : false,
+				paginating : true,
+				rowsPerPage : 7,
 				columns : [
 					{
-						Name : 'id',
-						Width : 30,
+						Name : 'Id',
 						Type : 'num',
-						show : false
+						Width: 60,
+						Format : function (n) {
+							var a = document.createElement('a');
+							a.setAttribute('href', 'javascript:alert("'+n+'");');
+							a.innerHTML = 'xxx';
+							return a;
+						}
 					},
 					{
-						Name : 'FirstName',
-						displayName : "Name",
-						Width: 120
+						Name : 'parentId',
+						Type : 'num',
+						Width : 60,
+						displayName : 'Padre'
 					},
 					{
-						Name : 'LastName',
-						displayName : "Last Name",
-						Width: 120
+						Name : 'Title',
+						Type : 'alpha',
+						Width: 200,
+						displayName : 'Título',
+						showToolTip : true
+					},
+					{
+						Name : 'Link',
+						Type : 'alpha',
+						Width: 250
 					}
 				]
 			});
+			
+			myDataViewCon = new Scriptor.DataConnectors.DataViewConnector({
+					dataView : myDataView,
+					api : 'testapi.php',
+					parameters : 'type=xml',
+					method : 'POST',
+					type:  'xml'
+				});
+			
+			myDataView.addColumn( myDataView.createColumn( {
+				Name : 'DateCreated',
+				Type : 'date', 
+				Width : 140,
+				Format : dateFormat,
+				displayName : 'Fecha de Creación'
+			}));
 			
 			ChildComponent.addChild(myDataView);
 			
@@ -90,10 +118,12 @@
 			
 			document.getElementById('scr_version').innerHTML = Scriptor.version;
 			
-			myDataView.totalRows = 2;
-			myDataView.addRow({'id' : 1, 'FirstName' : 'Matias', 'LastName' : 'Jose'});
-			myDataView.addRow({'id' : 2, 'FirstName' : 'Roberto', 'LastName' : 'Perez'});
+			myDataView.refresh();
 		});
+		
+		function dateFormat(date) {
+			return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
+		}
 		
 	</script>
 	

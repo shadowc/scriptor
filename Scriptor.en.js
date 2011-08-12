@@ -6557,7 +6557,7 @@ Scriptor.DataView.prototype.__goToPage = function (e) {
 			this.selectedRow = -1;
 			this.selectedRows = [];
 			
-			this.updateRows(true);
+			this.refresh();
 		}
 		
 		document.getElementById(this.divId + '_pageInput').focus();
@@ -6594,7 +6594,7 @@ Scriptor.DataView.prototype.__goToPagePrev = function (e) {
 		this.selectedRow = -1;
 		this.selectedRows = [];
 			
-		this.updateRows(true);
+		this.refresh();
 	}
 	
 	Scriptor.event.cancel(e);
@@ -6621,7 +6621,7 @@ Scriptor.DataView.prototype.__goToPageNext = function (e) {
 		this.selectedRow = -1;
 		this.selectedRows = [];
 			
-		this.updateRows(true);
+		this.refresh();
 	}
 	
 	Scriptor.event.cancel(e);
@@ -7559,8 +7559,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				if (!isNaN(totRows))
 				{
 					this.dataView.totalRows = totRows;
-					if (this.dataView.paginating)
-						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+					
 				}
 				var rows = root.getElementsByTagName('row');
 		
@@ -7604,8 +7603,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				if (!isNaN(totRows))
 				{
 					this.dataView.totalRows = totRows;
-					if (this.dataView.paginating)
-						document.getElementById(this.dataView.div + '_totalPagesHandler').innerHTML = this.dataView.getTotalPages();
+					
 				}
 				
 				for (var n=0; n < data.rows.length; n++)
