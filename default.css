@@ -295,6 +295,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   border-bottom:1px solid #b0b0b0;
 }
 .dataViewHeader ul { padding:0 0 0 3px; }
+.dataViewHeader ul li { overflow:hidden; }
 .dataViewHeader ul li a {
   color:#333333;
   text-decoration:none;
@@ -320,6 +321,12 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   overflow:auto;
   width:100%;
   background:transparent url(images/table-rows-back.png) repeat-x;
+}
+.dataViewOuterBody.dataViewLoading { background:transparent url(images/ajax-loader.gif) no-repeat center; }
+.dataViewOuterBody .dataViewMessageDiv {
+  font-size:12px;
+  padding:10px;
+  text-align:center;
 }
 .dataViewBody { overflow:hidden; }
 .dataViewBody ul {

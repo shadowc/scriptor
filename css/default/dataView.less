@@ -120,29 +120,33 @@
 	ul {
 		padding: 0 0 0 3px;
 		
-		li a {
-			color: @componentForeColor;
-			text-decoration: none;
-			display: block;
-			padding: 0 18px 0 0;
-		}
-		
-		li a.dataViewSortAsc {
-			font-weight: bold;
-			background: url(images/drop-up.png) no-repeat center right;
-		}
-		
-		li a.dataViewSortDesc {
-			font-weight: bold;
-			background: url(images/drop-down.png) no-repeat center right;
-		}
-		
-		li.dataViewColumn:hover {
-			background: #c9c9c9;
-		}
-		
-		li.dataViewColumnHidden {
-			display: none;
+		li {
+			overflow: hidden;
+			
+			a {
+				color: @componentForeColor;
+				text-decoration: none;
+				display: block;
+				padding: 0 18px 0 0;
+			}
+			
+			a.dataViewSortAsc {
+				font-weight: bold;
+				background: url(images/drop-up.png) no-repeat center right;
+			}
+			
+			a.dataViewSortDesc {
+				font-weight: bold;
+				background: url(images/drop-down.png) no-repeat center right;
+			}
+			
+			&.dataViewColumn:hover {
+				background: #c9c9c9;
+			}
+			
+			&.dataViewColumnHidden {
+				display: none;
+			}
 		}
 	}
 	
@@ -161,6 +165,16 @@
 	overflow: auto;
 	width: 100%;
 	background: transparent url(images/table-rows-back.png) repeat-x;
+	
+	&.dataViewLoading {
+		background: transparent url(images/ajax-loader.gif) no-repeat center;
+	}
+	
+	.dataViewMessageDiv {
+		font-size: 12px;
+		padding: 10px;
+		text-align: center;
+	}
 }
 
 .dataViewBody {
