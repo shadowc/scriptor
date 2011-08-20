@@ -1,0 +1,78 @@
+/* CSS Document */
+
+.treeView {
+	border: 1px solid @panelBorderColorFocus;
+	background: @panelBgColor;
+	overflow: auto;
+	
+	div.treeViewMessageDiv {
+		padding: 10px;
+		font-size: 12px;
+		text-align: center;
+	}
+	
+	ul { 
+		font-size: 12px;
+		padding: 3px;
+		list-style-type: none;
+		overflow: hidden;
+		clear: left;
+		margin: 0;
+		
+		ul {
+			margin-left: 15px;
+			padding: 0;
+			display: none;
+		}
+		
+		li {
+			margin: 0;
+			clear: left;
+			overflow: hidden;
+			
+			a {
+				font-size: 12px;
+				color: @componentForeColor;
+				text-decoration: none;
+				display: block;
+				height: 16px;
+				padding: 2px 4px;
+				border: 1px solid @panelBgColor;
+				float: left;
+				background: @panelBgColor;
+				
+				&.treeViewSingleNode {
+					margin-left: 15px;
+				}
+				
+				&.treeViewExpandableNode {
+					width: 15px;
+					height: 18px;
+					background: URL('images/plus.gif') no-repeat 2px 5px;
+					padding: 0;
+					border: none;
+				}
+				
+				&.treeViewCollapsableNode {
+					width: 15px;
+					height: 18px;
+					background: URL('images/minus.gif') no-repeat 2px 5px;
+					padding: 0;
+					border: none;
+				}
+				
+				&.treeViewSelectedNode {
+					background: #E6F0F6;
+					border: 1px solid #036188;
+					.borderRadius;
+					
+				}
+			}
+		}
+	}
+
+	&.treeViewLoading {
+		background: @panelBgColor URL('images/ajax-loader.gif') no-repeat center center;
+	}
+}
+

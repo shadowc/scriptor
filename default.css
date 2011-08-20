@@ -379,3 +379,66 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   background:transparent url(images/table-options.png) no-repeat center center;
 }
 .dataViewHeaderMenu a:hover { background-color:#bee4f4; }
+.treeView {
+  border:1px solid #888888;
+  background:#ffffff;
+  overflow:auto;
+}
+.treeView div.treeViewMessageDiv {
+  padding:10px;
+  font-size:12px;
+  text-align:center;
+}
+.treeView ul {
+  font-size:12px;
+  padding:3px;
+  list-style-type:none;
+  overflow:hidden;
+  clear:left;
+  margin:0;
+}
+.treeView ul ul {
+  margin-left:15px;
+  padding:0;
+  display:none;
+}
+.treeView ul li {
+  margin:0;
+  clear:left;
+  overflow:hidden;
+}
+.treeView ul li a {
+  font-size:12px;
+  color:#333333;
+  text-decoration:none;
+  display:block;
+  height:16px;
+  padding:2px 4px;
+  border:1px solid #ffffff;
+  float:left;
+  background:#ffffff;
+}
+.treeView ul li a.treeViewSingleNode { margin-left:15px; }
+.treeView ul li a.treeViewExpandableNode {
+  width:15px;
+  height:18px;
+  background:URL('images/plus.gif') no-repeat 2px 5px;
+  padding:0;
+  border:none;
+}
+.treeView ul li a.treeViewCollapsableNode {
+  width:15px;
+  height:18px;
+  background:URL('images/minus.gif') no-repeat 2px 5px;
+  padding:0;
+  border:none;
+}
+.treeView ul li a.treeViewSelectedNode {
+  background:#e6f0f6;
+  border:1px solid #036188;
+  border-radius:4px;
+  -webkit-border-radius:4px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:4px;
+}
+.treeView.treeViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }

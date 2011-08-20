@@ -152,7 +152,16 @@
 			BottomComponent.setContent("<p>Copyright notice here</p>");
 			TestComponent.show();
 			
-			LeftComponent.addTab({title : "Tab 1"}, new Scriptor.Panel());
+			myTreeView = new Scriptor.TreeView({id : 'treeView'});
+			myTreeViewCon = new Scriptor.DataConnectors.TreeViewConnector({
+				treeView : myTreeView,
+				api : 'testapi.php',
+				parameters : 'type=json&option=3',
+				method : 'POST',
+				type : 'json'
+			});
+			
+			LeftComponent.addTab({title : "Tree View"}, myTreeView);
 			LeftComponent.addTab({title : "Tab 2"}, new Scriptor.Panel());
 			LeftComponent.addTab({title : "Close me...", closable : true}, new Scriptor.Panel());
 			
@@ -164,6 +173,7 @@
 			
 			myDataView.refresh();
 			myDataView2.refresh();
+			myTreeView.refresh();
 		});
 		
 		function dateFormat(date) {
