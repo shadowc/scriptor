@@ -17,13 +17,57 @@
 				style : "border: none; background: transparent;"
 			});
 			
-			ChildComponent.addChild(new Scriptor.Panel({
-				id : "child_top",
+			myDataView2 = new Scriptor.DataView({
+				id : 'child_top',
 				region : "top",
+				style : "height: 50%; margin-bottom: 5px;",
 				resizable : true,
-				style : "margin-bottom: 5px; height: 50%"
-				
-			}));
+				multiselect : false,
+				columns : [
+					{
+						Name : 'id',
+						Type : 'num',
+						show: false,
+						displayName : 'Id',
+						Width : 30
+					},
+					{
+						Name : 'User',
+						Type : 'alpha',
+						displayName : 'Usuario',
+						Width : 80,
+					},
+					{
+						Name : 'Pass',
+						Type : 'alpha',
+						show : false,
+						width : 200,
+						displayName : 'Clave'
+					},
+					{
+						Name : 'FirstName',
+						Type : 'alpha',
+						Width : 150,
+						displayName : 'Nombre'
+					},
+					{
+						Name : 'LastName',
+						Type : 'alpha',
+						Width : 150,
+						displayName : 'Apellido'
+					}
+				]
+			});
+		
+			myDataView2Con = new Scriptor.DataConnectors.DataViewConnector({
+				dataView : myDataView2,
+				api : 'testapi.php',
+				parameters : 'type=json&option=2',
+				method : 'POST',
+				type :  'json'
+			});
+			
+			ChildComponent.addChild(myDataView2);
 			
 			myDataView = new Scriptor.DataView({
 				paginating : true,
@@ -119,6 +163,7 @@
 			document.getElementById('scr_version').innerHTML = Scriptor.version;
 			
 			myDataView.refresh();
+			myDataView2.refresh();
 		});
 		
 		function dateFormat(date) {

@@ -144,24 +144,12 @@ var dataTypes = {
 *  selectedRows: Array of the selected rows
 *  multiselect: set to true if to allow multiselect
 *  curRow(): a pointer to the current selected row or null if no row is selected
-*  enabled: If true, it will accept clicks. Otherwise table will be non functional for interaction.
 *  
-*  visible: Should be read only. It is set to true when a successfull Show() has been performed.
-*  div: string with the id of the object upon which the dataView will be rendered.
-*
 *  orderBy: should be read only. It holds information of the Javascript column Name of the
 *   active ordered column. It passes it to the SQL service for multipage dataViews or for
 *   refreshing purposes
 *  orderWay: should be read only. It holds information of the order way to be passed to the
 *   sql service on multipage dataviews or when refreshing.
-*
-*  Width: The width of the object in pixels. Cannot be less than total width of the columns
-*   plus 20 pixels
-*  Height: The height of the object in pixels. Cannot be less than header and footer height
-*   plus 20 pixels
-*  style: this is the style object which repeats some of the measures found on the external .css
-*   so dataView can calculate some widths and heights. Change this object if you change the
-*   stylesheet.
 *
 *	paginating: set to true if implementing pagination on table.
 *	rowsPerPage: set number of rows to show per page.
@@ -254,7 +242,8 @@ Scriptor.DataView = function(opts) {
 		{
 			// calculate toolbars height
 			var innerBox = this.__getInnerBox();
-			var offsetHeight = innerBox.top + innerBox.bottom;
+			var outerBox = this.__getOuterBox();
+			var offsetHeight = innerBox.top + innerBox.bottom + outerBox.top + outerBox.bottom;
 			
 			if (this._cached.pagination_header)
 			{
