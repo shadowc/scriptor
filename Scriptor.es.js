@@ -7204,7 +7204,10 @@ Scriptor.TreeView = function (opts) {
 	this.create();
 	
 	Scriptor.className.add(this.target, "treeView");
-	this.target.innerHTML = '<ul id="'+this.divId+'_0_branch" class="treeViewContainer"></ul>';
+	var ul = document.createElement('ul');
+	ul.id = this.divId+'_0_branch';
+	ul.className = 'treeViewContainer';
+	this.target.insertBefore(ul, this.invalidator);
 	
 	this._registeredEvents = [];
 	this.DOMAddedImplementation = function() {
@@ -7219,7 +7222,6 @@ Scriptor.TreeView = function (opts) {
 			
 	};
 };
-
 
 /*
 *  getNextInternalId
