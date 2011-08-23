@@ -3820,8 +3820,8 @@ Scriptor.ContextMenu = function(opts)
 		// hide previously active context menus
 		for (var n=0; n < Scriptor.ComponentRegistry._registry.length; n++)
 		{
-			var cmp = Scriptor.ComponentRegistry._registry[n];
-			if (cmp.CMP_SIGNATURE == "Scriptor.ui.ContextMenu" && cmp.visible)
+			var cmp = Scriptor.ComponentRegistry._registry[n].cmp;
+			if (cmp.CMP_SIGNATURE == "Scriptor.ui.ContextMenu" && cmp.visible && cmp != this)
 				cmp.hide();
 		}
 		
@@ -3846,6 +3846,11 @@ Scriptor.ContextMenu = function(opts)
 			}
 		}
 		
+		if (x + this.width > Scriptor.body().offsetWidth)
+			x = x-this.width;
+		if (y + this.height > Scriptor.body().offsetHeight)
+			y = y-this.height;
+			
 		this.y = y;
 		this.x = x;
 		this.updateSize();
