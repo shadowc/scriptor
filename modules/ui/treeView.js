@@ -321,9 +321,82 @@ Scriptor.TreeView.prototype.addNode = function(opts, parent, ndx) {
 		else
 			parentNode.childNodes.push(new treeNode(localOpts));
 			
-		if (this.inDOM)
+		if (this.inDOM)	// TODO: Add node one by one
 			this.updateNodes();
 	}
+};
+
+/*
+* treeView.deleteNode
+* 	Deletes a node idenfitied by its id or by passing the node element
+*
+*  identifier: the node id or node element
+*/
+Scriptor.TreeView.prototype.deleteNode = function(identifier) {
+	if (identifier == 0 || identifier == "0")
+		return;	// can't delete master node!
+	
+	this._searchAndDelete(identifier, this.masterNode);
+	
+	if (this.inDOM)	// TODO: delete nodes one by one
+		this.updateNodes();
+};
+
+/*
+* treeView._searchAndDelete
+*   For internal use only
+*/
+Scriptor.TreeView.prototype._searchAndDelete = function(identifier, node) {
+	var nodeDeleted = false;
+
+	if (typeof(identifier) == "number" || typeof(identifier) == "string")
+	{
+		// id passed
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			if (node.childNodes[n].id == identifier)
+			{
+				if (this.selectedNode == node.childNodes[n].id)
+					this.selectedNode = null;
+					
+				node.childNodes.splice(n, 1);
+				
+				nodeDeleted = true;
+				break;
+			}
+		}
+	}
+	else
+	{
+		// look for equal node
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			if (node.childNodes[n] == identifier)
+			{
+				if (this.selectedNode == node.childNodes[n].id)
+					this.selectedNode = null;
+					
+				node.childNodes.splice(n, 1);
+				nodeDeleted = true;
+				break;
+			}
+		}
+	}
+	
+	if (!nodeDeleted)
+	{
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			var done = this._searchAndDelete(node.childNodes[n], identifier);
+			if (done)
+			{
+				nodeDeleted = done;
+				break;
+			}
+		}
+	}
+	
+	return nodeDeleted;
 };
 
 /*

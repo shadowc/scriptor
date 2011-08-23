@@ -272,59 +272,42 @@ var Scriptor = {
 	
 	// add classname / remove classname
 	className : {
+		// check if an element has a className
+		has : function(elem, className) {	
+			if (!(elem)) return false;
+			
+			var elementClassName = elem.className;
+			var classNameRegexp = new RegExp("(^|\\s)" + className + "(\\s|$)");
+			return (elementClassName.length > 0 && (elementClassName == className ||
+				classNameRegexp.test(elementClassName)));
+		},
+		
 		// add a classname if not already added
 		add : function(elem, className) {
 			if (typeof(className) != 'string')
 				return;
 			
-			if (typeof(elem.className) == 'undefined')
+			if (!(elem)) return;
+			
+			if (elem.className === undefined)
 				elem.className = '';
 			
-			var classes = elem.className.split(' ');
-			var found = false;
-			
-			for (var n=0; n < classes.length; n++)
-			{
-				if (classes[n] == className)
-				{
-					found = true;
-					break;
-				}
-			}
-			
-			if (!found)
-				classes.push(className);
-				
-			var newClassName = classes.join(' ');
-			if (newClassName.substr(0, 1) == ' ')
-				newClassName = newClassName.substr(1);
-				
-			elem.className = newClassName;
+			if (!Scriptor.className.has(elem, className))
+				elem.className += (elem.className ? ' ' : '') + className;
 		},
 		
+		// remove a classname if present in an element's className
 		remove : function(elem, className) {
 			if (typeof(className) != 'string')
 				return;
-			
-			if (typeof(elem.className) == 'undefined')
+
+			if (!(elem)) return;
+		
+			if (elem.className === undefined)
 				elem.className = '';
 			
-			var classes = elem.className.split(' ');
-			
-			for (var n=0; n < classes.length; n++)
-			{
-				if (classes[n] == className)
-				{
-					classes.splice(n, 1);
-					n--;
-				}
-			}
-			
-			var newClassName = classes.join(' ');
-			if (newClassName.substr(0, 1) == ' ')
-				newClassName = newClassName.substr(1);
-				
-			elem.className = newClassName;
+			elem.className = elem.className.replace(
+			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').replace(/^\s+/, '').replace(/\s+$/, '');
 		},
 		
 		// returns the actual computed style of an element
@@ -7394,9 +7377,82 @@ Scriptor.TreeView.prototype.addNode = function(opts, parent, ndx) {
 		else
 			parentNode.childNodes.push(new treeNode(localOpts));
 			
-		if (this.inDOM)
+		if (this.inDOM)	// TODO: Add node one by one
 			this.updateNodes();
 	}
+};
+
+/*
+* treeView.deleteNode
+* 	Deletes a node idenfitied by its id or by passing the node element
+*
+*  identifier: the node id or node element
+*/
+Scriptor.TreeView.prototype.deleteNode = function(identifier) {
+	if (identifier == 0 || identifier == "0")
+		return;	// can't delete master node!
+	
+	this._searchAndDelete(identifier, this.masterNode);
+	
+	if (this.inDOM)	// TODO: delete nodes one by one
+		this.updateNodes();
+};
+
+/*
+* treeView._searchAndDelete
+*   For internal use only
+*/
+Scriptor.TreeView.prototype._searchAndDelete = function(identifier, node) {
+	var nodeDeleted = false;
+
+	if (typeof(identifier) == "number" || typeof(identifier) == "string")
+	{
+		// id passed
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			if (node.childNodes[n].id == identifier)
+			{
+				if (this.selectedNode == node.childNodes[n].id)
+					this.selectedNode = null;
+					
+				node.childNodes.splice(n, 1);
+				
+				nodeDeleted = true;
+				break;
+			}
+		}
+	}
+	else
+	{
+		// look for equal node
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			if (node.childNodes[n] == identifier)
+			{
+				if (this.selectedNode == node.childNodes[n].id)
+					this.selectedNode = null;
+					
+				node.childNodes.splice(n, 1);
+				nodeDeleted = true;
+				break;
+			}
+		}
+	}
+	
+	if (!nodeDeleted)
+	{
+		for (var n=0; n < node.childNodes.length; n++)
+		{
+			var done = this._searchAndDelete(node.childNodes[n], identifier);
+			if (done)
+			{
+				nodeDeleted = done;
+				break;
+			}
+		}
+	}
+	
+	return nodeDeleted;
 };
 
 /*

@@ -257,59 +257,42 @@ var Scriptor = {
 	
 	// add classname / remove classname
 	className : {
+		// check if an element has a className
+		has : function(elem, className) {	
+			if (!(elem)) return false;
+			
+			var elementClassName = elem.className;
+			var classNameRegexp = new RegExp("(^|\\s)" + className + "(\\s|$)");
+			return (elementClassName.length > 0 && (elementClassName == className ||
+				classNameRegexp.test(elementClassName)));
+		},
+		
 		// add a classname if not already added
 		add : function(elem, className) {
 			if (typeof(className) != 'string')
 				return;
 			
-			if (typeof(elem.className) == 'undefined')
+			if (!(elem)) return;
+			
+			if (elem.className === undefined)
 				elem.className = '';
 			
-			var classes = elem.className.split(' ');
-			var found = false;
-			
-			for (var n=0; n < classes.length; n++)
-			{
-				if (classes[n] == className)
-				{
-					found = true;
-					break;
-				}
-			}
-			
-			if (!found)
-				classes.push(className);
-				
-			var newClassName = classes.join(' ');
-			if (newClassName.substr(0, 1) == ' ')
-				newClassName = newClassName.substr(1);
-				
-			elem.className = newClassName;
+			if (!Scriptor.className.has(elem, className))
+				elem.className += (elem.className ? ' ' : '') + className;
 		},
 		
+		// remove a classname if present in an element's className
 		remove : function(elem, className) {
 			if (typeof(className) != 'string')
 				return;
-			
-			if (typeof(elem.className) == 'undefined')
+
+			if (!(elem)) return;
+		
+			if (elem.className === undefined)
 				elem.className = '';
 			
-			var classes = elem.className.split(' ');
-			
-			for (var n=0; n < classes.length; n++)
-			{
-				if (classes[n] == className)
-				{
-					classes.splice(n, 1);
-					n--;
-				}
-			}
-			
-			var newClassName = classes.join(' ');
-			if (newClassName.substr(0, 1) == ' ')
-				newClassName = newClassName.substr(1);
-				
-			elem.className = newClassName;
+			elem.className = elem.className.replace(
+			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').replace(/^\s+/, '').replace(/\s+$/, '');
 		},
 		
 		// returns the actual computed style of an element
