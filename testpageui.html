@@ -41,8 +41,8 @@
 						Name : 'Pass',
 						Type : 'alpha',
 						show : false,
-						width : 200,
-						displayName : 'Clave'
+						displayName : 'Clave',
+						Width : 200
 					},
 					{
 						Name : 'FirstName',
@@ -134,7 +134,7 @@
 				region : "left",
 				id : "container_left",
 				resizable : true,
-				style : "width: 300px; margin-right: 5px;"
+				style : "width: 400px; margin-right: 5px;"
 			});
 			
 			BottomComponent = new Scriptor.Panel({
@@ -162,12 +162,11 @@
 			});
 			
 			LeftComponent.addTab({title : "Tree View"}, myTreeView);
-			LeftComponent.addTab({title : "Tab 2"}, new Scriptor.Panel());
+			LeftComponent.addTab({title : "Calendar View"}, new Scriptor.CalendarView());
+			LeftComponent.addTab({title : "Gallery View"}, new Scriptor.Panel());
 			LeftComponent.addTab({title : "Close me...", closable : true}, new Scriptor.Panel());
 			
-			LeftComponent._tabs[0].pane.setContent('Tab 1 contents');
-			LeftComponent._tabs[1].pane.setContent('Tab 2 contents');
-			LeftComponent._tabs[2].pane.setContent('If you close this tab I will be destroyed!');
+			LeftComponent._tabs[3].pane.setContent('If you close this tab I will be destroyed!');
 			
 			document.getElementById('scr_version').innerHTML = Scriptor.version;
 			

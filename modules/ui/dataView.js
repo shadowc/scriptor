@@ -100,8 +100,10 @@ var dataRow = function(columnCollection, initialData) {
 * implemented to the object as long as they have toString method and are comparable.
 */
 var dataTypes = {
-	'num' : Number,
-	'alpha' : String,
+	'num' : Number,	// backwards compatibility
+	'number' : Number,
+	'alpha' : String,	// backwards compatibility
+	'string' : String,
 	'date' : function (str) {		// constructor for date objects from MySQL date strings
 		if (!str)
 			return '';
@@ -163,7 +165,8 @@ Scriptor.DataView = function(opts) {
 		multiselect : true,
 		paginating: false,
 		rowsPerPage : 20,
-		columns : [] }
+		columns : []
+	};
 		
 	Scriptor.mixin(localOpts, opts);
 	
@@ -1750,8 +1753,8 @@ Scriptor.DataView.prototype.toggleColumn = function(colNdx) {
 	
 	if (colNdx >= 0 && ((baseNdx + (colNdx*2) + 1) < columns.length))
 	{
-		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+colNdx], "dataViewColumnHidden");
-		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+colNdx+1], "dataViewColumnHidden");
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+(colNdx*2)], "dataViewColumnHidden");
+		Scriptor.className[this.columns[colNdx].show ? "remove" : "add"](columns[baseNdx+(colNdx*2)+1], "dataViewColumnHidden");
 	}
 	
 	var rows = this._cached.rows_body.getElementsByTagName('ul');
@@ -2053,6 +2056,59 @@ Scriptor.DataView.prototype.doResizing = function(e) {
 		
 		if (changedNextColSize) 
 			cols[offset+(colNdx)+1].style.width = this.columns[nextActualColNdx].Width + 'px';
+	}
+};
+
+/*
+* DataView.addDataType
+*
+* This is a function that allows to add custom data types to be handled
+* by all DataView objects.
+*
+* Parameters:
+*   name: a string with the name of the data type to be set to the column Type parameter
+*   constructor: a function that returns the object containing the data, must get
+*     1 parameter, value, to be used to feed the data type with actual values, must be
+*     comparable (you can use custom comparator functions) and have a valid toString
+*     method
+*
+* Example:
+*   myDataView.addDataType('custom', function(val) {
+*		var obj = {};
+*		
+*		obj.val = val;
+*		obj.toString = function() {return 'value is' + val};
+*		
+*		return obj;
+*		
+*	});
+*	
+*/
+Scriptor.DataView.prototype.addDataType = function(name, constructor) {
+	if (typeof(name) != 'string')
+	{
+		Scriptor.error.report("Invalid data type name.");
+		return;
+	}
+	
+	if (typeof(constructor) != 'object')
+	{
+		Scriptor.error.report("Invalid data type constructor.");
+		return;
+	}
+	else if (typeof(constructor.toString) != 'function')
+	{
+		Scriptor.error.report("Data type constructor missing toString method.");
+		return;
+	}
+	
+	if (!dataTypes[name])
+	{
+		dataTypes[name] = constructor;
+	}
+	else
+	{
+		Scriptor.error.report("Tried to instantiate a data type but data type was already defined");
 	}
 };
 

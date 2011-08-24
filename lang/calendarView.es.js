@@ -1,6 +1,6 @@
 // JavaScript Document
 
-calendarView.prototype.lang = {
+Scriptor.CalendarView.prototype.lang = {
 	shortDays : ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
 	longDays : ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
 	
