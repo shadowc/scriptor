@@ -1,0 +1,225 @@
+/* CSS Document */
+
+.calendarView {
+	background: @panelBgColor;
+	color: @componentForeColor;
+	overflow: auto;
+	
+	.calendarViewHeader {
+		height: 20px;
+		overflow: hidden;
+		border-bottom: 1px solid @panelBorderColorFocus;
+		background: #E9E9E9;
+		
+		ul {
+			list-style-type: none;
+			height: 20px;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+			
+			li {
+				width: 100%;
+				margin: 0 20px 0 40px;
+				height: 20px;
+				
+				&.calendarViewLeft {
+					float: left;
+					width: 20px;
+					margin: 0;
+				}
+				
+				&.calendarViewRight {
+					float: right;
+					width: 20px;
+					margin: 0;
+				}
+				
+				a {
+					display: inline-block;
+					width: 20px;
+					height: 20px;
+					
+					&.calendarViewPrev {
+						background: URL('images/prev.png') no-repeat 2px 2px;
+					}
+					
+					&.calendarAdvanced {
+						background: URL('images/advanced.jpg') no-repeat 2px 2px;
+					}
+					
+					&.calendarViewNext {
+						background: URL('images/next.png') no-repeat 2px 2px;
+					}
+					
+					&:hover {
+						background-color: @componentHoverColor;
+					}
+				}
+				
+				p.calendarViewMonth {
+					width: 100%;
+					padding: 2px 0 0 0;
+					margin: 0;
+					height: 18px;
+					font-size: 12px;
+					font-weight: bold;
+					text-align: center;
+				}
+			}
+		}
+		
+	}
+	
+	table.calendarViewBody {
+		width: 100%;
+		border-collapse: collapse;
+		
+		th {
+			padding: 2px;
+			font-size: 12px;
+			font-weight: bold;
+			background: #E6F0F6;
+			border-bottom: 1px solid @panelBorderColorFocus;
+			text-align: center;
+			
+		}
+		
+		td {
+			height: 29px;
+			width: 14%;
+			border-left: 1px solid @panelBorderColorFocus;
+			border-bottom: 1px solid @panelBorderColorFocus;
+			
+			a {
+				display: block;
+				height: 25px;
+				padding: 2px;
+				font-size: 11px;
+				color: #177fb4;
+				text-decoration: none;
+				
+				&:hover {
+					background: @componentHoverColor;
+					color: #3a96c5;
+					text-decoration: underline;
+				}
+			
+				&.calendarDisabled {
+					color: #AAAAAA;
+					cursor: default;
+				}
+				
+				&.calendarDisabled:hover {
+					color: #AAAAAA;
+					background: none;
+					text-decoration: none;
+					cursor: default;
+				}
+			
+				&.calendarToday {
+					color: #CC0000 !important;
+					font-weight: bold;
+				}
+				
+				&.calendarMarked {
+					background: #CCAAAA;
+				}
+				
+				&.calendarSelected {
+					background: #3A96C5;
+					color: #FFFFFF;
+				}
+			}
+			
+		}
+	}
+	
+	.calendarViewFooter {
+		height: 20px;
+		overflow: hidden;
+		background: #E9E9E9;
+		
+		p {
+			margin: 0;
+			padding: 2px 0 0 0;
+			text-align: center;
+			font-size: 12px;
+			font-weight: bold;
+			height: 18px;
+			
+			a.calendarGoHome {
+				width: 20px;
+				height: 20px;
+				float: left;
+				background: URL('images/home.jpg') no-repeat 2px 2px;
+				margin: -2px 0 0 2px !important;
+				
+				&:hover {
+					background-color: @componentHoverColor;
+				}
+			}
+		} 
+	}
+	
+	div.calendarViewAdvanced {
+		overflow: hidden;
+		
+		p {
+			font-size: 12px;
+			overflow: hidden;
+			margin: 4px !important;
+			clear: left;
+			
+			label, input, select {
+				color: @componentForeColor;
+				padding: 1px;
+				font-size: 12px;
+			}
+			
+			label {
+				float: left;
+				padding: 2px 0 0 0 !important;
+				width: 40px;
+			}
+			
+			input {
+				border: 1px solid @panelBorderColorFocus;
+				width: 50px;
+				padding: 1px;
+			}
+			
+			select {
+				border: 1px solid @panelBorderColorFocus;
+				padding: 1px;
+			}
+			
+			a {
+				width: 56px;
+				height: 18px;
+				padding: 2px 0 0 24px !important;
+				font-size: 12px;
+				float: left;
+				display: inline-block;
+				margin: 5px 0 0 5px !important;
+				color: #0e5970;
+				text-align: lect;
+				cursor: pointer;
+				
+				&.calendarAccept {
+					background: URL('images/btn-accept.jpg') no-repeat;
+				}
+			
+				&.calendarCancel {
+					background: URL('images/btn-cancel.jpg') no-repeat;
+				}
+				
+				&:hover {
+					color: @componentForeColor;
+				}	
+			}
+			
+		}
+		
+	}
+}

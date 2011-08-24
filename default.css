@@ -446,3 +446,166 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   -moz-border-radius:4px;
 }
 .treeView.treeViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }
+.calendarView {
+  background:#ffffff;
+  color:#333333;
+  overflow:auto;
+}
+.calendarView .calendarViewHeader {
+  height:20px;
+  overflow:hidden;
+  border-bottom:1px solid #888888;
+  background:#e9e9e9;
+}
+.calendarView .calendarViewHeader ul {
+  list-style-type:none;
+  height:20px;
+  overflow:hidden;
+  margin:0;
+  padding:0;
+}
+.calendarView .calendarViewHeader ul li {
+  width:100%;
+  margin:0 20px 0 40px;
+  height:20px;
+}
+.calendarView .calendarViewHeader ul li.calendarViewLeft {
+  float:left;
+  width:20px;
+  margin:0;
+}
+.calendarView .calendarViewHeader ul li.calendarViewRight {
+  float:right;
+  width:20px;
+  margin:0;
+}
+.calendarView .calendarViewHeader ul li a {
+  display:inline-block;
+  width:20px;
+  height:20px;
+}
+.calendarView .calendarViewHeader ul li a.calendarViewPrev { background:URL('images/prev.png') no-repeat 2px 2px; }
+.calendarView .calendarViewHeader ul li a.calendarAdvanced { background:URL('images/advanced.jpg') no-repeat 2px 2px; }
+.calendarView .calendarViewHeader ul li a.calendarViewNext { background:URL('images/next.png') no-repeat 2px 2px; }
+.calendarView .calendarViewHeader ul li a:hover { background-color:#bee4f4; }
+.calendarView .calendarViewHeader ul li p.calendarViewMonth {
+  width:100%;
+  padding:2px 0 0 0;
+  margin:0;
+  height:18px;
+  font-size:12px;
+  font-weight:bold;
+  text-align:center;
+}
+.calendarView table.calendarViewBody {
+  width:100%;
+  border-collapse:collapse;
+}
+.calendarView table.calendarViewBody th {
+  padding:2px;
+  font-size:12px;
+  font-weight:bold;
+  background:#e6f0f6;
+  border-bottom:1px solid #888888;
+  text-align:center;
+}
+.calendarView table.calendarViewBody td {
+  height:29px;
+  width:14%;
+  border-left:1px solid #888888;
+  border-bottom:1px solid #888888;
+}
+.calendarView table.calendarViewBody td a {
+  display:block;
+  height:25px;
+  padding:2px;
+  font-size:11px;
+  color:#177fb4;
+  text-decoration:none;
+}
+.calendarView table.calendarViewBody td a:hover {
+  background:#bee4f4;
+  color:#3a96c5;
+  text-decoration:underline;
+}
+.calendarView table.calendarViewBody td a.calendarDisabled {
+  color:#aaaaaa;
+  cursor:default;
+}
+.calendarView table.calendarViewBody td a.calendarDisabled:hover {
+  color:#aaaaaa;
+  background:none;
+  text-decoration:none;
+  cursor:default;
+}
+.calendarView table.calendarViewBody td a.calendarToday {
+  color:#cc0000 !important;
+  font-weight:bold;
+}
+.calendarView table.calendarViewBody td a.calendarMarked { background:#ccaaaa; }
+.calendarView table.calendarViewBody td a.calendarSelected {
+  background:#3a96c5;
+  color:#ffffff;
+}
+.calendarView .calendarViewFooter {
+  height:20px;
+  overflow:hidden;
+  background:#e9e9e9;
+}
+.calendarView .calendarViewFooter p {
+  margin:0;
+  padding:2px 0 0 0;
+  text-align:center;
+  font-size:12px;
+  font-weight:bold;
+  height:18px;
+}
+.calendarView .calendarViewFooter p a.calendarGoHome {
+  width:20px;
+  height:20px;
+  float:left;
+  background:URL('images/home.jpg') no-repeat 2px 2px;
+  margin:-2px 0 0 2px !important;
+}
+.calendarView .calendarViewFooter p a.calendarGoHome:hover { background-color:#bee4f4; }
+.calendarView div.calendarViewAdvanced { overflow:hidden; }
+.calendarView div.calendarViewAdvanced p {
+  font-size:12px;
+  overflow:hidden;
+  margin:4px !important;
+  clear:left;
+}
+.calendarView div.calendarViewAdvanced p label, .calendarView div.calendarViewAdvanced p input, .calendarView div.calendarViewAdvanced p select {
+  color:#333333;
+  padding:1px;
+  font-size:12px;
+}
+.calendarView div.calendarViewAdvanced p label {
+  float:left;
+  padding:2px 0 0 0 !important;
+  width:40px;
+}
+.calendarView div.calendarViewAdvanced p input {
+  border:1px solid #888888;
+  width:50px;
+  padding:1px;
+}
+.calendarView div.calendarViewAdvanced p select {
+  border:1px solid #888888;
+  padding:1px;
+}
+.calendarView div.calendarViewAdvanced p a {
+  width:56px;
+  height:18px;
+  padding:2px 0 0 24px !important;
+  font-size:12px;
+  float:left;
+  display:inline-block;
+  margin:5px 0 0 5px !important;
+  color:#0e5970;
+  text-align:lect;
+  cursor:pointer;
+}
+.calendarView div.calendarViewAdvanced p a.calendarAccept { background:URL('images/btn-accept.jpg') no-repeat; }
+.calendarView div.calendarViewAdvanced p a.calendarCancel { background:URL('images/btn-cancel.jpg') no-repeat; }
+.calendarView div.calendarViewAdvanced p a:hover { color:#333333; }

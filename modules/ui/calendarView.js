@@ -304,10 +304,11 @@ Scriptor.CalendarView.prototype.__refreshHeader = function() {
 	var targetDiv = document.getElementById(this.divId+'_header');
 	targetDiv.innerHTML = '';
 		
-	var hTemplate = '<ul><li><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="#"> </a></li>';
-	hTemplate += '<li><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="#"> </a></li>';
+	var hTemplate = '<ul><li class="calendarViewLeft"><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="#"> </a></li>';
+	hTemplate += '<li class="calendarViewLeft"><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="#"> </a></li>';
+	hTemplate += '<li class="calendarViewRight"><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="#"> </a></li>';
 	hTemplate += '<li><p class="calendarViewMonth">'+this.lang.longMonths[this.curMonth] + ' ' + this.curYear+'</p></li>';
-	hTemplate += '<li><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="#"> </a></li>';
+	hTemplate += '</ul>';
 	
 	targetDiv.innerHTML = hTemplate;
 	
