@@ -609,3 +609,30 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 .calendarView div.calendarViewAdvanced p a.calendarAccept { background:URL('images/btn-accept.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a.calendarCancel { background:URL('images/btn-cancel.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a:hover { color:#333333; }
+.galleryView {
+  background:#ffffff;
+  overflow:auto;
+  color:#333333;
+}
+.galleryView div {
+  float:left;
+  margin:5px;
+}
+.galleryView div img {
+  cursor:pointer;
+  display:block;
+  border:2px solid #ffffff;
+}
+.galleryView div p {
+  font-size:12px;
+  text-align:center;
+}
+.galleryView div.gvSelectedImage img { border:2px solid #333333; }
+.galleryView div.gvSelectedImage p { font-weight:bold; }
+.galleryViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }
+.galleryViewLoading div, .galleryViewMessage div { display:none; }
+.galleryViewMessage p {
+  margin:10px;
+  text-align:center;
+  font-size:11px;
+}

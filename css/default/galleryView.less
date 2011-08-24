@@ -1,0 +1,46 @@
+/* CSS Document */
+
+.galleryView {
+	background: @panelBgColor;
+	overflow: auto;
+	color: @componentForeColor;
+	
+	div {
+		float: left;
+		margin: 5px;
+		
+		img {
+			cursor: pointer;
+			display: block;
+			border: 2px solid @panelBgColor;
+		}
+		
+		p {
+			font-size: 12px;
+			text-align: center;
+		}
+		
+		&.gvSelectedImage img {
+			border: 2px solid @componentForeColor;
+		}
+		
+		&.gvSelectedImage p {
+			font-weight: bold;
+		}
+	}
+}
+
+.galleryViewLoading {
+	background: @panelBgColor URL('images/ajax-loader.gif') no-repeat center center;
+	
+}
+
+.galleryViewLoading div, .galleryViewMessage div {
+	display : none;
+}
+
+.galleryViewMessage p {
+	margin: 10px;
+	text-align: center;
+	font-size: 11px;
+}
