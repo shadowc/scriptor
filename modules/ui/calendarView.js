@@ -138,8 +138,8 @@ Scriptor.CalendarView.prototype.renderTemplate = function () {
 	cTemplate += '<input type="text" id="'+this.divId+'YearSelector" value="'+targetDate.getFullYear()+'" /></p>';
 	
 	// buttons
-	cTemplate += '<p><a class="calendarAccept" id="'+this.divId+'_advancedAccept">'+this.lang.accept+'</a>';
-	cTemplate += '<a class="calendarCancel" id="'+this.divId+'_advancedCancel">'+this.lang.cancel+'</a></p>';
+	cTemplate += '<p><input type="button" class="calendarBtn calendarAccept" id="'+this.divId+'_advancedAccept" value="'+this.lang.accept+'"> ';
+	cTemplate += '<input type="button" class="calendarBtn calendarCancel" id="'+this.divId+'_advancedCancel" value="'+this.lang.cancel+'"></p>';
 	
 	cTemplate += '</div>';
 	

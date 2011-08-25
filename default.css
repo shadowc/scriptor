@@ -486,7 +486,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   height:20px;
 }
 .calendarView .calendarViewHeader ul li a.calendarViewPrev { background:URL('images/prev.png') no-repeat 2px 2px; }
-.calendarView .calendarViewHeader ul li a.calendarAdvanced { background:URL('images/advanced.jpg') no-repeat 2px 2px; }
+.calendarView .calendarViewHeader ul li a.calendarAdvanced { background:URL('images/add.png') no-repeat 2px 2px; }
 .calendarView .calendarViewHeader ul li a.calendarViewNext { background:URL('images/next.png') no-repeat 2px 2px; }
 .calendarView .calendarViewHeader ul li a:hover { background-color:#bee4f4; }
 .calendarView .calendarViewHeader ul li p.calendarViewMonth {
@@ -565,7 +565,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   width:20px;
   height:20px;
   float:left;
-  background:URL('images/home.jpg') no-repeat 2px 2px;
+  background:URL('images/home.png') no-repeat 2px 2px;
   margin:-2px 0 0 2px !important;
 }
 .calendarView .calendarViewFooter p a.calendarGoHome:hover { background-color:#bee4f4; }
@@ -584,7 +584,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 .calendarView div.calendarViewAdvanced p label {
   float:left;
   padding:2px 0 0 0 !important;
-  width:40px;
+  width:50px;
 }
 .calendarView div.calendarViewAdvanced p input {
   border:1px solid #888888;
@@ -595,21 +595,21 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   border:1px solid #888888;
   padding:1px;
 }
-.calendarView div.calendarViewAdvanced p a {
-  width:56px;
-  height:18px;
-  padding:2px 0 0 24px !important;
-  font-size:12px;
-  float:left;
+.calendarView div.calendarViewAdvanced p .calendarBtn {
   display:inline-block;
-  margin:5px 0 0 5px !important;
-  color:#0e5970;
-  text-align:lect;
-  cursor:pointer;
+  width:auto;
+  padding:2px 6px;
+  font-size:12px;
+  margin:5px;
+  color:#333333;
+  background:#dddddd;
+  border:1px solid ;
+  border-radius:3px;
+  -webkit-border-radius:3px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:3px;
 }
-.calendarView div.calendarViewAdvanced p a.calendarAccept { background:URL('images/btn-accept.jpg') no-repeat; }
-.calendarView div.calendarViewAdvanced p a.calendarCancel { background:URL('images/btn-cancel.jpg') no-repeat; }
-.calendarView div.calendarViewAdvanced p a:hover { color:#333333; }
+.calendarView div.calendarViewAdvanced p .calendarBtn:hover { background:#bee4f4; }
 .galleryViewWrapper {
   background:#ffffff;
   color:#333333;

@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2,_3){
-var _4={version:{major:2,minor:0,instance:"alpha 6",toString:function(){
+var _4={version:{major:2,minor:0,instance:"alpha 7",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_5,_6){
 if(arguments.length>2){
@@ -4226,8 +4226,8 @@ _183+="<option value=\""+n+"\""+(_184.getMonth()==n?" selected=\"selected\"":"")
 _183+="</select></p>";
 _183+="<p><label for=\""+this.divId+"YearSelector\">"+this.lang.year+"</label>";
 _183+="<input type=\"text\" id=\""+this.divId+"YearSelector\" value=\""+_184.getFullYear()+"\" /></p>";
-_183+="<p><a class=\"calendarAccept\" id=\""+this.divId+"_advancedAccept\">"+this.lang.accept+"</a>";
-_183+="<a class=\"calendarCancel\" id=\""+this.divId+"_advancedCancel\">"+this.lang.cancel+"</a></p>";
+_183+="<p><input type=\"button\" class=\"calendarBtn calendarAccept\" id=\""+this.divId+"_advancedAccept\" value=\""+this.lang.accept+"\"> ";
+_183+="<input type=\"button\" class=\"calendarBtn calendarCancel\" id=\""+this.divId+"_advancedCancel\" value=\""+this.lang.cancel+"\"></p>";
 _183+="</div>";
 _183+="<div class=\"calendarViewFooter\" id=\""+this.divId+"_footer\"></div></div>";
 this.cmpTarget.innerHTML=_183;
