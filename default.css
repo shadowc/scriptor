@@ -642,3 +642,12 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
   text-align:center;
   font-size:11px;
 }
+.jsToolbar {
+  border:1px solid #888888;
+  border-radius:4px;
+  -webkit-border-radius:4px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:4px;
+  background:#bebebe url(images/table-header-back.jpg) repeat-x;
+  overflow:hidden;
+}
