@@ -1,8 +1,8 @@
 /*
 *
-* Scriptor Panel
+* Scriptor Toolbar
 *
-* Panel component class
+* Toolbar component class
 *
 */
 
@@ -35,4 +35,41 @@ Scriptor.Toolbar = function(opts) {
 	
 	this.create();
 	Scriptor.className.add(this.target, "jsToolbar");
+	
+	this.buttons = [];
+};
+
+/*
+* Scriptor.Toolbar.addButton
+*
+* Adds a toolbar button at the specified index
+* 
+* Parameters:
+*   opts: button options
+*   ndx: optional number defining the index to insert the button at
+*   
+* Options:
+*   label: the label of the button
+*   className: a value to be set as classname of the button
+*   onclick: callback function for click on button
+*   contents: alternatively, set contents to provide custom HTML
+*     for the button. All other options will be ignored.
+*/
+Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
+	var localOpts = {
+		label : '',
+		className : '',
+		onclick : null,
+		contents : null
+	};
+};
+
+/*
+* Scriptor.Toolbar.removeButton
+*
+* Removes a button specified by its index or by providing the
+* button object as stored in Scriptor.Toolbar.buttons array
+*/
+Scriptor.Toolbar.prototype.removeButton = function(identifier) {
+	
 };
