@@ -163,16 +163,25 @@
 			
 			LeftComponent.addTab({title : "Tree View"}, myTreeView);
 			LeftComponent.addTab({title : "Calendar View"}, new Scriptor.CalendarView());
-			LeftComponent.addTab({title : "Gallery View"}, new Scriptor.Panel());
+			LeftComponent.addTab({title : "Gallery View"}, myGalleryView = new Scriptor.GalleryView({thumbWidth : 150, thumbHeight : 180}));
 			LeftComponent.addTab({title : "Close me...", closable : true}, new Scriptor.Panel());
 			
 			LeftComponent._tabs[3].pane.setContent('If you close this tab I will be destroyed!');
 			
 			document.getElementById('scr_version').innerHTML = Scriptor.version;
 			
+			myGalleryViewCon = new Scriptor.DataConnectors.GalleryViewConnector({
+					galleryView : myGalleryView,
+					api : 'testapi.php',
+					parameters : 'type=xml&option=4',
+					method : 'POST',
+					type :'xml'
+				});
+			
 			myDataView.refresh();
 			myDataView2.refresh();
 			myTreeView.refresh();
+			myGalleryView.refresh();
 		});
 		
 		function dateFormat(date) {

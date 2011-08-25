@@ -451,6 +451,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   color:#333333;
   overflow:auto;
 }
+.calendarView .calendarViewWrapper { border:1px solid #888888; }
 .calendarView .calendarViewHeader {
   height:20px;
   overflow:hidden;
@@ -609,26 +610,31 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 .calendarView div.calendarViewAdvanced p a.calendarAccept { background:URL('images/btn-accept.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a.calendarCancel { background:URL('images/btn-cancel.jpg') no-repeat; }
 .calendarView div.calendarViewAdvanced p a:hover { color:#333333; }
-.galleryView {
+.galleryViewWrapper {
   background:#ffffff;
-  overflow:auto;
   color:#333333;
+  border:1px solid #888888;
 }
-.galleryView div {
+div.galleryView {
+  background:#ffffff;
+  color:#333333;
+  overflow:auto;
+}
+div.galleryView div {
   float:left;
   margin:5px;
 }
-.galleryView div img {
+div.galleryView div img {
   cursor:pointer;
   display:block;
   border:2px solid #ffffff;
 }
-.galleryView div p {
+div.galleryView div p {
   font-size:12px;
   text-align:center;
 }
-.galleryView div.gvSelectedImage img { border:2px solid #333333; }
-.galleryView div.gvSelectedImage p { font-weight:bold; }
+div.galleryView div.gvSelectedImage img { border:2px solid #333333; }
+div.galleryView div.gvSelectedImage p { font-weight:bold; }
 .galleryViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }
 .galleryViewLoading div, .galleryViewMessage div { display:none; }
 .galleryViewMessage p {

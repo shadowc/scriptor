@@ -4,7 +4,6 @@ rm Scriptor.en.uncompressed.js
 
 cat modules/intro.js 		>> Scriptor.en.uncompressed.js
 cat modules/core.js 		>> Scriptor.en.uncompressed.js
-cat modules/galleryView.js	>> Scriptor.en.uncompressed.js
 cat modules/httpRequest.js	>> Scriptor.en.uncompressed.js
 cat lang/httpRequest.en.js	>> Scriptor.en.uncompressed.js
 cat modules/ui/component.js		>> Scriptor.en.uncompressed.js
@@ -16,13 +15,13 @@ cat lang/dataView.en.js 		>> Scriptor.en.uncompressed.js
 cat modules/ui/treeView.js		>> Scriptor.en.uncompressed.js
 cat modules/ui/calendarView.js	>> Scriptor.en.uncompressed.js
 cat lang/calendarView.en.js 	>> Scriptor.en.uncompressed.js
+cat modules/ui/galleryView.js	>> Scriptor.en.uncompressed.js
 cat modules/outro.js			>> Scriptor.en.uncompressed.js
 
 rm Scriptor.es.uncompressed.js
 
 cat modules/intro.js 		>> Scriptor.es.uncompressed.js
 cat modules/core.js 		>> Scriptor.es.uncompressed.js
-cat modules/galleryView.js	>> Scriptor.es.uncompressed.js
 cat modules/httpRequest.js	>> Scriptor.es.uncompressed.js
 cat lang/httpRequest.es.js	>> Scriptor.es.uncompressed.js
 cat modules/ui/component.js		>> Scriptor.es.uncompressed.js
@@ -34,4 +33,5 @@ cat lang/dataView.es.js 		>> Scriptor.es.uncompressed.js
 cat modules/ui/treeView.js		>> Scriptor.es.uncompressed.js
 cat modules/ui/calendarView.js	>> Scriptor.es.uncompressed.js
 cat lang/calendarView.es.js 	>> Scriptor.es.uncompressed.js
+cat modules/ui/galleryView.js	>> Scriptor.es.uncompressed.js
 cat modules/outro.js			>> Scriptor.es.uncompressed.js

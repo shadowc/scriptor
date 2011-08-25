@@ -1,10 +1,7 @@
 // JavaScript Document
 /*
 *
-*  galleryView version 2.0b
-*
 *  Will display a selectable group of thumbnails with information about the image itself.
-*  Compatible with scriptor dynamic javascript+css script loader
 *
 * Browser Compatibility: Gecko 1.8+, IE6+, Opera 9+, Safari 3.1+
 */
@@ -29,11 +26,9 @@ var gv_ImageObject = function(thumbnail, path, name) {
 * galleryView
 *
 * This is the main component. It will set up a div element with the array of
-* gv_ImagePbjects representing images.
+* gv_ImageObjects representing images.
 *
 * Options are:
-*  div: a string with the id attribute of a unique div element to be the container of
-*    the component or the actual HTML element
 *  In opts:
 *  thumbWidth: optional, the fixed width of the thumbnails in pixels
 *  thumbHeight: optional, the fixed height of the thumbnails in pixles
@@ -53,8 +48,10 @@ var gv_ImageObject = function(thumbnail, path, name) {
 *  visible: readonly property. It is true if the component has been shown sucessfully
 *  images: an array of gv_ImageObjects contained in the component
 */
-galleryView = Scriptor.galleryView = function(div, opts) /*sqlService, thumbWidth, thumbHeight)*/ {
+Scriptor.GalleryView = function(div, opts) {
 	var localOpts = {
+		canHaveChildren : true,
+		hasInvalidator : true,
 		thumbWidth : 154,
 		thumbHeight : 184,
 		showNames : true,
@@ -62,282 +59,235 @@ galleryView = Scriptor.galleryView = function(div, opts) /*sqlService, thumbWidt
 	};
 	Scriptor.mixin(localOpts, opts);
 	
+	var cmp = Component.get(localOpts);
+	for (var prop in cmp)
+	{
+		this[prop] = cmp[prop];
+	}
+	this.CMP_SIGNATURE = "Scriptor.ui.GalleryView";
+	
 	this.selectedImage = -1;
-	this.enabled = true;
 	this.showNames = localOpts.showNames;
 	this.fixedThumbSize = localOpts.fixedThumbSize;
 	this.thumbWidth = localOpts.thumbWidth;
 	this.thumbHeight = localOpts.thumbHeight;
-	
-	Scriptor.event.init(this);
-	Scriptor.event.registerCustomEvent(this, 'onshow');
-	Scriptor.event.registerCustomEvent(this, 'onrefresh');
-	Scriptor.event.registerCustomEvent(this, 'onhide');
-	Scriptor.event.registerCustomEvent(this, 'onselect');
-	
-	this.visible = false;
-	
-	this.divElem = typeof(div) == 'string' ? document.getElementById(div) : div;
-	this.div = typeof(div) == 'string' ? div : this.divElem.id;
-	
 	this.images = [];
 	
+	// initialize events!
+	Scriptor.event.init(this);
+	Scriptor.event.registerCustomEvent(this, 'onbeforeshow');
+	Scriptor.event.registerCustomEvent(this, 'onshow');
+	Scriptor.event.registerCustomEvent(this, 'onbeforehide');
+	Scriptor.event.registerCustomEvent(this, 'onhide');
+	Scriptor.event.registerCustomEvent(this, 'onbeforedestroy');
+	Scriptor.event.registerCustomEvent(this, 'ondestroy');
+	Scriptor.event.registerCustomEvent(this, 'oncreate');
+	Scriptor.event.registerCustomEvent(this, 'onresize');
+	Scriptor.event.registerCustomEvent(this, 'onfocus');
+	Scriptor.event.registerCustomEvent(this, 'onblur');
+	
+	Scriptor.event.registerCustomEvent(this, 'onrefresh');
+	Scriptor.event.registerCustomEvent(this, 'onselect');
+	
+	this.create();
+	Scriptor.className.add(this.target, "galleryViewWrapper");
+	Scriptor.className.add(this.cmpTarget, "galleryView");
+	
+	// component template 
+	this.canHaveChildren = false;
+	
+	this.DOMAddedImplementation = function() {
+		this.updateImages();
+	};
 };
 
-galleryView.prototype = {
-	/*
-	* galleryView.addImage
-	*
-	* Adds an image to the list, options are:
-	* 	thumbnail: the path to the image thumbnail
-	* 	path: the path to the full image (optional)
-	* 	name: the name of the image (optional)
-	* 	insertIndex: the index to insert the image in the list (optional)
-	*/
-	addImage : function(opts)
+/*
+* galleryView.addImage
+*
+* Adds an image to the list, options are:
+* 	thumbnail: the path to the image thumbnail
+* 	path: the path to the full image (optional)
+* 	name: the name of the image (optional)
+* 	insertIndex: the index to insert the image in the list (optional)
+*/
+Scriptor.GalleryView.prototype.addImage = function(opts)
+{
+	var localOpts = {
+		thumbnail: null,
+		path: null,
+		name: null,
+		insertIndex: this.images.length
+	};
+	
+	Scriptor.mixin(localOpts, opts);
+	
+	if (!localOpts.thumbnail)
 	{
-		var localOpts = {
-			thumbnail: null,
-			path: null,
-			name: null,
-			insertIndex: this.images.length
-		};
-		
-		Scriptor.mixin(localOpts, opts);
-		
-		if (!localOpts.thumbnail)
+		Scriptor.error.report('Missing thumbnail information for galleryView image');
+		return;
+	}
+	
+	if (localOpts.insertIndex == this.images.length)
+	{
+		this.images.push(new gv_ImageObject(localOpts.thumbnail, localOpts.path, localOpts.name));
+	}
+	else
+	{
+		this.images.splice(localOpts.insertIndex, 0, new gv_ImageObject(localOpts.thumbnail, localOpts.path, localOpts.name));
+	}
+	
+	if (this.inDOM)	// TODO: a way to add one image to DOM
+		this.updateImages();
+};
+
+Scriptor.GalleryView.prototype.deleteImage = function(identifier)
+{
+	if (typeof(identifier) == 'number')
+	{
+		this.images.splice(identifier,1);
+	}
+	else if (typeof(identifier) == 'object')
+	{
+		for (var n=0; n < this.images.length; n++)
 		{
-			Scriptor.error.report('Missing thumbnail information for galleryView image');
-			return;
+			if (this.images[n] == identifier)
+			{
+				this.images.splice(n,1);
+				break;
+			}
 		}
-		
-		if (localOpts.insertIndex == this.images.length)
+	}
+	
+	if (this.selectedImage > this.images.length-1)
+		this.selectedImage = -1;
+	
+	if (this.inDOM)	// TODO: a way to remove only one image from DOM
+		this.updateImages();
+};
+
+Scriptor.GalleryView.prototype.refresh = function() {
+	var e = Scriptor.event.fire(this, 'onrefresh');
+	if (!e.returnValue)
+		return;
+	
+	if (this.inDOM)
+		this.updateImages();
+};
+
+/*
+* galleryView.setLoading(val)
+*   If val is true, show loading spinner, else show the actual rows,
+*   usefull for assync updates
+*/
+Scriptor.GalleryView.prototype.setLoading = function(val) {
+	Scriptor.className[(val ? "add" : "remove")](this.cmpTarget, "galleryViewLoading");
+};
+
+/*
+* galleryView.setMessage(msg)
+*	Set a message (usefull for error messages) and hide all info in a galleryView
+* 	If msg is set to false or not present, it will restore galleryView to normal
+*/
+Scriptor.GalleryView.prototype.setMessage = function(msg) {
+	// false, null, or msg not present resets dataView to normal
+	if (msg === false || msg === null || typeof(msg) != "string")
+	{
+		if (document.getElementById(this.divId + '_message'))
+			this.target.removeChild(document.getElementById(this.divId + '_message'));
+			
+		Scriptor.className.remove(this.cmpTarget, "galleryViewMessage");
+	}
+	else	// if string passed, we show a message
+	{
+		Scriptor.className.add(this.cmpTarget, "galleryViewMessage");
+		var msgDiv;
+		if (!document.getElementById(this.divId + '_message'))
 		{
-			this.images.push(new gv_ImageObject(localOpts.thumbnail, localOpts.path, localOpts.name));
+			msgDiv = document.createElement('p');
+			msgDiv.id = this.divId + '_message';
+			this.target.appendChild(msgDiv);
 		}
 		else
 		{
-			this.images.splice(localOpts.insertIndex, 0, new gv_ImageObject(localOpts.thumbnail, localOpts.path, localOpts.name));
+			msgDiv = document.getElementById(this.divId + '_message');
 		}
-		
-		if (this.visible)
-			this.updateImages();
-	},
+		msgDiv.innerHTML = msg;
+	}
+};
 
-	deleteImage : function(identifier)
+Scriptor.GalleryView.prototype.updateImages = function()
+{
+	if (!this.inDOM) {
+		Scriptor.error.report( "Can't update images on non visible galleryView object.");
+		return;
+	}
+		
+	this.cmpTarget.innerHTML = '';
+	
+	var iTemplate = '';
+	
+	for (var n=0; n < this.images.length; n++) {
+		iTemplate += '<div id="' + this.divId + '_envelop_' + n + '" ';
+		if (this.fixedThumbSize) 
+			iTemplate += 'style="width: ' + this.thumbWidth + 'px; height: ' + this.thumbHeight + 'px; overflow: hidden;"';
+		
+		if (this.selectedImage == n)
+			iTemplate += 'class="gvSelectedImage" ';
+		iTemplate += '>';
+		
+		iTemplate += '<img id="' + this.divId + '_img_' + n + '" src="' + this.images[n].thumbnail + '" />';
+		
+		if (this.showNames && this.images[n].name) 
+			iTemplate += '<p>' + this.images[n].name + '</p>'
+		
+		iTemplate += '</div>';
+	}
+	
+	this.cmpTarget.innerHTML = iTemplate;
+	for (var n=0; n < this.images.length; n++)
 	{
-		if (typeof(identifier) == 'number')
-		{
-			this.images.splice(identifier,1);
-		}
-		else if (typeof(identifier) == 'object')
-		{
-			for (var n=0; n < this.images.length; n++)
-			{
-				if (this.images[n] == identifier)
-				{
-					this.images.splice(n,1);
+		Scriptor.event.attach(document.getElementById(this.divId + '_img_' + n), 'onclick', Scriptor.bindAsEventListener(this._selectImage, this, n));
+	}
+	
+	if (this.selectedImage >= this.images.length) 
+		this.selectedImage = -1;
+};
+
+Scriptor.GalleryView.prototype._selectImage = function(e, imgNdx) {
+	if (!e) e = window.event;
+	
+	e.selectedImage = this.selectedImage;	
+	e.selecting = imgNdx;
+	e = Scriptor.event.fire(this, 'onselect', e);
+	
+	if (e.returnValue == false)
+	{
+		Scriptor.event.cancel(e, true);
+		return false;
+	}
+	
+	var imgs = this.cmpTarget.getElementsByTagName('img');
+	if (imgNdx != -1) {	
+		if (this.selectedImage != -1) {
+			for (var a=0; a < imgs.length; a++) {
+				if (imgs[a].parentNode.className == 'gvSelectedImage') {
+					imgs[a].parentNode.className = '';				
 					break;
 				}
 			}
 		}
 		
-		if (this.selectedImage > this.images.length-1)
+		if (this.selectedImage == imgNdx) {
 			this.selectedImage = -1;
-		
-		if (this.visible)
-			this.updateImages();
-	},
-
-	Refresh : function() {
-		var e = Scriptor.event.fire(this, 'onrefresh');
-		if (!e.returnValue)
-			return;
-		
-		if (this.visible)
-			this.updateImages();
-	},
-
-	Show : function(withRefresh)
-	{
-		var e = Scriptor.event.fire(this, 'onshow');
-		if (!e.returnValue)
-			return;
-		
-				
-		if (this.visible) 	// we're redrawing
-			this._oldScrollTop = document.getElementById(this.div).scrollTop;
-		
-		if (!this.divElem)
-		{
-			this.divElem = document.getElementById(this.div);
 		}
-		else
-		{
-			if (!this.divElem.id)
-			{
-				if (!this.div)
-					this.div = __getNextHtmlId();
-					
-				this.divElem.id = this.div;
-			}
+		else {
+			this.selectedImage = imgNdx;
+			imgs[imgNdx].parentNode.className = 'gvSelectedImage';
 		}
-		
-		if (!this.divElem) {
-			Scriptor.error.report('Error: galleryView DIV does not exist.');
-			return;
-		}
-		
-		var target = this.divElem;
-		target.className = 'galleryView scriptor';
-		target.innerHTML = '';
-		
-		this.visible = true;
-		if (withRefresh) 
-			this.Refresh();
-		
-	},
-
-	Hide : function()
-	{
-		var e = Scriptor.event.fire(this, 'onhide');
-		if (!e.returnValue)
-			return;
-		
-		if (this.divElem)
-			this.divElem.style.display = 'none';
-			
-		this.visible = false;
-	},
-	
-	/*
-	* galleryView.setLoading(val)
-	*   If val is true, show loading spinner, else show the actual rows,
-	*   usefull for assync updates
-	*/
-	setLoading : function(val) {
-		var body = document.getElementById(this.div);
-		
-		body.className = val ? 'galleryView scriptor galleryViewLoading' : 'galleryView scriptor';		
-	},
-	
-	/*
-	* galleryView.setMessage(msg)
-	*	Set a message (usefull for error messages) and hide all info in a galleryView
-	* 	If msg is set to false or not present, it will restore galleryView to normal
-	*/
-	setMessage : function(msg) {
-		// false, null, or msg not present resets dataView to normal
-		if (msg === false || msg === null || typeof(msg) != "string")
-		{
-			if (document.getElementById(this.div + '_message'))
-				document.getElementById(this.div + '_message').parentNode.removeChild(document.getElementById(this.div + '_message'));
-				
-			this.divElem.className = 'galleryView scriptor';
-		}
-		else	// if string passed, we show a message
-		{
-			this.divElem.className = 'galleryView scriptor galleryViewMessage';
-			var msgDiv;
-			if (!document.getElementById(this.div + '_message'))
-			{
-				msgDiv = document.createElement('p');
-				msgDiv.id = this.div + '_message';
-				document.getElementById(this.div).appendChild(msgDiv);
-			}
-			else
-			{
-				msgDiv = document.getElementById(this.div + '_message');
-			}
-			msgDiv.innerHTML = msg;
-		}
-	},
-	
-	updateImages : function()
-	{
-		if (!this.visible) {
-			Scriptor.error.report( "Can't update rows on non visible galleryView object.");
-			return;
-		}
-			
-		var target = document.getElementById(this.div);
-		if (!this._oldScrollTop)
-			this._oldScrollTop = target.parentNode.scrollTop;
-			
-		target.innerHTML = '';
-			
-		var iTemplate = '';
-		
-		for (var n=0; n < this.images.length; n++) {
-			iTemplate += '<div id="' + this.div + '_envelop_' + n + '" ';
-			if (this.fixedThumbSize) 
-				iTemplate += 'style="width: ' + this.thumbWidth + 'px; height: ' + this.thumbHeight + 'px; overflow: hidden;"';
-			
-			if (this.selectedImage == n)
-				iTemplate += 'class="gvSelectedImage" ';
-			iTemplate += '>';
-			
-			iTemplate += '<img id="' + this.div + '_img_' + n + '" src="' + this.images[n].thumbnail + '" />';
-			
-			if (this.showNames && this.images[n].name) 
-				iTemplate += '<p>' + this.images[n].name + '</p>'
-			
-			iTemplate += '</div>';
-		}
-		
-		target.innerHTML = iTemplate;
-		for (var n=0; n < this.images.length; n++)
-		{
-			Scriptor.event.attach(document.getElementById(this.div + '_img_' + n), 'onclick', Scriptor.bind(this._selectImage, this, n));
-		}
-		
-		if (this.selectedImage >= this.images.length) 
-			this.selectedImage = -1;
-		
-	},
-	
-	_selectImage : function(e, imgNdx) {
-		if (!e) e = window.event;
-		
-		if (!this.visible || !this.enabled)
-		{
-			Scriptor.event.cancel(e, true);
-			return false;
-		}
-		
-		e.selectedImage = this.selectedImage;	
-		e.selecting = imgNdx;
-		e = Scriptor.event.fire(this, 'onselect', e);
-		
-		if (e.returnValue == false)
-		{
-			Scriptor.event.cancel(e, true);
-			return false;
-		}
-		
-		var imgs = this.divElem.getElementsByTagName('img');
-		if (imgNdx != -1) {	
-			if (this.selectedImage != -1) {
-				for (var a=0; a < imgs.length; a++) {
-					if (imgs[a].parentNode.className == 'gvSelectedImage') {
-						imgs[a].parentNode.className = '';				
-						break;
-					}
-				}
-			}
-			
-			if (this.selectedImage == imgNdx) {
-				this.selectedImage = -1;
-			}
-			else {
-				this.selectedImage = imgNdx;
-				imgs[imgNdx].parentNode.className = 'gvSelectedImage';
-			}
-		}
-				
-		Scriptor.event.cancel(e);
-		return false;
 	}
+			
+	Scriptor.event.cancel(e);
+	return false;
 };
 
 /*
@@ -371,7 +321,10 @@ galleryView.prototype = {
 *    ]}
 *
 */
-galleryViewConnector = Scriptor.galleryViewConnector = function(opts) {
+if (Scriptor.DataConnectors === undefined)
+	Scriptor.DataConnectors = {};
+	
+Scriptor.DataConnectors.GalleryViewConnector = function(opts) {
 	var localOpts = {
 		galleryView : null,
 		api : null,
@@ -427,7 +380,7 @@ galleryViewConnector = Scriptor.galleryViewConnector = function(opts) {
 	});
 };
 
-galleryViewConnector.prototype = {
+Scriptor.DataConnectors.GalleryViewConnector.prototype = {
 	_onRefresh : function(e) {
 		this.galleryView.setLoading(true);
 			
@@ -446,8 +399,6 @@ galleryViewConnector.prototype = {
 			// TODO: Add/Remove/Update images instead of replacing the whole data structure
 			//   upgrade addImage, deleteImage to avoid using updateImages
 			// fake visible = false so we call updateImages only once
-			var oldVisible = this.galleryView.visible;
-			this.galleryView.visible = false;
 			this.galleryView.images.length = 0;
 
 			if (root.getAttribute('success') == '1') {
@@ -499,19 +450,14 @@ galleryViewConnector.prototype = {
 				this.galleryView.setMessage(root.getAttribute('errormessage'));
 			}
 			
-			if (oldVisible)
-			{
-				this.galleryView.visible = oldVisible;
+			if (this.galleryView.inDOM)
 				this.galleryView.updateImages();
-			}
 		}
 		else	// json
 		{
 			// TODO: Add/Remove/Update images instead of replacing the whole data structure
 			//   upgrade addImage, deleteImage to avoid using updateImages
 			// fake visible = false so we call updateImages only once
-			var oldVisible = this.galleryView.visible;
-			this.galleryView.visible = false;
 			this.galleryView.images.length = 0;
 			
 			if (data.success) {
@@ -537,11 +483,9 @@ galleryViewConnector.prototype = {
 				this.galleryView.setMessage(data.errormessage);
 			}
 			
-			if (oldVisible)
-			{
-				this.galleryView.visible = oldVisible;
+			if (this.galleryView.inDOM)
 				this.galleryView.updateImages();
-			}
+			
 		}
 	},
 	

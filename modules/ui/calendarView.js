@@ -111,7 +111,7 @@ Scriptor.CalendarView = function(opts) {
 
 Scriptor.CalendarView.prototype.renderTemplate = function () {	
 	// Create table header
-	var cTemplate = '<div class="calendarViewHeader" id="' + this.divId + '_header"></div>';
+	var cTemplate = '<div class="calendarViewWrapper"><div class="calendarViewHeader" id="' + this.divId + '_header"></div>';
 	
 	// Create body
 	cTemplate += '<table border="0" cellpadding="0" cellspacing="0" class="calendarViewBody" id="' + this.divId + '_body"></table>';
@@ -144,7 +144,7 @@ Scriptor.CalendarView.prototype.renderTemplate = function () {
 	cTemplate += '</div>';
 	
 	// Create footer
-	cTemplate += '<div class="calendarViewFooter" id="' + this.divId + '_footer"></div>';
+	cTemplate += '<div class="calendarViewFooter" id="' + this.divId + '_footer"></div></div>';
 	
 	this.cmpTarget.innerHTML = cTemplate;
 	

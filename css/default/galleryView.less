@@ -1,9 +1,15 @@
 /* CSS Document */
 
-.galleryView {
+.galleryViewWrapper {
 	background: @panelBgColor;
-	overflow: auto;
 	color: @componentForeColor;
+	border: 1px solid @panelBorderColorFocus;
+}
+
+div.galleryView {
+	background: @panelBgColor;
+	color: @componentForeColor;
+	overflow: auto;
 	
 	div {
 		float: left;
