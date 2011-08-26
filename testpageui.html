@@ -146,7 +146,9 @@
 				id : "addTabBtn",
 				label : "Add a Tab",
 				onclick : function() {
-					alert('add a tab here');
+					var p = new Scriptor.Panel();
+					p.setContent('If you close this tab I will be destroyed!');
+					LeftComponent.addTab({title : "Close me...", closable : true}, p);
 				}
 			});
 			
