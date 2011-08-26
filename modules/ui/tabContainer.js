@@ -125,6 +125,9 @@ Scriptor.TabContainer = function(opts) {
 		
 	};
 
+	this.destroyImplementation = function() {
+		this._tabsContextMenu.destroy();
+	};
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {

@@ -308,6 +308,10 @@ Scriptor.DataView = function(opts) {
 			
 		this._cached = null;
 	};
+	
+	this.destroyImplementation = function() {
+		this.optionsMenu.destroy();
+	};
 };
 
 /*

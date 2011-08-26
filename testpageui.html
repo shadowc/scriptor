@@ -134,13 +134,22 @@
 				region : "left",
 				id : "container_left_main",
 				resizable : true,
-				style : "width: 400px; margin-right: 5px; border: none;"
+				style : "width: 400px; margin-right: 5px; border: none; background: transparent;"
 			});
 			
 			LeftTopComponent = new Scriptor.Toolbar({
 				region : "top",
 				style : "height: 30px; margin-bottom: 5px;"
 			});
+			
+			LeftTopComponent.addButton({
+				id : "addTabBtn",
+				label : "Add a Tab",
+				onclick : function() {
+					alert('add a tab here');
+				}
+			});
+			
 			
 			LeftComponent = new Scriptor.TabContainer({
 				region : "center",
