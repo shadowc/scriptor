@@ -180,7 +180,7 @@ Scriptor.ContextMenu.prototype.addItem = function(opts, ndx)
 			if (item.checked)
 				li.className = "OptionChecked";
 				
-			cTemplate += '<a href="'+window.location+'#" id="'+this.divId+'_itm_' + ndx + '"';
+			cTemplate += '<a href="'+Scriptor.getInactiveLocation()+'" id="'+this.divId+'_itm_' + ndx + '"';
 			if (item['class'])
 				cTemplate += ' class="' + item['class'] + '"';
 			cTemplate += '>' + item.label + '</a>';

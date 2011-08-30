@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2,_3){
-var _4={version:{major:2,minor:0,instance:"beta 2",toString:function(){
+var _4={version:{major:2,minor:0,instance:"beta 3",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_5,_6){
 if(arguments.length>2){
@@ -322,7 +322,7 @@ _35=_2.getElementsByTagName("body")[0];
 }
 return _35;
 },getInactiveLocation:function(){
-return String((_1.location.indexOf("#")!=-1)?_1.location:_1.location+"#");
+return String((_1.location.href.indexOf("#")!=-1)?_1.location.href:_1.location.href+"#");
 },invalidate:function(_36,msg){
 if(_36){
 _4._calculateBrowserSize();
@@ -1818,7 +1818,7 @@ li.className="contextMenuSep";
 if(_b9.checked){
 li.className="OptionChecked";
 }
-_b8+="<a href=\""+_1.location+"#\" id=\""+this.divId+"_itm_"+ndx+"\"";
+_b8+="<a href=\""+_4.getInactiveLocation()+"\" id=\""+this.divId+"_itm_"+ndx+"\"";
 if(_b9["class"]){
 _b8+=" class=\""+_b9["class"]+"\"";
 }
@@ -2563,13 +2563,13 @@ this.addColumn(this.createColumn(_f8.columns[n]));
 _4.DataView.prototype.renderTemplate=function(){
 if(!this._templateRendered){
 var _fc="";
-var _fd=_1.location;
+var _fd=_4.getInactiveLocation();
 if(this.paginating){
 _fc+="<div class=\"dataViewPaginationHeader dataViewToolbar\" id=\""+this.divId+"_paginationHeader\"><ul><li class=\"first\">";
 _fc+="<label class=\"dataViewPaginationPages\" id=\""+this.divId+"_paginationLabel\">"+this.lang.pageStart+(this.curPage+1)+this.lang.pageMiddle+"<span id=\""+this.divId+"_totalPagesHandler\">"+(this.getTotalPages())+"</span>";
 _fc+="</label></li><li>";
-_fc+="<a href=\""+_fd+"#\" class=\"dataViewPrevBtn\" id=\""+this.divId+"_goToPagePrev\"> </a>";
-_fc+="<a href=\""+_fd+"#\" class=\"dataViewNextBtn\" id=\""+this.divId+"_goToPageNext\"> </a>";
+_fc+="<a href=\""+_fd+"\" class=\"dataViewPrevBtn\" id=\""+this.divId+"_goToPagePrev\"> </a>";
+_fc+="<a href=\""+_fd+"\" class=\"dataViewNextBtn\" id=\""+this.divId+"_goToPageNext\"> </a>";
 _fc+="</li><li><label class=\"dataViewPaginationGotoPage\" for=\""+this.divId+"_pageInput\">"+this.lang.pageEnd+"</label>";
 _fc+="<input type=\"text\" class=\"dataViewPaginationInput\" id=\""+this.divId+"_pageInput\" />";
 _fc+="<input type=\"button\" value=\""+this.lang.pageGo+"\" class=\"dataViewPageButton\" id=\""+this.divId+"_pageInputBtn\" />";
@@ -2584,7 +2584,7 @@ _fc+="<li class=\"dataViewSep\"></li>";
 }
 _fc+="</ul>";
 _fc+="<span id=\""+this.divId+"_optionsMenuBtn\" class=\"dataViewHeaderMenu\">";
-_fc+="<a href=\""+_fd+"#\"> </a></span></div>";
+_fc+="<a href=\""+_fd+"\"> </a></span></div>";
 _fc+="<div id=\""+this.divId+"_outerBody\" class=\"dataViewOuterBody\">";
 _fc+="<div class=\"dataViewBody"+(this.multiselect?" dataViewMultiselect":"")+"\" id=\""+this.divId+"_body\"></div>";
 _fc+="</div>";
@@ -2714,7 +2714,7 @@ a.className="dataViewSortDesc";
 }
 }
 a.id=this.divId+"_columnHeader_"+ndx;
-a.setAttribute("href",_1.location+"#");
+a.setAttribute("href",_4.getInactiveLocation());
 a.innerHTML=_107.Name;
 li.appendChild(a);
 li2=_2.createElement("li");
@@ -3843,7 +3843,7 @@ _163++;
 return srch;
 },updateChildrenNodes:function(){
 var _164=_2.getElementById(this.treeView.divId+"_"+this.id+"_branch");
-var _165=_1.location;
+var _165=_4.getInactiveLocation();
 for(var i=0;i<this.childNodes.length;i++){
 var node=_2.createElement("li");
 node.id=this.treeView.divId+"_"+this.childNodes[i].id;
@@ -3851,14 +3851,14 @@ _164.appendChild(node);
 var _166="";
 var _167=this.childNodes[i].childNodes.length;
 if(_167){
-_166+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_expandable\" href=\""+_165+"#\" class=\"";
+_166+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_expandable\" href=\""+_165+"\" class=\"";
 _166+=(this.childNodes[i].expanded?"treeViewCollapsableNode":"treeViewExpandableNode")+"\"></a>";
 }
 _166+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_selectNode\" ";
 if(!_167){
 _166+="class=\"treeViewSingleNode\" ";
 }
-_166+="href=\""+_165+"#\">"+this.childNodes[i].Name+"</a>";
+_166+="href=\""+_165+"\">"+this.childNodes[i].Name+"</a>";
 if(_167){
 _166+="<ul id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_branch\"></ul>";
 }
@@ -4292,7 +4292,7 @@ _185=_2.createElement("td");
 _185.setAttribute("align","left");
 _185.setAttribute("valign","top");
 tmpA=_2.createElement("a");
-tmpA.setAttribute("href",_1.location+"#");
+tmpA.setAttribute("href",_4.getInactiveLocation());
 tmpA.appendChild(_2.createTextNode(_187.getDate()));
 var _18c=false;
 if(this.isEqual(_187,_186)){
@@ -4361,10 +4361,10 @@ return;
 }
 var _18e=_2.getElementById(this.divId+"_header");
 _18e.innerHTML="";
-var _18f=_1.location;
-var _190="<ul><li class=\"calendarViewLeft\"><a class=\"calendarViewPrev\" title=\""+this.lang.prevMonth+"\" id=\""+this.divId+"_prevMonth\" href=\""+_18f+"#\"> </a></li>";
-_190+="<li class=\"calendarViewLeft\"><a class=\"calendarAdvanced\" title=\""+this.lang.advanced+"\" id=\""+this.divId+"_viewAdvanced\" href=\""+_18f+"#\"> </a></li>";
-_190+="<li class=\"calendarViewRight\"><a class=\"calendarViewNext\" title=\""+this.lang.nextMonth+"\" id=\""+this.divId+"_nextMonth\" href=\""+_18f+"#\"> </a></li>";
+var _18f=_4.getInactiveLocation();
+var _190="<ul><li class=\"calendarViewLeft\"><a class=\"calendarViewPrev\" title=\""+this.lang.prevMonth+"\" id=\""+this.divId+"_prevMonth\" href=\""+_18f+"\"> </a></li>";
+_190+="<li class=\"calendarViewLeft\"><a class=\"calendarAdvanced\" title=\""+this.lang.advanced+"\" id=\""+this.divId+"_viewAdvanced\" href=\""+_18f+"\"> </a></li>";
+_190+="<li class=\"calendarViewRight\"><a class=\"calendarViewNext\" title=\""+this.lang.nextMonth+"\" id=\""+this.divId+"_nextMonth\" href=\""+_18f+"\"> </a></li>";
 _190+="<li><p class=\"calendarViewMonth\">"+this.lang.longMonths[this.curMonth]+" "+this.curYear+"</p></li>";
 _190+="</ul>";
 _18e.innerHTML=_190;
@@ -4379,7 +4379,7 @@ return;
 }
 var _191=_2.getElementById(this.divId+"_footer");
 _191.innerHTML="";
-var _192="<p><a class=\"calendarGoHome\" title=\""+this.lang.homeDate+"\" href=\""+_1.location+"#\" id=\""+this.divId+"_goHome\"> </a>";
+var _192="<p><a class=\"calendarGoHome\" title=\""+this.lang.homeDate+"\" href=\""+_4.getInactiveLocation()+"\" id=\""+this.divId+"_goHome\"> </a>";
 if(this.selectedDates.length){
 if(this.selectedDates.length==1){
 var text=this.lang.oneSelection;
@@ -5059,7 +5059,7 @@ _1be.target=_2.createElement("span");
 _1be.target.id=this.divId+"_btn_"+_1be.id;
 var _1bf="";
 if(typeof (_1be.onContentAdded)!="function"){
-_1bf="<a"+(_1be.className?" class=\""+_1be.className+"\" ":"")+" href=\""+_1.location+"#\">"+_1be.label+"</a>";
+_1bf="<a"+(_1be.className?" class=\""+_1be.className+"\" ":"")+" href=\""+_4.getInactiveLocation()+"\">"+_1be.label+"</a>";
 }
 if(ndx===_3){
 ndx=this.buttons.length;

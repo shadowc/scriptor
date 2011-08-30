@@ -4,7 +4,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 0,
-		instance : "beta 2",
+		instance : "beta 3",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -479,7 +479,7 @@ var Scriptor = {
 	*   be switching the page when clicked or change tha page's hash information
 	*/
 	getInactiveLocation : function() {
-		return String((window.location.indexOf('#') != -1) ? window.location : window.location + "#");
+		return String((window.location.href.indexOf('#') != -1) ? window.location.href : window.location.href + "#");
 	},
 	
 	/*

@@ -221,7 +221,7 @@ Scriptor.CalendarView.prototype.updateDates = function() {
 		tmpTd.setAttribute('valign', 'top');
 		
 		tmpA = document.createElement('a');
-		tmpA.setAttribute('href', window.location +'#');
+		tmpA.setAttribute('href', Scriptor.getInactiveLocation());
 		tmpA.appendChild(document.createTextNode(curMonth.getDate()));
 		
 		// detect today
@@ -314,11 +314,11 @@ Scriptor.CalendarView.prototype.__refreshHeader = function() {
 	
 	var targetDiv = document.getElementById(this.divId+'_header');
 	targetDiv.innerHTML = '';
-	var curLocation = window.location;
+	var curLocation = Scriptor.getInactiveLocation();
 			
-	var hTemplate = '<ul><li class="calendarViewLeft"><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="'+curLocation+'#"> </a></li>';
-	hTemplate += '<li class="calendarViewLeft"><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="'+curLocation+'#"> </a></li>';
-	hTemplate += '<li class="calendarViewRight"><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="'+curLocation+'#"> </a></li>';
+	var hTemplate = '<ul><li class="calendarViewLeft"><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="'+curLocation+'"> </a></li>';
+	hTemplate += '<li class="calendarViewLeft"><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="'+curLocation+'"> </a></li>';
+	hTemplate += '<li class="calendarViewRight"><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="'+curLocation+'"> </a></li>';
 	hTemplate += '<li><p class="calendarViewMonth">'+this.lang.longMonths[this.curMonth] + ' ' + this.curYear+'</p></li>';
 	hTemplate += '</ul>';
 	
@@ -342,7 +342,7 @@ Scriptor.CalendarView.prototype.__refreshFooter = function() {
 	var targetDiv = document.getElementById(this.divId+'_footer');
 	targetDiv.innerHTML = '';
 	
-	var fTemplate = '<p><a class="calendarGoHome" title="'+this.lang.homeDate+'" href="'+window.location+'#" id="'+this.divId+'_goHome"> </a>';
+	var fTemplate = '<p><a class="calendarGoHome" title="'+this.lang.homeDate+'" href="'+Scriptor.getInactiveLocation()+'" id="'+this.divId+'_goHome"> </a>';
 	
 	if (this.selectedDates.length) {
 		if (this.selectedDates.length == 1) { // single selection

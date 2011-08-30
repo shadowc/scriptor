@@ -168,7 +168,7 @@ Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
 	var template = ''	
 	if (typeof(theBtn.onContentAdded) != 'function')
 	{
-		template = '<a' + (theBtn.className ? ' class="' + theBtn.className + '" ' : '') + ' href="'+window.location+'#">' + theBtn.label + '</a>';
+		template = '<a' + (theBtn.className ? ' class="' + theBtn.className + '" ' : '') + ' href="'+Scriptor.getInactiveLocation()+'">' + theBtn.label + '</a>';
 	}
 	
 	if (ndx === undefined)

@@ -325,7 +325,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	if (!this._templateRendered)
 	{
 		var dvTemplate = '';
-		var curLocation = window.location;
+		var curLocation = Scriptor.getInactiveLocation();
 		
 		// Create table paginating header
 		if (this.paginating) {
@@ -333,8 +333,8 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 			dvTemplate += '<label class="dataViewPaginationPages" id="'+this.divId+'_paginationLabel">' + this.lang.pageStart + (this.curPage + 1) +
 								this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 			dvTemplate += '</label></li><li>';
-			dvTemplate += '<a href="'+curLocation+'#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
-			dvTemplate += '<a href="'+curLocation+'#" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
+			dvTemplate += '<a href="'+curLocation+'" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
+			dvTemplate += '<a href="'+curLocation+'" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
 			dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.divId + '_pageInput">' + this.lang.pageEnd + '</label>';
 			dvTemplate += '<input type="text" class="dataViewPaginationInput" id="' + this.divId + '_pageInput" />';
 			dvTemplate += '<input type="button" value="' + this.lang.pageGo + '" class="dataViewPageButton" id="' + this.divId + '_pageInputBtn" />';
@@ -354,7 +354,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		
 		// add field list menu
 		dvTemplate += '<span id="' + this.divId + '_optionsMenuBtn" class="dataViewHeaderMenu">';
-		dvTemplate += '<a href="'+curLocation+'#"> </a></span></div>';
+		dvTemplate += '<a href="'+curLocation+'"> </a></span></div>';
 		
 		// Create body
 		dvTemplate += '<div id="'+this.divId+'_outerBody" class="dataViewOuterBody">';
@@ -564,7 +564,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 			a.className = 'dataViewSortDesc';
 	}
 	a.id = this.divId + '_columnHeader_'+ndx;
-	a.setAttribute('href', window.location + '#');
+	a.setAttribute('href', Scriptor.getInactiveLocation());
 	a.innerHTML = column.Name;
 	li.appendChild(a);
 	
