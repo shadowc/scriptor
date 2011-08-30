@@ -7,6 +7,12 @@
 
 		<script language="javascript" type="text/javascript">
 		Scriptor.addOnLoad(function() {
+			myToolbar = new Scriptor.Toolbar({
+				id : "myToolbar",
+				width: 500,
+				height: 65
+			});
+			
 			myTabView = new Scriptor.TabContainer({
 				id : "myTabView",
 				width: 500,
@@ -104,6 +110,11 @@
 					type : 'json'
 				});
 		
+			
+			myToolbar.show();
+			myToolbar.addButton({label : "Button 1"});
+			myToolbar.addButton({label : "Button 2"});
+			
 			myTabView.show();
 			myTabView.addTab({title : "Some Tab"}, new Scriptor.Panel());
 			myTabView.addTab({title : "Some Other Tab"}, new Scriptor.Panel());
@@ -133,6 +144,7 @@
 		<h1>Scriptor Test, isolated components in DOM</h1>
 	
 		<div id="container">
+			<div id="myToolbar" class="componentWrapper"></div>
 			<div id="myTabView" class="componentWrapper"></div>
 			<div id="myDataView" class="componentWrapper"></div>
 			<div id="myGalleryView" class="componentWrapper"></div>

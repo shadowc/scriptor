@@ -54,6 +54,7 @@ treeNode.prototype = {
 	updateChildrenNodes : function()
 	{
 		var parentNode = document.getElementById(this.treeView.divId + '_' + this.id + '_branch');
+		var curLocation = window.location;
 		
 		for (var i=0; i < this.childNodes.length; i++) { 
 			var node = document.createElement('li');
@@ -65,7 +66,7 @@ treeNode.prototype = {
 			
 			if (hasChildren) {
 				// Create link to expand node
-				nodeTemplate += '<a id="'+this.treeView.divId + '_' + this.childNodes[i].id + '_expandable" href="#" class="';
+				nodeTemplate += '<a id="'+this.treeView.divId + '_' + this.childNodes[i].id + '_expandable" href="'+curLocation+'#" class="';
 				nodeTemplate += (this.childNodes[i].expanded ? 'treeViewCollapsableNode' : 'treeViewExpandableNode') + '"></a>';
 			}
 			
@@ -73,7 +74,7 @@ treeNode.prototype = {
 			nodeTemplate += '<a id="'+this.treeView.divId+'_'+this.childNodes[i].id+'_selectNode" ';
 			if (!hasChildren)
 				nodeTemplate += 'class="treeViewSingleNode" ';
-			nodeTemplate += 'href="#">'+this.childNodes[i].Name+'</a>';
+			nodeTemplate += 'href="'+curLocation+'#">'+this.childNodes[i].Name+'</a>';
 			
 			if (hasChildren)
 			{

@@ -2545,7 +2545,7 @@ Scriptor.ContextMenu.prototype.addItem = function(opts, ndx)
 			if (item.checked)
 				li.className = "OptionChecked";
 				
-			cTemplate += '<a href="#" id="'+this.divId+'_itm_' + ndx + '"';
+			cTemplate += '<a href="'+window.location+'#" id="'+this.divId+'_itm_' + ndx + '"';
 			if (item['class'])
 				cTemplate += ' class="' + item['class'] + '"';
 			cTemplate += '>' + item.label + '</a>';
@@ -3720,6 +3720,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 	if (!this._templateRendered)
 	{
 		var dvTemplate = '';
+		var curLocation = window.location;
 		
 		// Create table paginating header
 		if (this.paginating) {
@@ -3727,8 +3728,8 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 			dvTemplate += '<label class="dataViewPaginationPages" id="'+this.divId+'_paginationLabel">' + this.lang.pageStart + (this.curPage + 1) +
 								this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
 			dvTemplate += '</label></li><li>';
-			dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
-			dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
+			dvTemplate += '<a href="'+curLocation+'#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
+			dvTemplate += '<a href="'+curLocation+'#" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
 			dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.divId + '_pageInput">' + this.lang.pageEnd + '</label>';
 			dvTemplate += '<input type="text" class="dataViewPaginationInput" id="' + this.divId + '_pageInput" />';
 			dvTemplate += '<input type="button" value="' + this.lang.pageGo + '" class="dataViewPageButton" id="' + this.divId + '_pageInputBtn" />';
@@ -3748,7 +3749,7 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		
 		// add field list menu
 		dvTemplate += '<span id="' + this.divId + '_optionsMenuBtn" class="dataViewHeaderMenu">';
-		dvTemplate += '<a href="#"> </a></span></div>';
+		dvTemplate += '<a href="'+curLocation+'#"> </a></span></div>';
 		
 		// Create body
 		dvTemplate += '<div id="'+this.divId+'_outerBody" class="dataViewOuterBody">';
@@ -3958,7 +3959,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 			a.className = 'dataViewSortDesc';
 	}
 	a.id = this.divId + '_columnHeader_'+ndx;
-	a.setAttribute('href', '#');
+	a.setAttribute('href', window.location + '#');
 	a.innerHTML = column.Name;
 	li.appendChild(a);
 	
@@ -5800,6 +5801,7 @@ treeNode.prototype = {
 	updateChildrenNodes : function()
 	{
 		var parentNode = document.getElementById(this.treeView.divId + '_' + this.id + '_branch');
+		var curLocation = window.location;
 		
 		for (var i=0; i < this.childNodes.length; i++) { 
 			var node = document.createElement('li');
@@ -5811,7 +5813,7 @@ treeNode.prototype = {
 			
 			if (hasChildren) {
 				// Create link to expand node
-				nodeTemplate += '<a id="'+this.treeView.divId + '_' + this.childNodes[i].id + '_expandable" href="#" class="';
+				nodeTemplate += '<a id="'+this.treeView.divId + '_' + this.childNodes[i].id + '_expandable" href="'+curLocation+'#" class="';
 				nodeTemplate += (this.childNodes[i].expanded ? 'treeViewCollapsableNode' : 'treeViewExpandableNode') + '"></a>';
 			}
 			
@@ -5819,7 +5821,7 @@ treeNode.prototype = {
 			nodeTemplate += '<a id="'+this.treeView.divId+'_'+this.childNodes[i].id+'_selectNode" ';
 			if (!hasChildren)
 				nodeTemplate += 'class="treeViewSingleNode" ';
-			nodeTemplate += 'href="#">'+this.childNodes[i].Name+'</a>';
+			nodeTemplate += 'href="'+curLocation+'#">'+this.childNodes[i].Name+'</a>';
 			
 			if (hasChildren)
 			{
@@ -6584,7 +6586,7 @@ Scriptor.CalendarView.prototype.updateDates = function() {
 		tmpTd.setAttribute('valign', 'top');
 		
 		tmpA = document.createElement('a');
-		tmpA.setAttribute('href', '#');
+		tmpA.setAttribute('href', window.location +'#');
 		tmpA.appendChild(document.createTextNode(curMonth.getDate()));
 		
 		// detect today
@@ -6677,10 +6679,11 @@ Scriptor.CalendarView.prototype.__refreshHeader = function() {
 	
 	var targetDiv = document.getElementById(this.divId+'_header');
 	targetDiv.innerHTML = '';
-		
-	var hTemplate = '<ul><li class="calendarViewLeft"><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="#"> </a></li>';
-	hTemplate += '<li class="calendarViewLeft"><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="#"> </a></li>';
-	hTemplate += '<li class="calendarViewRight"><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="#"> </a></li>';
+	var curLocation = window.location;
+			
+	var hTemplate = '<ul><li class="calendarViewLeft"><a class="calendarViewPrev" title="'+this.lang.prevMonth+'" id="'+this.divId+'_prevMonth" href="'+curLocation+'#"> </a></li>';
+	hTemplate += '<li class="calendarViewLeft"><a class="calendarAdvanced" title="'+this.lang.advanced+'" id="'+this.divId+'_viewAdvanced" href="'+curLocation+'#"> </a></li>';
+	hTemplate += '<li class="calendarViewRight"><a class="calendarViewNext" title="'+this.lang.nextMonth+'" id="'+this.divId+'_nextMonth" href="'+curLocation+'#"> </a></li>';
 	hTemplate += '<li><p class="calendarViewMonth">'+this.lang.longMonths[this.curMonth] + ' ' + this.curYear+'</p></li>';
 	hTemplate += '</ul>';
 	
@@ -6704,7 +6707,7 @@ Scriptor.CalendarView.prototype.__refreshFooter = function() {
 	var targetDiv = document.getElementById(this.divId+'_footer');
 	targetDiv.innerHTML = '';
 	
-	var fTemplate = '<p><a class="calendarGoHome" title="'+this.lang.homeDate+'" href="#" id="'+this.divId+'_goHome"> </a>';
+	var fTemplate = '<p><a class="calendarGoHome" title="'+this.lang.homeDate+'" href="'+window.location+'#" id="'+this.divId+'_goHome"> </a>';
 	
 	if (this.selectedDates.length) {
 		if (this.selectedDates.length == 1) { // single selection
@@ -7829,7 +7832,7 @@ Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
 	var template = ''	
 	if (typeof(theBtn.onContentAdded) != 'function')
 	{
-		template = '<a' + (theBtn.className ? ' class="' + theBtn.className + '" ' : '') + ' href="#">' + theBtn.label + '</a>';
+		template = '<a' + (theBtn.className ? ' class="' + theBtn.className + '" ' : '') + ' href="'+window.location+'#">' + theBtn.label + '</a>';
 	}
 	
 	if (ndx === undefined)
