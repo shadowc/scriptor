@@ -185,7 +185,8 @@ var Component = {
 					if (this.style)
 						this.target.setAttribute('style', this.style);
 					
-					this.target.className = this.className ? 'jsComponent jsComponentHidden ' + this.className : 'jsComponent jsComponentHidden';
+					var compClassName = this.className ? ('jsComponent jsComponentHidden ' + this.className) : 'jsComponent jsComponentHidden';
+					this.target.className = this.target.className ? (compClassName + ' ' + this.target.className) : compClassName;
 					
 					targetMinHeight = parseInt(this.target.style.minHeight);
 					targetMaxHeight = parseInt(this.target.style.maxHeight);

@@ -2,194 +2,142 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es-AR">
 	<head>
 		<title>Scriptor test page</title>
-		<script language="javascript" type="text/javascript" src="Scriptor.en.js"></script>
+		<script language="javascript" type="text/javascript" src="Scriptor.en.uncompressed.js"></script>
 		<link rel="stylesheet" type="text/css" href="default.css" />
 
 		<script language="javascript" type="text/javascript">
-		var myTabView;
-		var myDataView;
-		var myDataView2;
-		var myGalleryView;
-		var myTreeView;
+		Scriptor.addOnLoad(function() {
+			myTabView = new Scriptor.TabContainer({
+				id : "myTabView",
+				width: 500,
+				height: 200
+			});
 		
-		myTabView = new tabView('tabTest', 'tabContainer', [ {label: 'dataView', elem : 'tab1'},
-												{label: 'dataView2', elem : 'tab2'},
-												{label: 'treeView', elem: 'tab4'},
-												{label: 'galleryView', elem: 'tab5'},
-												{label: 'calendarView', elem: 'tab3'}
-												 ] );
-		
-		myDataView = new dataView('somediv', { width : 720, height : 200,
-			paginating : true,
-			rowsPerPage : 7,
-			columns : [
-				{
-					Name : 'Id',
-					Type : 'num',
-					Width: 60,
-					Format : function (n) {
-						var a = document.createElement('a');
-						a.setAttribute('href', 'javascript:alert("'+n+'");');
-						a.innerHTML = 'xxx';
-						return a;
+			myDataView = new Scriptor.DataView({
+				id : 'myDataView',
+				width : 720,
+				height : 200,
+				paginating : true,
+				rowsPerPage : 7,
+				columns : [
+					{
+						Name : 'Id',
+						Type : 'num',
+						Width: 60,
+						Format : function (n) {
+							var a = document.createElement('a');
+							a.setAttribute('href', 'javascript:alert("'+n+'");');
+							a.innerHTML = 'xxx';
+							return a;
+						}
+					},
+					{
+						Name : 'parentId',
+						Type : 'num',
+						Width : 60,
+						displayName : 'Padre'
+					},
+					{
+						Name : 'Title',
+						Type : 'alpha',
+						Width: 200,
+						displayName : 'Título',
+						showToolTip : true
+					},
+					{
+						Name : 'Link',
+						Type : 'alpha',
+						Width: 250
 					}
-				},
-				{
-					Name : 'parentId',
-					Type : 'num',
-					Width : 60,
-					displayName : 'Padre'
-				},
-				{
-					Name : 'Title',
-					Type : 'alpha',
-					Width: 200,
-					displayName : 'Título',
-					showToolTip : true
-				},
-				{
-					Name : 'Link',
-					Type : 'alpha',
-					Width: 250
-				}
-			]
+				]
+			});
+			
+			myDataViewCon = new Scriptor.DataConnectors.DataViewConnector({
+					dataView : myDataView,
+					api : 'testapi.php',
+					parameters : 'type=xml',
+					method : 'POST',
+					type:  'xml'
+				});
+			
+			myDataView.addColumn( myDataView.createColumn( {
+				Name : 'DateCreated',
+				Type : 'date', 
+				Width : 140,
+				Format : dateFormat,
+				displayName : 'Fecha de Creación'
+			}));
+			
+			myCalendarView = new Scriptor.CalendarView({
+				id : 'myCalendarView',
+				width: 240,
+				height: 200
+			});
+			
+			myGalleryView = new Scriptor.GalleryView({
+				id : 'myGalleryView',
+				thumbWidth : 150,
+				thumbHeight : 180,
+				width: 500,
+				height: 200
+			});
+			
+			myGalleryViewCon = new Scriptor.DataConnectors.GalleryViewConnector({
+					galleryView : myGalleryView,
+					api : 'testapi.php',
+					parameters : 'type=xml&option=4',
+					method : 'POST',
+					type :'xml'
+				});
+			
+			myTreeView = new Scriptor.TreeView({
+				id : 'myTreeView',
+				width: 500,
+				height: 200
+			});
+			
+			myTreeViewCon = new Scriptor.DataConnectors.TreeViewConnector({
+					treeView : myTreeView,
+					api : 'testapi.php',
+					parameters : 'type=json&option=3',
+					method : 'POST',
+					type : 'json'
+				});
+		
+			myTabView.show();
+			myTabView.addTab({title : "Some Tab"}, new Scriptor.Panel());
+			
+			myDataView.show();
+			myDataView.refresh();
+			myCalendarView.show();
+			myGalleryView.show();
+			myGalleryView.refresh();
+			myTreeView.show();
+			myTreeView.refresh();
 		});
-		
-		myDataViewCon = new dataViewConnector({
-				dataView : myDataView,
-				api : 'testapi.php',
-				parameters : 'type=xml',
-				method : 'POST',
-				type:  'xml'
-			});
-		
-		myDataView.addColumn( myDataView.createColumn( {
-			Name : 'DateCreated',
-			Type : 'date', 
-			Width : 140,
-			Format : dateFormat,
-			displayName : 'Fecha de Creación'
-		}));
-		
-		myDataView2 = new dataView('someotherdiv', { width : 720, height : 200, multiselect : false,
-			columns : [
-				{
-					Name : 'id',
-					Type : 'num',
-					show: false,
-					displayName : 'Id',
-					Width : 30
-				},
-				{
-					Name : 'User',
-					Type : 'alpha',
-					displayName : 'Usuario',
-					Width : 80,
-				},
-				{
-					Name : 'Pass',
-					Type : 'alpha',
-					show : false,
-					width : 200,
-					displayName : 'Clave'
-				},
-				{
-					Name : 'FirstName',
-					Type : 'alpha',
-					Width : 150,
-					displayName : 'Nombre'
-				},
-				{
-					Name : 'LastName',
-					Type : 'alpha',
-					Width : 150,
-					displayName : 'Apellido'
-				}
-			]
-		});
-		
-		myDataView2Con = new dataViewConnector({
-				dataView : myDataView2,
-				api : 'testapi.php',
-				parameters : 'type=json&option=2',
-				method : 'POST',
-				type :  'json'
-			});
-		
-		myCalendarView = new calendarView('calendarView');
-		
-		myGalleryView = new galleryView('galleryView', {thumbWidth : 150, thumbHeight : 180});
-		myGalleryViewCon = new galleryViewConnector({
-				galleryView : myGalleryView,
-				api : 'testapi.php',
-				parameters : 'type=xml&option=4',
-				method : 'POST',
-				type :'xml'
-			});
-		
-		myTreeView = new treeView('treeView');
-		myTreeViewCon = new treeViewConnector({
-				treeView : myTreeView,
-				api : 'testapi.php',
-				parameters : 'type=json&option=3',
-				method : 'POST',
-				type : 'json'
-			});
 		
 		function dateFormat(date) {
 			return date.getDate() + '/' + (date.getMonth()+1) + '/' + date.getFullYear();
 		}
 		
-		function loadView() {
-			myTabView.Show();
-			
-			myDataView.Show(true);
-			myDataView2.Show(true);
-			myCalendarView.Show();
-			myGalleryView.Show(true);
-			myTreeView.Show(true);
-		}
-		
-		Scriptor.addOnLoad(loadView);
 	</script>
 	<style type="text/css">
 		h1 { font-weight: normal; font-size: 24px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 20px; }
 		#container { margin: 20px; }
-		.dataView { border: 1px solid #AAAAAA; }
-		
-		.tabViewDiv { overflow: hidden; }
-		.galleryView { width: 600px; height: 300px; }
-		#treeView { width: 250px; height: 300px; }
+		.componentWrapper { margin: 20px; }
 	</style>
 	</head>
 	
-	<body>
-		<h1>Scriptor Test: Components are loaded inside a TabView</h1>
+	<body class="scriptor">
+		<h1>Scriptor Test, isolated components in DOM</h1>
 	
 		<div id="container">
-			<ul id="tabTest" class="tabViewUl"></ul>
+			<div id="myTabView" class="componentWrapper"></div>
+			<div id="myDataView" class="componentWrapper"></div>
+			<div id="myGalleryView" class="componentWrapper"></div>
+			<div id="myTreeView" class="componentWrapper"></div>
+			<div id="myCalendarView" class="componentWrapper"></div>
 			
-			<div id="tabContainer">
-				<div id="tab1" class="tabViewDiv">
-					<div id="somediv" class="dataView">Garbage</div>
-				</div>
-		
-				<div id="tab2" class="tabViewDiv">
-					<div id="someotherdiv" class="dataView"></div>
-				</div>
-				
-				<div id="tab3" class="tabViewDiv">
-					<div id="calendarView" class="calendarView"></div>
-				</div>
-				
-				<div id="tab4" class="tabViewDiv">
-					<div id="treeView" class="treeView"></div>
-				</div>
-				
-				<div id="tab5" class="tabViewDiv">
-					<div id="galleryView" class="galleryView"></div>
-				</div>
-			</div>
 		</div>	
 	</body>
 </html>

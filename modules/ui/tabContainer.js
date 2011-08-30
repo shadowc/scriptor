@@ -14,10 +14,7 @@ Scriptor.TabContainer = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.TabContainer";
 	
 	// initialize events!
@@ -36,27 +33,6 @@ Scriptor.TabContainer = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	Scriptor.event.registerCustomEvent(this, 'ontabclosed');
 	
-	this.create();
-	Scriptor.className.add(this.target, "jsTabContainer");
-	
-	// component template
-	this._tabList = new TabListObj({
-		id : this.divId + '_tabList',
-		region : "top",
-		className : 'jsTabList'
-	});
-	this.addChild(this._tabList);
-	
-	this._pageContainer = new TabPageContainer({
-		id : this.divId + '_pageContainer',
-		region : "center",
-		className : 'jsPageContainer'
-	});
-	this.addChild(this._pageContainer);
-	
-	this._tabsContextMenu = new Scriptor.ContextMenu();
-	
-	this._canHaveChildren = false;
 	this._tabs = [];
 	this._selectedTabId = null;
 	
@@ -131,6 +107,28 @@ Scriptor.TabContainer = function(opts) {
 	this.destroyImplementation = function() {
 		this._tabsContextMenu.destroy();
 	};
+	
+	this.create();
+	Scriptor.className.add(this.target, "jsTabContainer");
+	
+	// component template
+	this._tabsContextMenu = new Scriptor.ContextMenu();
+	
+	this._tabList = new TabListObj({
+		id : this.divId + '_tabList',
+		region : "top",
+		className : 'jsTabList'
+	});
+	this.addChild(this._tabList);
+	
+	this._pageContainer = new TabPageContainer({
+		id : this.divId + '_pageContainer',
+		region : "center",
+		className : 'jsPageContainer'
+	});
+	this.addChild(this._pageContainer);
+	
+	this._canHaveChildren = false;
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {

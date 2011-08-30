@@ -171,10 +171,7 @@ Scriptor.DataView = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.DataView";
 	
 	this.rows = [];
@@ -217,26 +214,8 @@ Scriptor.DataView = function(opts) {
 	this.nextRowId = 1;
 	
 	this._cached = null;
-	this.create();
-	Scriptor.className.add(this.target, "dataViewMain");
-	
-	// component template 
-	this.renderTemplate();
-	this.canHaveChildren = false;
-	
-	this.optionsMenu = new Scriptor.ContextMenu();
-	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
-		this.refresh();
-		
-	}, this)});
-	this.optionsMenu.addItem({label : 'sep'});
-	
-	// add predefined columns
-	for (var n=0; n < localOpts.columns.length; n++)
-	{
-		this.addColumn(this.createColumn(localOpts.columns[n]));
-	}
-	// end add
+	this._templateRendered = false;
+	this._registeredEvents = [];
 	
 	this.resizeImplementation = function() {
 		this._checkCache();
@@ -272,31 +251,34 @@ Scriptor.DataView = function(opts) {
 		}
 	};
 	
-	this._registeredEvents = [];
 	this.DOMAddedImplementation = function() {
 		this._checkCache();
-		this.__refreshFooter();
 		
-		//assign some events
-		if (this.multiselect) 
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this)));
-		
-		if (this.paginating) {
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this)));
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this)));
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this)));
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this)));
+		if (this._cached)
+		{
+			this.__refreshFooter();
+			
+			//assign some events
+			if (this.multiselect) 
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this)));
+			
+			if (this.paginating) {
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this)));
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this)));
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this)));
+				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this)));
+			}
+			
+			for (var n=0; n < this.columns.length; n++)
+				this._addColumnToUI(this.columns[n], n);
+			
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
+			
+			this.updateRows(true);
 		}
-		
-		for (var n=0; n < this.columns.length; n++)
-			this._addColumnToUI(this.columns[n], n);
-		
-		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
-		this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
-		this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
-		this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
-		
-		this.updateRows(true);
 	};
 	
 	this.DOMRemovedImplementation = function() {
@@ -312,6 +294,26 @@ Scriptor.DataView = function(opts) {
 	this.destroyImplementation = function() {
 		this.optionsMenu.destroy();
 	};
+	
+	this.create();
+	Scriptor.className.add(this.target, "dataViewMain");
+	
+	// component template 
+	this.renderTemplate();
+	this.canHaveChildren = false;
+	
+	this.optionsMenu = new Scriptor.ContextMenu();
+	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
+		this.refresh();
+	}, this)});
+	this.optionsMenu.addItem({label : 'sep'});
+	
+	// add predefined columns
+	for (var n=0; n < localOpts.columns.length; n++)
+	{
+		this.addColumn(this.createColumn(localOpts.columns[n]));
+	}
+	// end add
 };
 
 /*
@@ -320,54 +322,57 @@ Scriptor.DataView = function(opts) {
 * 
 */
 Scriptor.DataView.prototype.renderTemplate = function() {
-	var dvTemplate = '';
-	
-	// Create table paginating header
-	if (this.paginating) {
-		dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar" id="'+this.divId+'_paginationHeader"><ul><li class="first">';
-		dvTemplate += '<label class="dataViewPaginationPages" id="'+this.divId+'_paginationLabel">' + this.lang.pageStart + (this.curPage + 1) +
-							this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
-		dvTemplate += '</label></li><li>';
-		dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
-		dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
-		dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.divId + '_pageInput">' + this.lang.pageEnd + '</label>';
-		dvTemplate += '<input type="text" class="dataViewPaginationInput" id="' + this.divId + '_pageInput" />';
-		dvTemplate += '<input type="button" value="' + this.lang.pageGo + '" class="dataViewPageButton" id="' + this.divId + '_pageInputBtn" />';
-		dvTemplate += '</li></ul></div>';
-	}
-	
-	// Create table header
-	dvTemplate += '<div class="dataViewHeader' + (this.multiselect ? ' dataViewMultiselect' : '') + ' dataViewToolbar" id="'+this.divId+'_columnsHeader">';
-	dvTemplate += '<ul id="'+this.divId+'_columnsUl">';
-	
-	if (this.multiselect) {
-		dvTemplate += '<li class="dataViewCheckBoxHeader">';
-		dvTemplate += '<input type="checkbox" id="' + this.divId + '_selectAll" class="dataViewCheckBox" /></li>';
-		dvTemplate += '<li class="dataViewSep"></li>';
-	}
-	dvTemplate += '</ul>';
-	
-	// add field list menu
-	dvTemplate += '<span id="' + this.divId + '_optionsMenuBtn" class="dataViewHeaderMenu">';
-	dvTemplate += '<a href="#"> </a></span></div>';
-	
-	// Create body
-	var bodyHeight = 0;
-	if (this.paginating) 
-		bodyHeight = (this.height - 40);
-	else
-		bodyHeight = (this.height - 40);
+	if (!this._templateRendered)
+	{
+		var dvTemplate = '';
 		
-	dvTemplate += '<div id="'+this.divId+'_outerBody" class="dataViewOuterBody">';
-	dvTemplate += '<div class="dataViewBody' + (this.multiselect ? ' dataViewMultiselect' : '') + '" id="'+this.divId+'_body"></div>';
-	dvTemplate += '</div>';
-	
-	// Create footer
-	dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
-	
-	this.cmpTarget.innerHTML = dvTemplate;
-	
-	this._checkCache();
+		// Create table paginating header
+		if (this.paginating) {
+			dvTemplate += '<div class="dataViewPaginationHeader dataViewToolbar" id="'+this.divId+'_paginationHeader"><ul><li class="first">';
+			dvTemplate += '<label class="dataViewPaginationPages" id="'+this.divId+'_paginationLabel">' + this.lang.pageStart + (this.curPage + 1) +
+								this.lang.pageMiddle + '<span id="' + this.divId + '_totalPagesHandler">' + (this.getTotalPages()) + '</span>';
+			dvTemplate += '</label></li><li>';
+			dvTemplate += '<a href="#" class="dataViewPrevBtn" id="' + this.divId + '_goToPagePrev"> </a>';
+			dvTemplate += '<a href="#" class="dataViewNextBtn" id="' + this.divId + '_goToPageNext"> </a>';		
+			dvTemplate += '</li><li><label class="dataViewPaginationGotoPage" for="' + this.divId + '_pageInput">' + this.lang.pageEnd + '</label>';
+			dvTemplate += '<input type="text" class="dataViewPaginationInput" id="' + this.divId + '_pageInput" />';
+			dvTemplate += '<input type="button" value="' + this.lang.pageGo + '" class="dataViewPageButton" id="' + this.divId + '_pageInputBtn" />';
+			dvTemplate += '</li></ul></div>';
+		}
+		
+		// Create table header
+		dvTemplate += '<div class="dataViewHeader' + (this.multiselect ? ' dataViewMultiselect' : '') + ' dataViewToolbar" id="'+this.divId+'_columnsHeader">';
+		dvTemplate += '<ul id="'+this.divId+'_columnsUl">';
+		
+		if (this.multiselect) {
+			dvTemplate += '<li class="dataViewCheckBoxHeader">';
+			dvTemplate += '<input type="checkbox" id="' + this.divId + '_selectAll" class="dataViewCheckBox" /></li>';
+			dvTemplate += '<li class="dataViewSep"></li>';
+		}
+		dvTemplate += '</ul>';
+		
+		// add field list menu
+		dvTemplate += '<span id="' + this.divId + '_optionsMenuBtn" class="dataViewHeaderMenu">';
+		dvTemplate += '<a href="#"> </a></span></div>';
+		
+		// Create body
+		dvTemplate += '<div id="'+this.divId+'_outerBody" class="dataViewOuterBody">';
+		dvTemplate += '<div class="dataViewBody' + (this.multiselect ? ' dataViewMultiselect' : '') + '" id="'+this.divId+'_body"></div>';
+		dvTemplate += '</div>';
+		
+		// Create footer
+		dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
+		
+		this.cmpTarget.innerHTML = dvTemplate;
+		
+		this._templateRendered = true;
+		// if the component had a present DOM element at the time of instantiation, we have called
+		// DOMAddedImplementation before having the proper template created.
+		if (this.inDOM && this._registeredEvents.length == 0)
+		{
+			this.DOMAddedImplementation();
+		}
+	}
 };
 
 /*
