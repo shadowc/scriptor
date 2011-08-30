@@ -2505,14 +2505,14 @@ this.create();
 _4.className.add(this.target,"dataViewMain");
 this.renderTemplate();
 this.canHaveChildren=false;
-for(var n=0;n<_fc.columns.length;n++){
-this.addColumn(this.createColumn(_fc.columns[n]));
-}
 this.optionsMenu=new _4.ContextMenu();
 this.optionsMenu.addItem({label:this.lang.refresh,onclick:_4.bindAsEventListener(function(e){
 this.refresh();
 },this)});
 this.optionsMenu.addItem({label:"sep"});
+for(var n=0;n<_fc.columns.length;n++){
+this.addColumn(this.createColumn(_fc.columns[n]));
+}
 this.resizeImplementation=function(){
 this._checkCache();
 if(this._cached){

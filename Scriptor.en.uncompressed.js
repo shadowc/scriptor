@@ -3632,19 +3632,19 @@ Scriptor.DataView = function(opts) {
 	this.renderTemplate();
 	this.canHaveChildren = false;
 	
-	// add predefined columns
-	for (var n=0; n < localOpts.columns.length; n++)
-	{
-		this.addColumn(this.createColumn(localOpts.columns[n]));
-	}
-	// end add
-	
 	this.optionsMenu = new Scriptor.ContextMenu();
 	this.optionsMenu.addItem({label : this.lang.refresh, onclick : Scriptor.bindAsEventListener(function(e) {
 		this.refresh();
 		
 	}, this)});
 	this.optionsMenu.addItem({label : 'sep'});
+	
+	// add predefined columns
+	for (var n=0; n < localOpts.columns.length; n++)
+	{
+		this.addColumn(this.createColumn(localOpts.columns[n]));
+	}
+	// end add
 	
 	this.resizeImplementation = function() {
 		this._checkCache();
