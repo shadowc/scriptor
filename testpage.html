@@ -93,7 +93,7 @@
 			myTreeView = new Scriptor.TreeView({
 				id : 'myTreeView',
 				width: 500,
-				height: 200
+				height: 150
 			});
 			
 			myTreeViewCon = new Scriptor.DataConnectors.TreeViewConnector({
@@ -106,6 +106,7 @@
 		
 			myTabView.show();
 			myTabView.addTab({title : "Some Tab"}, new Scriptor.Panel());
+			myTabView.addTab({title : "Some Other Tab"}, new Scriptor.Panel());
 			
 			myDataView.show();
 			myDataView.refresh();

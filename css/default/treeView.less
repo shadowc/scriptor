@@ -3,7 +3,7 @@
 .treeView {
 	border: 1px solid @panelBorderColorFocus;
 	background: @panelBgColor;
-	overflow: auto;
+	overflow: auto !important;
 	
 	div.treeViewMessageDiv {
 		padding: 10px;
@@ -13,11 +13,9 @@
 	
 	ul {
 		&.treeViewContainer {
-			width: 100%;
-			height: 100%;
 			overflow: auto;
 			padding: 0;
-			margin: 0;
+			margin: 5px;
 		}
 		
 		font-size: 12px;
@@ -84,5 +82,9 @@
 	&.treeViewLoading {
 		background: @panelBgColor URL('images/ajax-loader.gif') no-repeat center center;
 	}
+}
+
+.jsPageContainer ul.treeViewContainer {
+	margin: 0;
 }
 

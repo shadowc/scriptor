@@ -3882,10 +3882,18 @@ _4.TreeView=function(opts){
 var _16a={canHaveChildren:false,hasInvalidator:true};
 _4.mixin(_16a,opts);
 var cmp=_76.get(_16a);
-for(var prop in cmp){
-this[prop]=cmp[prop];
-}
+_4.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.TreeView";
+this.DOMAddedImplementation=function(){
+if(this._templateRendered){
+this.updateNodes();
+}
+};
+this.DOMRemovedImplementation=function(){
+while(this._registeredEvents.length){
+_4.event.detach(this._registeredEvents.pop());
+}
+};
 this.selectedNode=null;
 _4.event.init(this);
 _4.event.registerCustomEvent(this,"onbeforeshow");
@@ -3903,21 +3911,23 @@ _4.event.registerCustomEvent(this,"oncontentupdated");
 _4.event.registerCustomEvent(this,"onselect");
 this.masterNode=new _164({id:0,parentId:0,parent:null,Name:"root",treeView:this});
 this.nextNodeId=1;
+this._registeredEvents=[];
+this._templateRendered=false;
 this.create();
 _4.className.add(this.target,"treeView");
+this.renderTemplate();
+};
+_4.TreeView.prototype.renderTemplate=function(){
+if(!this._templateRendered){
 var ul=_2.createElement("ul");
 ul.id=this.divId+"_0_branch";
 ul.className="treeViewContainer";
 this.target.insertBefore(ul,this.invalidator);
-this._registeredEvents=[];
-this.DOMAddedImplementation=function(){
+this._templateRendered=true;
+if(this.inDOM){
 this.updateNodes();
-};
-this.DOMRemovedImplementation=function(){
-while(this._registeredEvents.length){
-_4.event.detach(this._registeredEvents.pop());
 }
-};
+}
 };
 _4.TreeView.prototype.getNextNodeId=function(){
 var _16b=true;

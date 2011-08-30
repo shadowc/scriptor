@@ -117,11 +117,21 @@ Scriptor.TreeView = function (opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.TreeView";
+	
+	this.DOMAddedImplementation = function() {
+		// TODO: assign global event listener!
+		
+		if (this._templateRendered)
+			this.updateNodes();
+	};
+	
+	this.DOMRemovedImplementation = function() {
+		while (this._registeredEvents.length)
+			Scriptor.event.detach(this._registeredEvents.pop());
+			
+	};
 	
 	this.selectedNode = null;
 	
@@ -144,27 +154,32 @@ Scriptor.TreeView = function (opts) {
 	
 	this.masterNode = new treeNode({id : 0, parentId : 0, parent : null, Name : "root", treeView : this });
 	this.nextNodeId = 1;
+	this._registeredEvents = [];
+	this._templateRendered = false;
 	
 	this.create();
 	
 	Scriptor.className.add(this.target, "treeView");
-	var ul = document.createElement('ul');
-	ul.id = this.divId+'_0_branch';
-	ul.className = 'treeViewContainer';
-	this.target.insertBefore(ul, this.invalidator);
 	
-	this._registeredEvents = [];
-	this.DOMAddedImplementation = function() {
-		// TODO
+	this.renderTemplate();
+};
+
+/*
+*
+* Call only once on creation!
+* 
+*/
+Scriptor.TreeView.prototype.renderTemplate = function() {
+	if (!this._templateRendered) {
+		var ul = document.createElement('ul');
+		ul.id = this.divId+'_0_branch';
+		ul.className = 'treeViewContainer';
+		this.target.insertBefore(ul, this.invalidator);
 		
-		this.updateNodes();
-	};
-	
-	this.DOMRemovedImplementation = function() {
-		while (this._registeredEvents.length)
-			Scriptor.event.detach(this._registeredEvents.pop());
-			
-	};
+		this._templateRendered = true;
+		if (this.inDOM)
+			this.updateNodes();
+	}
 };
 
 /*
