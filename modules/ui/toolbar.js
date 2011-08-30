@@ -42,16 +42,18 @@ Scriptor.Toolbar = function(opts) {
 	this._moreSpan.className = 'jsToolbarDropdown jsToolbarDropdownHidden';
 	this.target.appendChild(this._moreSpan);
 	this._moreSpan.innerHTML = ' ';
-	this._showingMode = false;
+	this._showingMore = false;
 	this._extraBtns = 1;
 	
 	this._extraButtons = document.createElement('div');
 	this._extraButtons.id = this.divId + "_extraBtns";
-	this._extraButtons.className = 'jsToolbarExtraPanel jsToolbarExtraPanelHidden';
+	this._extraButtons.className = 'jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden';
+	this._showingExtraButtons = false;
+	this._checkMenuBind = null;
+	Scriptor.body().appendChild(this._extraButtons);
 	
 	this.buttons = [];
 	this.nextButtonId = '0';
-	
 	
 	// redefine component implementation
 	this._registeredEvents = [];
@@ -60,7 +62,7 @@ Scriptor.Toolbar = function(opts) {
 			this.addClickEvent(this.buttons[n]);
 		
 		// add "more" dropdown button onclick event
-		this._registeredEvents.push(Scriptor.event.attach(this._moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this)));			
+		this._registeredEvents.push(Scriptor.event.attach(this._moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this)));
 	};
 	
 	this.DOMRemovedImplementation = function() {
@@ -70,6 +72,9 @@ Scriptor.Toolbar = function(opts) {
 	};	
 
 	this.resizeImplementation = function() {
+		if (this._showingExtraButtons)
+			this.hideDropDown();
+		
 		var btnsInnerWidth = this.cmpTarget.offsetWidth;
 		var orignBtnsInnerWidth = btnsInnerWidth;
 		
@@ -83,10 +88,10 @@ Scriptor.Toolbar = function(opts) {
 		for (var n=0; n < this.cmpTarget.childNodes.length; n++)
 		{
 			var theBtn = this.cmpTarget.childNodes[n];
-			
+
 			var outerLeft = parseInt(Scriptor.className.getComputedProperty(theBtn, 'margin-left'));
 			var outerRight = parseInt(Scriptor.className.getComputedProperty(theBtn, 'margin-right'));
-			
+				
 			if (isNaN(outerLeft))
 				outerLeft = 0;
 				
@@ -124,9 +129,6 @@ Scriptor.Toolbar = function(opts) {
 				
 			this._extraBtns = this.buttons.length;
 		}
-		
-		// TODO: exchange btns between Toolbar and more panel
-		//this._updateExtraTabsContextMenu();
 		
 	};
 	
@@ -177,7 +179,8 @@ Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
 		
 	if (!isNaN(Number(ndx)) && ndx >= 0 && ndx <= this.buttons.length)
 	{
-		this.hideMore();
+		if (this._showingExtraButtons)
+			this.hideDropDown();
 		
 		if (ndx == this.buttons.length)
 		{
@@ -281,10 +284,20 @@ Scriptor.Toolbar.prototype.removeButton = function(identifier) {
 	
 	if (ndx !== null)
 	{
-		this.hideMore();
+		if (this._showingExtraButtons)
+			this.hideDropDown();
 		
+		for (var n=0; n < this._registeredEvents.length; n++)
+		{
+			if (this._registeredEvents[n][0].parentNode == this.buttons[ndx].target)
+			{
+				Scriptor.event.detach(this._registeredEvents[n]);
+				this._registeredEvents.splice(n, 1);
+				break;
+			}
+		}
 		this.buttons.splice(ndx, 1);
-		// TODO: remove button click events??
+		
 		this.cmpTarget.removeChild(this.buttons[ndx].target);
 		this.resize();
 	}
@@ -297,8 +310,7 @@ Scriptor.Toolbar.prototype.removeButton = function(identifier) {
 */
 Scriptor.Toolbar.prototype.showMore = function() {
 	Scriptor.className.remove(this._moreSpan, "jsToolbarDropdownHidden");
-	
-	// TODO: move buttons to more panel and show
+	this._showingMore = true;
 };
 
 /*
@@ -308,21 +320,107 @@ Scriptor.Toolbar.prototype.showMore = function() {
 */
 Scriptor.Toolbar.prototype.hideMore = function() {
 	Scriptor.className.add(this._moreSpan, "jsToolbarDropdownHidden");
+	this._showingMore = false;
 	
-	// TODO: remove buttons from more panel and hide
+	if (this._showingExtraButtons)
+		this.hideDropDown();
 };
 
 /*
 * Scriptor.Toolbar.onDropdownClick
 *
 * Internal use only
+*
+* TODO: replace with a floating panel (to be defined)
 */
 Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 	if (!e) e = window.event;
 	
-	// TODO: this is a fake floating panel, we need to engineer this
-	//this.parent._tabsContextMenu.show(e);
+	if (!this._showingExtraButtons)
+	{
+		// trusting that appendChild effectively removes the DOM element
+		// from DOM before appending, keeping its associated events!
+		for (var n=this._extraBtns; n < this.buttons.length; n++) {
+			this._extraButtons.appendChild(this.buttons[n].target);
+			this.buttons[n].target.style.visibility = 'visible';
+		}
+		
+		// calculate x, y
+		var x = 0, y = 0;
+		
+		if (e)
+		{
+			if (typeof(e.pageX) == 'number') {
+				x = e.pageX;
+				y = e.pageY;
+			}
+			else {
+				if (typeof(e.clientX) == 'number') {
+					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					y = (e.clientY + document.documentElement.scrollTop);
+				}
+				else {
+					x = 0;
+					y = 0;
+				}
+			}
+		}
+		
+		if (x + this.width > Scriptor.body().offsetWidth)
+			x = x-this.width;
+		if (y + this.height > Scriptor.body().offsetHeight)
+			y = y-this.height;
+			
+		this._extraButtons.style.top = y + 'px';
+		this._extraButtons.style.left = x + 'px';
+		
+		if (this._checkMenuBind)
+			Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+		
+		setTimeout(Scriptor.bind(function() {	
+			Scriptor.event.attach(document, 'onclick', this._checkMenuBind = Scriptor.bind(this.checkDropDown, this));
+		}, this), 1);
+		
+		Scriptor.className.remove(this._extraButtons, "jsToolbarExtraPanelHidden");
+		this._showingExtraButtons = true;
+	}
 	
 	Scriptor.event.cancel(e, true);
 	return false;
+};
+
+/*
+* Scriptor.Toolbar.checkDropDown
+*
+* Internal use only, hides dropDown component on mouse click
+*/
+Scriptor.Toolbar.prototype.checkDropDown = function(e) {
+	if (this._checkMenuBind)
+		Scriptor.event.detach(document, 'onclick', this._checkMenuBind);
+		
+	// always hide after click?
+	this.hideDropDown();
+};
+
+/*
+* Scriptor.Toolbar.hideDropDown
+*
+* Internal use only
+*
+* TODO: replace with a floating panel (to be defined)
+*/
+Scriptor.Toolbar.prototype.hideDropDown = function() {
+	if (this._showingExtraButtons)
+	{
+		// trusting that appendChild effectively removes the DOM element
+		// from DOM before appending, keeping its associated events!
+		while (this._extraButtons.childNodes.length) {
+			this._extraButtons.childNodes[0].style.visibility = 'hidden';
+			this.cmpTarget.appendChild(this._extraButtons.childNodes[0]);
+		}
+		
+		this._showingExtraButtons = false;
+	
+		Scriptor.className.add(this._extraButtons, "jsToolbarExtraPanelHidden");
+	}
 };

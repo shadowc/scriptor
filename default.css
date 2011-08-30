@@ -198,6 +198,7 @@ span.jsTabListDropdown {
   width:12px;
   height:23px;
   background:#ffffff url(../../images/drop-down.png) -2px 5px no-repeat;
+  cursor:pointer;
 }
 span.jsTabListDropdown:hover { background-color:#bee4f4; }
 span.jsTabListDropdownHidden { visibility:hidden; }
@@ -651,3 +652,48 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
   background:#bebebe url(images/table-header-back.jpg) repeat-x;
   overflow:hidden;
 }
+.jsToolbar span {
+  color:#333333;
+  font-size:12px;
+  padding:0 6px 0 4px;
+  background:url(images/table-header-sep.png) no-repeat center right;
+}
+.jsToolbar span a {
+  font-size:12px;
+  color:#333333;
+  text-decoration:none;
+  display:inline-block;
+  vertical-align:middle;
+}
+.jsToolbar span a:hover { text-decoration:underline; }
+.jsToolbar span.jsToolbarDropdown {
+  position:absolute;
+  top:0;
+  right:0;
+  margin-right:2px;
+  padding:0;
+  width:12px;
+  height:23px;
+  background:transparent url(../../images/drop-down.png) -2px 5px no-repeat;
+  cursor:pointer;
+}
+.jsToolbar span.jsToolbarDropdown:hover { background-color:#bee4f4; }
+.jsToolbar span.jsToolbarDropdown.jsToolbarDropdownHidden { visibility:hidden; }
+.jsToolbarExtraPanel { z-index:500; }
+.jsToolbarExtraPanel span {
+  display:block;
+  float:left;
+  clear:left;
+  background:transparent;
+  padding:2px;
+  font-size:12px;
+}
+.jsToolbarExtraPanel span a {
+  font-size:12px;
+  color:#333333;
+  text-decoration:none;
+  display:inline-block;
+  vertical-align:middle;
+}
+.jsToolbarExtraPanel span a:hover { text-decoration:underline; }
+.jsToolbarExtraPanel.jsToolbarExtraPanelHidden { visibility:hidden; }

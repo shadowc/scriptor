@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es-AR">
 	<head>
 		<title>Scriptor test page</title>
-		<script language="javascript" type="text/javascript" src="Scriptor.en.js"></script>
+		<script language="javascript" type="text/javascript" src="Scriptor.en.uncompressed.js"></script>
 		<link rel="stylesheet" type="text/css" href="default.css" />
 
 	<script type="text/javascript">
@@ -152,6 +152,21 @@
 				}
 			});
 			
+			LeftTopComponent.addButton({
+				id : "dummyBtn",
+				label : "Some Button",
+				onclick : function() {
+					alert("Some button clicked");
+				}
+			});
+			
+			LeftTopComponent.addButton({
+				id : "dummyBtn2",
+				label : "Some Other Button",
+				onclick : function() {
+					alert("Some other button clicked");
+				}
+			});
 			
 			LeftComponent = new Scriptor.TabContainer({
 				region : "center",

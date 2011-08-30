@@ -1953,6 +1953,9 @@ this._selectedTabId=null;
 this.resizeImplementation=function(){
 var _c5=this._tabList.cmpTarget.offsetWidth;
 var _c6=_c5;
+if(this._tabsContextMenu.visible){
+this._tabsContextMenu.checkMenu();
+}
 var _c7=_2.getElementById(this._tabList.divId+"_more");
 if(_c7){
 var _c8=parseInt(_4.className.getComputedProperty(_c7,"margin-left"));
@@ -4969,11 +4972,14 @@ this._moreSpan.id=this.divId+"_more";
 this._moreSpan.className="jsToolbarDropdown jsToolbarDropdownHidden";
 this.target.appendChild(this._moreSpan);
 this._moreSpan.innerHTML=" ";
-this._showingMode=false;
+this._showingMore=false;
 this._extraBtns=1;
 this._extraButtons=_2.createElement("div");
 this._extraButtons.id=this.divId+"_extraBtns";
-this._extraButtons.className="jsToolbarExtraPanel jsToolbarExtraPanelHidden";
+this._extraButtons.className="jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden";
+this._showingExtraButtons=false;
+this._checkMenuBind=null;
+_4.body().appendChild(this._extraButtons);
 this.buttons=[];
 this.nextButtonId="0";
 this._registeredEvents=[];
@@ -4989,6 +4995,9 @@ _4.event.detach(this._registeredEvents.pop());
 }
 };
 this.resizeImplementation=function(){
+if(this._showingExtraButtons){
+this.hideDropDown();
+}
 var _1b8=this.cmpTarget.offsetWidth;
 var _1b9=_1b8;
 var _1ba=parseInt(_4.className.getComputedProperty(this._moreSpan,"margin-left"));
@@ -5047,7 +5056,9 @@ if(ndx===_3){
 ndx=this.buttons.length;
 }
 if(!isNaN(Number(ndx))&&ndx>=0&&ndx<=this.buttons.length){
-this.hideMore();
+if(this._showingExtraButtons){
+this.hideDropDown();
+}
 if(ndx==this.buttons.length){
 this.buttons.push(_1c1);
 this.cmpTarget.appendChild(_1c1.target);
@@ -5110,7 +5121,16 @@ break;
 }
 }
 if(ndx!==null){
-this.hideMore();
+if(this._showingExtraButtons){
+this.hideDropDown();
+}
+for(var n=0;n<this._registeredEvents.length;n++){
+if(this._registeredEvents[n][0].parentNode==this.buttons[ndx].target){
+_4.event.detach(this._registeredEvents[n]);
+this._registeredEvents.splice(n,1);
+break;
+}
+}
 this.buttons.splice(ndx,1);
 this.cmpTarget.removeChild(this.buttons[ndx].target);
 this.resize();
@@ -5118,16 +5138,74 @@ this.resize();
 };
 _4.Toolbar.prototype.showMore=function(){
 _4.className.remove(this._moreSpan,"jsToolbarDropdownHidden");
+this._showingMore=true;
 };
 _4.Toolbar.prototype.hideMore=function(){
 _4.className.add(this._moreSpan,"jsToolbarDropdownHidden");
+this._showingMore=false;
+if(this._showingExtraButtons){
+this.hideDropDown();
+}
 };
 _4.Toolbar.prototype.onDropdownClick=function(e){
 if(!e){
 e=_1.event;
 }
+if(!this._showingExtraButtons){
+for(var n=this._extraBtns;n<this.buttons.length;n++){
+this._extraButtons.appendChild(this.buttons[n].target);
+this.buttons[n].target.style.visibility="visible";
+}
+var x=0,y=0;
+if(e){
+if(typeof (e.pageX)=="number"){
+x=e.pageX;
+y=e.pageY;
+}else{
+if(typeof (e.clientX)=="number"){
+x=(e.clientX+_2.documentElement.scrollLeft)-this.Width;
+y=(e.clientY+_2.documentElement.scrollTop);
+}else{
+x=0;
+y=0;
+}
+}
+}
+if(x+this.width>_4.body().offsetWidth){
+x=x-this.width;
+}
+if(y+this.height>_4.body().offsetHeight){
+y=y-this.height;
+}
+this._extraButtons.style.top=y+"px";
+this._extraButtons.style.left=x+"px";
+if(this._checkMenuBind){
+_4.event.detach(_2,"onclick",this._checkMenuBind);
+}
+setTimeout(_4.bind(function(){
+_4.event.attach(_2,"onclick",this._checkMenuBind=_4.bind(this.checkDropDown,this));
+},this),1);
+_4.className.remove(this._extraButtons,"jsToolbarExtraPanelHidden");
+this._showingExtraButtons=true;
+}
 _4.event.cancel(e,true);
 return false;
+};
+_4.Toolbar.prototype.checkDropDown=function(e){
+if(this._checkMenuBind){
+_4.event.detach(_2,"onclick",this._checkMenuBind);
+}
+this.hideDropDown();
+};
+_4.Toolbar.prototype.hideDropDown=function(){
+if(this._showingExtraButtons){
+while(this._extraButtons.childNodes.length){
+this._extraButtons.childNodes[0].style.visibility="hidden";
+this.cmpTarget.appendChild(this._extraButtons.childNodes[0]);
+}
+this._showingExtraButtons=false;
+_4.className.add(this._extraButtons,"jsToolbarExtraPanelHidden");
+}
 };
 return _4;
 })(window,document);

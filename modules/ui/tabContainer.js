@@ -65,6 +65,9 @@ Scriptor.TabContainer = function(opts) {
 		var tabsInnerWidth = this._tabList.cmpTarget.offsetWidth;
 		var orignTabsInnerWidth = tabsInnerWidth;
 		
+		if (this._tabsContextMenu.visible)
+			this._tabsContextMenu.checkMenu();	// this will cause the menu to hide
+		
 		var moreDropDown = document.getElementById(this._tabList.divId + "_more");
 		if (moreDropDown)
 		{
