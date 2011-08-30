@@ -98,6 +98,8 @@ div.jsComponent.jsContextMenu {
   background:#fbfbfb;
   padding:3px;
   position:absolute;
+  top:0;
+  left:0;
 }
 div.jsContextMenu ul {
   list-style-type:none;
