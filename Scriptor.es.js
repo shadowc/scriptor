@@ -3332,7 +3332,10 @@ colNdx=Number(_13f.id.substr(_13f.id.lastIndexOf("_")+1));
 if(!isNaN(colNdx)){
 this.__setOrder(colNdx);
 }
+_4.event.cancel(e,true);
+return false;
 }
+return true;
 };
 _4.DataView.prototype._onHeaderColumnMousedown=function(e){
 if(!e){

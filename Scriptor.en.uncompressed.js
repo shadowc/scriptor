@@ -4914,8 +4914,12 @@ Scriptor.DataView.prototype._onHeaderColumnClicked = function(e) {
 		{
 			this.__setOrder(colNdx);
 		}
+		
+		Scriptor.event.cancel(e, true);
+		return false;
 	}
 	
+	return true;
 };
 
 
