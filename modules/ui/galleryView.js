@@ -48,7 +48,7 @@ var gv_ImageObject = function(thumbnail, path, name) {
 *  visible: readonly property. It is true if the component has been shown sucessfully
 *  images: an array of gv_ImageObjects contained in the component
 */
-Scriptor.GalleryView = function(div, opts) {
+Scriptor.GalleryView = function(opts) {
 	var localOpts = {
 		canHaveChildren : true,
 		hasInvalidator : true,
@@ -60,10 +60,7 @@ Scriptor.GalleryView = function(div, opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.GalleryView";
 	
 	this.selectedImage = -1;
@@ -72,6 +69,10 @@ Scriptor.GalleryView = function(div, opts) {
 	this.thumbWidth = localOpts.thumbWidth;
 	this.thumbHeight = localOpts.thumbHeight;
 	this.images = [];
+	
+	this.DOMAddedImplementation = function() {
+		this.updateImages();
+	};
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -95,10 +96,6 @@ Scriptor.GalleryView = function(div, opts) {
 	
 	// component template 
 	this.canHaveChildren = false;
-	
-	this.DOMAddedImplementation = function() {
-		this.updateImages();
-	};
 };
 
 /*

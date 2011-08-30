@@ -2394,10 +2394,7 @@ Scriptor.ContextMenu = function(opts)
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.ContextMenu";
 	
 	// initialize events!
@@ -2673,10 +2670,7 @@ Scriptor.Panel = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.Panel";
 	
 	// initialize events!
@@ -3270,10 +3264,7 @@ var TabListObj = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.private.TabListObj";
 	
 	// initialize events!
@@ -3342,10 +3333,7 @@ var TabPageContainer = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.private.TabPageContainer";
 	
 	// initialize events!
@@ -6421,10 +6409,7 @@ Scriptor.CalendarView = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.CalendarView";
 	
 	this.selectedDates = [];
@@ -6441,6 +6426,8 @@ Scriptor.CalendarView = function(opts) {
 	this.markedDates = [];
 	
 	this.hookedTo = null;
+	this._registeredEvents = [];
+	this._templateRendered = false;
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -6457,20 +6444,15 @@ Scriptor.CalendarView = function(opts) {
 	
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	
-	this.create();
-	Scriptor.className.add(this.cmpTarget, "calendarView");
-	
-	// component template 
-	this.renderTemplate();
-	this.canHaveChildren = false;
-	
-	this._registeredEvents = [];
 	this.DOMAddedImplementation = function() {
-		this.updateDates();
-		
-		// advanced view event handlers
-		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId+'_advancedAccept'), 'onclick', Scriptor.bindAsEventListener(this.selectAdvanced, this)));
-		this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId+'_advancedCancel'), 'onclick', Scriptor.bindAsEventListener(this.cancelAdvanced, this)));
+		if (document.getElementById(this.divId + '_body'))
+		{
+			this.updateDates();
+			
+			// advanced view event handlers
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId+'_advancedAccept'), 'onclick', Scriptor.bindAsEventListener(this.selectAdvanced, this)));
+			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId+'_advancedCancel'), 'onclick', Scriptor.bindAsEventListener(this.cancelAdvanced, this)));
+		}
 	};
 	
 	this.DOMRemovedImplementation = function() {
@@ -6478,47 +6460,64 @@ Scriptor.CalendarView = function(opts) {
 			Scriptor.event.detach(this._registeredEvents.pop());
 		
 	};
+	
+	this.create();
+	Scriptor.className.add(this.cmpTarget, "calendarView");
+	
+	// component template 
+	this.renderTemplate();
+	this.canHaveChildren = false;
 };
 
-Scriptor.CalendarView.prototype.renderTemplate = function () {	
-	// Create table header
-	var cTemplate = '<div class="calendarViewWrapper"><div class="calendarViewHeader" id="' + this.divId + '_header"></div>';
-	
-	// Create body
-	cTemplate += '<table border="0" cellpadding="0" cellspacing="0" class="calendarViewBody" id="' + this.divId + '_body"></table>';
-	
-	// create advanced dialog
-	cTemplate += '<div class="calendarViewAdvanced" style="display: none;" id="'+this.divId+'_advanced">';
-	var targetDate = new Date();
-	if (this.selectedDates.length)
-		targetDate = this.selectedDates[0];
-	
-	// day selector
-	cTemplate += '<p><label for="'+this.divId+'DaySelector">'+this.lang.day+'</label>';
-	cTemplate += '<input type="text" id="'+this.divId+'DaySelector" value="'+targetDate.getDate()+'" /></p>';
-	
-	// month selector
-	cTemplate += '<p><label for="'+this.divId+'MonthSelector">'+this.lang.month+'</label>';
-	cTemplate += '<select id="'+this.divId+'MonthSelector">';
-	for (var n=0; n < 12; n++) 
-		cTemplate += '<option value="'+n+'"' + (targetDate.getMonth() == n ? ' selected="selected"' : '') + '>'+this.lang.longMonths[n]+'</option>';	
-	cTemplate += '</select></p>';
-	
-	// year selector
-	cTemplate += '<p><label for="'+this.divId+'YearSelector">'+this.lang.year+'</label>';
-	cTemplate += '<input type="text" id="'+this.divId+'YearSelector" value="'+targetDate.getFullYear()+'" /></p>';
-	
-	// buttons
-	cTemplate += '<p><input type="button" class="calendarBtn calendarAccept" id="'+this.divId+'_advancedAccept" value="'+this.lang.accept+'"> ';
-	cTemplate += '<input type="button" class="calendarBtn calendarCancel" id="'+this.divId+'_advancedCancel" value="'+this.lang.cancel+'"></p>';
-	
-	cTemplate += '</div>';
-	
-	// Create footer
-	cTemplate += '<div class="calendarViewFooter" id="' + this.divId + '_footer"></div></div>';
-	
-	this.cmpTarget.innerHTML = cTemplate;
-	
+Scriptor.CalendarView.prototype.renderTemplate = function () {
+	if (!this._templateRendered)
+	{
+		// Create table header
+		var cTemplate = '<div class="calendarViewWrapper"><div class="calendarViewHeader" id="' + this.divId + '_header"></div>';
+		
+		// Create body
+		cTemplate += '<table border="0" cellpadding="0" cellspacing="0" class="calendarViewBody" id="' + this.divId + '_body"></table>';
+		
+		// create advanced dialog
+		cTemplate += '<div class="calendarViewAdvanced" style="display: none;" id="'+this.divId+'_advanced">';
+		var targetDate = new Date();
+		if (this.selectedDates.length)
+			targetDate = this.selectedDates[0];
+		
+		// day selector
+		cTemplate += '<p><label for="'+this.divId+'DaySelector">'+this.lang.day+'</label>';
+		cTemplate += '<input type="text" id="'+this.divId+'DaySelector" value="'+targetDate.getDate()+'" /></p>';
+		
+		// month selector
+		cTemplate += '<p><label for="'+this.divId+'MonthSelector">'+this.lang.month+'</label>';
+		cTemplate += '<select id="'+this.divId+'MonthSelector">';
+		for (var n=0; n < 12; n++) 
+			cTemplate += '<option value="'+n+'"' + (targetDate.getMonth() == n ? ' selected="selected"' : '') + '>'+this.lang.longMonths[n]+'</option>';	
+		cTemplate += '</select></p>';
+		
+		// year selector
+		cTemplate += '<p><label for="'+this.divId+'YearSelector">'+this.lang.year+'</label>';
+		cTemplate += '<input type="text" id="'+this.divId+'YearSelector" value="'+targetDate.getFullYear()+'" /></p>';
+		
+		// buttons
+		cTemplate += '<p><input type="button" class="calendarBtn calendarAccept" id="'+this.divId+'_advancedAccept" value="'+this.lang.accept+'"> ';
+		cTemplate += '<input type="button" class="calendarBtn calendarCancel" id="'+this.divId+'_advancedCancel" value="'+this.lang.cancel+'"></p>';
+		
+		cTemplate += '</div>';
+		
+		// Create footer
+		cTemplate += '<div class="calendarViewFooter" id="' + this.divId + '_footer"></div></div>';
+		
+		this.cmpTarget.innerHTML = cTemplate;
+		
+		this._templateRendered = true;
+		// if the component had a present DOM element at the time of instantiation, we have called
+		// DOMAddedImplementation before having the proper template created.
+		if (this.inDOM && this._registeredEvents.length == 0)
+		{
+			this.DOMAddedImplementation();
+		}
+	}
 };
 
 
@@ -7213,7 +7212,7 @@ var gv_ImageObject = function(thumbnail, path, name) {
 *  visible: readonly property. It is true if the component has been shown sucessfully
 *  images: an array of gv_ImageObjects contained in the component
 */
-Scriptor.GalleryView = function(div, opts) {
+Scriptor.GalleryView = function(opts) {
 	var localOpts = {
 		canHaveChildren : true,
 		hasInvalidator : true,
@@ -7225,10 +7224,7 @@ Scriptor.GalleryView = function(div, opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.GalleryView";
 	
 	this.selectedImage = -1;
@@ -7237,6 +7233,10 @@ Scriptor.GalleryView = function(div, opts) {
 	this.thumbWidth = localOpts.thumbWidth;
 	this.thumbHeight = localOpts.thumbHeight;
 	this.images = [];
+	
+	this.DOMAddedImplementation = function() {
+		this.updateImages();
+	};
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -7260,10 +7260,6 @@ Scriptor.GalleryView = function(div, opts) {
 	
 	// component template 
 	this.canHaveChildren = false;
-	
-	this.DOMAddedImplementation = function() {
-		this.updateImages();
-	};
 };
 
 /*
@@ -7675,10 +7671,7 @@ Scriptor.Toolbar = function(opts) {
 	Scriptor.mixin(localOpts, opts);
 	
 	var cmp = Component.get(localOpts);
-	for (var prop in cmp)
-	{
-		this[prop] = cmp[prop];
-	}
+	Scriptor.mixin(this, cmp);
 	this.CMP_SIGNATURE = "Scriptor.ui.Toolbar";
 	
 	// initialize events!
