@@ -472,6 +472,17 @@ var Scriptor = {
 	},
 	
 	/*
+	* Scriptor.getInactiveLocation
+	*
+	* Takes the current location and adds a traling hash (#) when necessary.
+	* Useful for A elements which need an inactive href, to ensure we won't
+	*   be switching the page when clicked or change tha page's hash information
+	*/
+	getInactiveLocation : function() {
+		return String((window.location.indexOf('#') != -1) ? window.location : window.location + "#");
+	},
+	
+	/*
 	* Scriptor.invalidate
 	*
 	*   Creates an invalidator blocking the interface, if

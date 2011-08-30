@@ -91,8 +91,8 @@ var Component = {
 					e = window.event;
 					
 				if (!this.hasFocus) {
-					this.zIndexCache = this.target.style.zIndex ? Number(this.target.style.zIndex) : 1;
-					this.target.style.zIndex = this.zIndexCache +1;
+					/*this.zIndexCache = this.target.style.zIndex ? Number(this.target.style.zIndex) : 1;
+					this.target.style.zIndex = this.zIndexCache +1;*/
 					
 					if (this.parent && this.parent.CMP_SIGNATURE)
 						for (var n=0; n < this.parent.components.length; n++) {
@@ -114,7 +114,7 @@ var Component = {
 			
 			blur : function() {
 				if (this.hasFocus) {
-					this.target.style.zIndex = this.zIndexCache;
+					//this.target.style.zIndex = this.zIndexCache;
 					
 					this.blurImplementation.apply(this, arguments);
 					Scriptor.event.fire(this, 'onblur');
