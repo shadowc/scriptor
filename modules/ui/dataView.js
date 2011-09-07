@@ -565,7 +565,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 	}
 	a.id = this.divId + '_columnHeader_'+ndx;
 	a.setAttribute('href', Scriptor.getInactiveLocation());
-	a.innerHTML = column.Name;
+	a.innerHTML = column.displayName;
 	li.appendChild(a);
 	
 	li2 = document.createElement('li');

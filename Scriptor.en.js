@@ -2715,7 +2715,7 @@ a.className="dataViewSortDesc";
 }
 a.id=this.divId+"_columnHeader_"+ndx;
 a.setAttribute("href",_4.getInactiveLocation());
-a.innerHTML=_107.Name;
+a.innerHTML=_107.displayName;
 li.appendChild(a);
 li2=_2.createElement("li");
 li2.id=this.divId+"_sep_"+ndx;
