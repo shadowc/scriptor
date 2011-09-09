@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 0,
-		instance : "beta 3",
+		instance : "beta 4",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -7725,7 +7725,7 @@ Scriptor.Toolbar = function(opts) {
 	Scriptor.body().appendChild(this._extraButtons);
 	
 	this.buttons = [];
-	this.nextButtonId = '0';
+	this.nextButtonId = 0;
 	
 	// redefine component implementation
 	this._registeredEvents = [];
