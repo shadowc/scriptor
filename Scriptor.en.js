@@ -4990,7 +4990,7 @@ this._showingExtraButtons=false;
 this._checkMenuBind=null;
 _4.body().appendChild(this._extraButtons);
 this.buttons=[];
-this.nextButtonId=0;
+this.nextBtnId=0;
 this._registeredEvents=[];
 this.DOMAddedImplementation=function(){
 for(var n=0;n<this.buttons.length;n++){

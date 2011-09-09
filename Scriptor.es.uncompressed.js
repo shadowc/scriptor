@@ -7725,7 +7725,7 @@ Scriptor.Toolbar = function(opts) {
 	Scriptor.body().appendChild(this._extraButtons);
 	
 	this.buttons = [];
-	this.nextButtonId = 0;
+	this.nextBtnId = 0;
 	
 	// redefine component implementation
 	this._registeredEvents = [];
