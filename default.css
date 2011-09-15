@@ -153,7 +153,7 @@ div.jsTabLabel {
   float:left;
   bottom:0;
   top:2px;
-  background:#ffffff url(../../images/tab-unsel-back.png) top repeat-x;
+  background:#ffffff url(images/tab-unsel-back.png) top repeat-x;
   padding:2px 6px;
   height:16px;
   color:#666666;
@@ -168,7 +168,7 @@ div.jsTabLabel {
   font-weight:bold;
 }
 div.jsTabLabel.jsTabSelected {
-  background:#ffffff url(../../images/tab-sel-back.png) top repeat-x;
+  background:#ffffff url(images/tab-sel-back.png) top repeat-x;
   bottom:-1px;
   height:17px;
   padding-top:4px;
@@ -187,9 +187,9 @@ span.jsTabCloseBtn {
   right:4px;
   width:12px;
   height:12px;
-  background:transparent url(../../images/close-btn.png) 0 0 no-repeat;
+  background:transparent url(images/close-btn.png) 0 0 no-repeat;
 }
-span.jsTabCloseBtn:hover { background:transparent url(../../images/close-btn.png) 0 -12px no-repeat; }
+span.jsTabCloseBtn:hover { background:transparent url(images/close-btn.png) 0 -12px no-repeat; }
 div.jsTabSelected span.jsTabCloseBtn { top:6px; }
 span.jsTabCloseHidden { display:none !important; }
 span.jsTabListDropdown {
@@ -199,7 +199,7 @@ span.jsTabListDropdown {
   margin-right:2px;
   width:12px;
   height:23px;
-  background:#ffffff url(../../images/drop-down.png) -2px 5px no-repeat;
+  background:#ffffff url(images/drop-down.png) -2px 5px no-repeat;
   cursor:pointer;
 }
 span.jsTabListDropdown:hover { background-color:#bee4f4; }
@@ -675,7 +675,7 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
   padding:0;
   width:12px;
   height:23px;
-  background:transparent url(../../images/drop-down.png) -2px 5px no-repeat;
+  background:transparent url(images/drop-down.png) -2px 5px no-repeat;
   cursor:pointer;
 }
 .jsToolbar span.jsToolbarDropdown:hover { background-color:#bee4f4; }
