@@ -372,10 +372,10 @@ Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 			}
 		}
 		
-		if (x + this.width > Scriptor.body().offsetWidth)
-			x = x-this.width;
-		if (y + this.height > Scriptor.body().offsetHeight)
-			y = y-this.height;
+		if (x + this._extraButtons.offsetWidth > Scriptor.body().offsetWidth)
+			x = x-this._extraButtons.offsetWidth;
+		if (y + this._extraButtons.offsetHeight > Scriptor.body().offsetHeight)
+			y = y-this._extraButtons.offsetHeight;
 			
 		this._extraButtons.style.top = y + 'px';
 		this._extraButtons.style.left = x + 'px';

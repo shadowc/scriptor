@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2,_3){
-var _4={version:{major:2,minor:0,instance:"beta 5",toString:function(){
+var _4={version:{major:2,minor:0,instance:"beta 6",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_5,_6){
 if(arguments.length>2){
@@ -5185,11 +5185,11 @@ y=0;
 }
 }
 }
-if(x+this.width>_4.body().offsetWidth){
-x=x-this.width;
+if(x+this._extraButtons.offsetWidth>_4.body().offsetWidth){
+x=x-this._extraButtons.offsetWidth;
 }
-if(y+this.height>_4.body().offsetHeight){
-y=y-this.height;
+if(y+this._extraButtons.offsetHeight>_4.body().offsetHeight){
+y=y-this._extraButtons.offsetHeight;
 }
 this._extraButtons.style.top=y+"px";
 this._extraButtons.style.left=x+"px";
