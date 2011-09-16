@@ -4974,29 +4974,20 @@ _4.event.registerCustomEvent(this,"oncreate");
 _4.event.registerCustomEvent(this,"onresize");
 _4.event.registerCustomEvent(this,"onfocus");
 _4.event.registerCustomEvent(this,"onblur");
-this.create();
-_4.className.add(this.target,"jsToolbar");
-this._moreSpan=_2.createElement("span");
-this._moreSpan.id=this.divId+"_more";
-this._moreSpan.className="jsToolbarDropdown jsToolbarDropdownHidden";
-this.target.appendChild(this._moreSpan);
-this._moreSpan.innerHTML=" ";
-this._showingMore=false;
-this._extraBtns=1;
-this._extraButtons=_2.createElement("div");
-this._extraButtons.id=this.divId+"_extraBtns";
-this._extraButtons.className="jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden";
-this._showingExtraButtons=false;
-this._checkMenuBind=null;
-_4.body().appendChild(this._extraButtons);
 this.buttons=[];
 this.nextBtnId=0;
+this._showingMore=false;
+this._extraBtns=1;
+this._showingExtraButtons=false;
+this._checkMenuBind=null;
 this._registeredEvents=[];
 this.DOMAddedImplementation=function(){
 for(var n=0;n<this.buttons.length;n++){
 this.addClickEvent(this.buttons[n]);
 }
+if(this._moreSpan){
 this._registeredEvents.push(_4.event.attach(this._moreSpan,"onclick",_4.bindAsEventListener(this.onDropdownClick,this)));
+}
 };
 this.DOMRemovedImplementation=function(){
 while(this._registeredEvents.length){
@@ -5051,6 +5042,20 @@ this._extraBtns=this.buttons.length;
 this.destroyImplementation=function(){
 this._extraButtons.parentNode.removeChild(this._extraButtons);
 };
+this.create();
+_4.className.add(this.target,"jsToolbar");
+this._moreSpan=_2.createElement("span");
+this._moreSpan.id=this.divId+"_more";
+this._moreSpan.className="jsToolbarDropdown jsToolbarDropdownHidden";
+this.target.appendChild(this._moreSpan);
+this._moreSpan.innerHTML=" ";
+if(this.inDOM){
+this._registeredEvents.push(_4.event.attach(this._moreSpan,"onclick",_4.bindAsEventListener(this.onDropdownClick,this)));
+}
+this._extraButtons=_2.createElement("div");
+this._extraButtons.id=this.divId+"_extraBtns";
+this._extraButtons.className="jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden";
+_4.body().appendChild(this._extraButtons);
 };
 _4.Toolbar.prototype.addButton=function(opts,ndx){
 var _1be={label:"",id:this.getNextBtnId(),className:"",onclick:null,onContentAdded:null,target:null};

@@ -30,27 +30,12 @@ Scriptor.Toolbar = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
-	this.create();
-	Scriptor.className.add(this.target, "jsToolbar");
-	
-	// add the "more" dropdown button
-	this._moreSpan = document.createElement('span');
-	this._moreSpan.id = this.divId + '_more';
-	this._moreSpan.className = 'jsToolbarDropdown jsToolbarDropdownHidden';
-	this.target.appendChild(this._moreSpan);
-	this._moreSpan.innerHTML = ' ';
-	this._showingMore = false;
-	this._extraBtns = 1;
-	
-	this._extraButtons = document.createElement('div');
-	this._extraButtons.id = this.divId + "_extraBtns";
-	this._extraButtons.className = 'jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden';
-	this._showingExtraButtons = false;
-	this._checkMenuBind = null;
-	Scriptor.body().appendChild(this._extraButtons);
-	
 	this.buttons = [];
 	this.nextBtnId = 0;
+	this._showingMore = false;
+	this._extraBtns = 1;
+	this._showingExtraButtons = false;
+	this._checkMenuBind = null;
 	
 	// redefine component implementation
 	this._registeredEvents = [];
@@ -59,7 +44,8 @@ Scriptor.Toolbar = function(opts) {
 			this.addClickEvent(this.buttons[n]);
 		
 		// add "more" dropdown button onclick event
-		this._registeredEvents.push(Scriptor.event.attach(this._moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this)));
+		if (this._moreSpan)
+			this._registeredEvents.push(Scriptor.event.attach(this._moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this)));
 	};
 	
 	this.DOMRemovedImplementation = function() {
@@ -132,6 +118,29 @@ Scriptor.Toolbar = function(opts) {
 	this.destroyImplementation = function() {
 		this._extraButtons.parentNode.removeChild(this._extraButtons);
 	};
+	
+	this.create();
+	Scriptor.className.add(this.target, "jsToolbar");
+	
+	// add the "more" dropdown button
+	this._moreSpan = document.createElement('span');
+	this._moreSpan.id = this.divId + '_more';
+	this._moreSpan.className = 'jsToolbarDropdown jsToolbarDropdownHidden';
+	this.target.appendChild(this._moreSpan);
+	this._moreSpan.innerHTML = ' ';
+	
+	/* if we created the component and DOMAddedImplementation was called instantly,
+	  we need to attach the moreSpan event here, because it was not
+	  present before
+	*/
+	if (this.inDOM)
+		this._registeredEvents.push(Scriptor.event.attach(this._moreSpan, 'onclick', Scriptor.bindAsEventListener(this.onDropdownClick, this)));
+		
+	this._extraButtons = document.createElement('div');
+	this._extraButtons.id = this.divId + "_extraBtns";
+	this._extraButtons.className = 'jsComponent jsContextMenu jsToolbarExtraPanel jsToolbarExtraPanelHidden';
+	Scriptor.body().appendChild(this._extraButtons);
+	
 };
 
 /*
