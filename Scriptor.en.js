@@ -1375,6 +1375,7 @@ if(ref.parent){
 ref.parent.removeChild(ref);
 }
 if(ref.target.parentNode){
+ref.onDOMRemoved();
 ref.target.parentNode.removeChild(ref.target);
 }
 this.components.push(ref);
