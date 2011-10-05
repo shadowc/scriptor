@@ -4719,13 +4719,14 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 	
 	// save selected rows as ids!
 	var savedSelectedRow = null;
-	if (this.selectedRow != -1)
+	if (this.selectedRow != -1 && this.rows[this.selectedRow])
 		savedSelectedRow = this.rows[this.selectedRow].id;
 		
 	var savedSelectedRows = [];
 	if (this.selectedRows.length)
 		for (var n=0; n < this.selectedRows.length; n++)
-			savedSelectedRows.push(this.rows[this.selectedRows[n]].id);
+			if (this.rows[this.selectedRows[n]])
+				savedSelectedRows.push(this.rows[this.selectedRows[n]].id);
 	
 	if (!this._oldScrollTop)
 		this._oldScrollTop = this._cached.outer_body.scrollTop;

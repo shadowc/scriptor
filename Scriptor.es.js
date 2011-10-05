@@ -3216,13 +3216,15 @@ if(_134===_3){
 _134=false;
 }
 var _135=null;
-if(this.selectedRow!=-1){
+if(this.selectedRow!=-1&&this.rows[this.selectedRow]){
 _135=this.rows[this.selectedRow].id;
 }
 var _136=[];
 if(this.selectedRows.length){
 for(var n=0;n<this.selectedRows.length;n++){
+if(this.rows[this.selectedRows[n]]){
 _136.push(this.rows[this.selectedRows[n]].id);
+}
 }
 }
 if(!this._oldScrollTop){
