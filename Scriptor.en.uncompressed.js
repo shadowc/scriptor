@@ -4758,7 +4758,7 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 		}
 		else
 		{
-			this._refreshRowInUi(this.rows[n].id);
+			this._refreshRowInUI(this.rows[n].id);
 		}
 	}	
 	

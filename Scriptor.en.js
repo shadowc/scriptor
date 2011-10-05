@@ -3246,7 +3246,7 @@ for(var n=0;n<this.rows.length;n++){
 if(!_2.getElementById(this.divId+"_row_"+this.rows[n].id)){
 this._addRowToUI(n);
 }else{
-this._refreshRowInUi(this.rows[n].id);
+this._refreshRowInUI(this.rows[n].id);
 }
 }
 if(!_134){
