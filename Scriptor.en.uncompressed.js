@@ -4005,7 +4005,7 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 	}
 	
 	this.optionsMenu.addItem({
-		label : column.Name,
+		label : column.displayName,
 		onclick : Scriptor.bindAsEventListener(function(e, ndx) {this.toggleColumn(ndx);}, this, ndx),
 		checked : column.show
 	}, ndx+2);

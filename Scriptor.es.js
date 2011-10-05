@@ -2738,7 +2738,7 @@ this._cached.headerUl.appendChild(li);
 this._cached.headerUl.appendChild(li2);
 }
 }
-this.optionsMenu.addItem({label:_107.Name,onclick:_4.bindAsEventListener(function(e,ndx){
+this.optionsMenu.addItem({label:_107.displayName,onclick:_4.bindAsEventListener(function(e,ndx){
 this.toggleColumn(ndx);
 },this,ndx),checked:_107.show},ndx+2);
 if(this.rows.length){
