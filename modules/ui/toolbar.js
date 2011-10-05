@@ -97,10 +97,19 @@ Scriptor.Toolbar = function(opts) {
 					extraBtnReached = true;
 				}
 				
+				Scriptor.className.remove(theBtn, "jsToolbarLast");
 				theBtn.style.visibility = "hidden";
+				
+				if (n > 0)
+					Scriptor.className.add(this.buttons[n-1].target, "jsToolbarLast");
 			}
 			else
 			{
+				if (n < this.buttons.length-1)
+					Scriptor.className.remove(theBtn, "jsToolbarLast");
+				else
+					Scriptor.className.add(theBtn, "jsToolbarLast");
+					
 				theBtn.style.visibility = "visible";
 			}
 		}
@@ -112,7 +121,6 @@ Scriptor.Toolbar = function(opts) {
 				
 			this._extraBtns = this.buttons.length;
 		}
-		
 	};
 	
 	this.destroyImplementation = function() {
@@ -184,9 +192,25 @@ Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
 		ndx = this.buttons.length;
 		
 	if (!isNaN(Number(ndx)) && ndx >= 0 && ndx <= this.buttons.length)
-	{
+	{	
 		if (this._showingExtraButtons)
 			this.hideDropDown();
+	
+		if (ndx == 0)	// adding the first button
+		{
+			if (this.buttons.length)
+				Scriptor.className.remove(this.buttons[0].target, "jsToolbarFirst");
+			
+			theBtn.target.className = "jsToolbarFirst";
+		}
+		
+		if (ndx == this.buttons.length)	// adding the last button
+		{
+			if (this.buttons.length)
+				Scriptor.className.remove(this.buttons[this.buttons.length-1].target, "jsToolbarLast");
+			
+			Scriptor.className.add(theBtn.target, "jsToolbarLast");
+		}
 		
 		if (ndx == this.buttons.length)
 		{
@@ -195,6 +219,8 @@ Scriptor.Toolbar.prototype.addButton = function(opts, ndx) {
 		}
 		else
 		{
+			if (ndx == 0)
+			
 			this.buttons.splice(ndx, 0, theBtn);
 			this.cmpTarget.insertBefore(theBtn.target, this.cmpTarget.childNodes[ndx]);
 		}
@@ -292,6 +318,22 @@ Scriptor.Toolbar.prototype.removeButton = function(identifier) {
 	{
 		if (this._showingExtraButtons)
 			this.hideDropDown();
+		
+		if (ndx == 0)	//removing the first button
+		{
+			if (this.buttons.length > 1)
+			{
+				Scriptor.className.add(this.buttons[1].target, "jsToolbarFirst");
+			}
+		}
+		
+		if (ndx == this.buttons.length-1)	//removing the last button
+		{
+			if (this.buttons.length > 1)
+			{
+				Scriptor.className.add(this.buttons[this.buttons.length-2].target, "jsToolbarLast");
+			}
+		}
 		
 		for (var n=0; n < this._registeredEvents.length; n++)
 		{
