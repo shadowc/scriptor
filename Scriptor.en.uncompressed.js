@@ -3692,7 +3692,7 @@ Scriptor.DataView = function(opts) {
 			Scriptor.event.detach(this._registeredEvents.pop());
 			
 		for (var n=0; n < this.columns.length; n++)
-			this._removeColumnFromUI(n);
+			this._removeColumnFromUI(0);
 			
 		this._cached = null;
 	};
@@ -4168,7 +4168,7 @@ Scriptor.DataView.prototype._addCellToUI = function(rowId, colName, ndx) {
 		if (this.columns[ndx].showToolTip) 
 			li.setAttribute("title", this.getById(rowId)[colName]);
 		
-		if (ndx > 0 && ndx < cells.length-1)
+		if (ndx >= 0 && ndx < cells.length-1)
 		{
 			rowsUl.insertBefore(li, cells[ndx]);
 		}
@@ -4192,7 +4192,7 @@ Scriptor.DataView.prototype._removeCellFromUI = function(rowId, ndx) {
 	{
 		var cells = rowsUl.getElementsByTagName('li');
 		
-		if (ndx > 0 && (baseNdx+ndx) < cells.length)
+		if (ndx >= 0 && (baseNdx+ndx) < cells.length)
 		{
 			rowsUl.removeChild(cells[baseNdx+ndx]);
 		}

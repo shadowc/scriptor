@@ -2540,7 +2540,7 @@ while(this._registeredEvents.length){
 _4.event.detach(this._registeredEvents.pop());
 }
 for(var n=0;n<this.columns.length;n++){
-this._removeColumnFromUI(n);
+this._removeColumnFromUI(0);
 }
 this._cached=null;
 };
@@ -2854,7 +2854,7 @@ li.style.width=this.columns[ndx].Width+"px";
 if(this.columns[ndx].showToolTip){
 li.setAttribute("title",this.getById(_119)[_11a]);
 }
-if(ndx>0&&ndx<_11c.length-1){
+if(ndx>=0&&ndx<_11c.length-1){
 _11b.insertBefore(li,_11c[ndx]);
 }else{
 _11b.appendChild(li);
@@ -2867,7 +2867,7 @@ var _11f=this.multiselect?1:0;
 var _120=_2.getElementById(this.divId+"_row_"+_11e);
 if(_120){
 var _121=_120.getElementsByTagName("li");
-if(ndx>0&&(_11f+ndx)<_121.length){
+if(ndx>=0&&(_11f+ndx)<_121.length){
 _120.removeChild(_121[_11f+ndx]);
 }
 }
