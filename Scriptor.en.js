@@ -1796,6 +1796,7 @@ return false;
 _4.ContextMenu.prototype.updateSize=function(){
 var _b4=_4.element.getOuterBox(this.ul);
 var _b5=this.__getInnerBox();
+this.target.style.width="auto";
 this.width=this.ul.offsetWidth+_b4.left+_b4.right+_b5.left+_b5.right;
 this.height=this.ul.offsetHeight+_b4.top+_b4.bottom+_b5.top+_b5.bottom;
 this.__updatePosition();

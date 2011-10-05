@@ -129,6 +129,7 @@ Scriptor.ContextMenu.prototype.updateSize = function()
 	var ubox = Scriptor.element.getOuterBox(this.ul);
 	var ibox = this.__getInnerBox();
 	
+	this.target.style.width = "auto";
 	this.width = this.ul.offsetWidth + ubox.left + ubox.right + ibox.left + ibox.right;
 	this.height = this.ul.offsetHeight + ubox.top + ubox.bottom + ibox.top + ibox.bottom;
 	this.__updatePosition();
