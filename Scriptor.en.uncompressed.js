@@ -4148,6 +4148,21 @@ Scriptor.DataView.prototype._removeRowFromUI = function(rowNdx) {
 	this.__refreshFooter();
 };
 
+Scriptor.DataView.prototype._refreshRowInUI = function(rowId) {
+	var row = this.getById(rowId)
+	
+	if (row)
+	{
+		var theRow = document.getElementById(this.divId + "_row_" + rowId);
+	
+		if (theRow)
+		{
+			for (var a=0; a < this.columns.length; a++)
+				this.setCellValue(rowId, this.columns[a].Name, row[this.columns[a].Name]);
+				
+		}
+	}
+};
 
 /*
 * dataView._addCellToUI()
@@ -4224,7 +4239,10 @@ Scriptor.DataView.prototype.createRow = function(data) {
 *  as an argument, an empty row will be added. If dataView is visible it will call
 *  updateRows to reflect the changes.
 */
-Scriptor.DataView.prototype.addRow = function(rowObj, ndx) {
+Scriptor.DataView.prototype.addRow = function(rowObj, ndx, ui) {
+	if (ui === undefined)
+		ui = true;
+		
 	if (!this.inDOM)
 	{
 		Scriptor.error.report("Add table to DOM before working with rows");
@@ -4247,21 +4265,24 @@ Scriptor.DataView.prototype.addRow = function(rowObj, ndx) {
 	else
 		this.rows.push(rowObj);
 	
-	this._addRowToUI(ndx);
-	
-	if (this.selectedRow >= ndx)
+	if (ui)
 	{
-		this.selectedRow++;
-	}
+		this._addRowToUI(ndx);
 	
-	if (this.multiselect)
-		for (var n=0; n < this.selectedRows.length; n++)
+		if (this.selectedRow >= ndx)
 		{
-			if (this.selectedRows >= ndx)
-				this.selectedRows[n]++;
+			this.selectedRow++;
 		}
 		
-	this._UIUpdateSelection();
+		if (this.multiselect)
+			for (var n=0; n < this.selectedRows.length; n++)
+			{
+				if (this.selectedRows >= ndx)
+					this.selectedRows[n]++;
+			}
+			
+		this._UIUpdateSelection();
+	}
 };
 
 /*
@@ -4270,7 +4291,10 @@ Scriptor.DataView.prototype.addRow = function(rowObj, ndx) {
 *  array of rows (i.e.: dataView.selectedRow when != -1) or an instance of a row object 
 *  in the array. If dataView is visible it will call updateRows to reflect the changes.
 */
-Scriptor.DataView.prototype.deleteRow = function(identifier) {
+Scriptor.DataView.prototype.deleteRow = function(identifier, ui) {
+	if (ui === undefined)
+		ui = true;
+		
 	if (!this.inDOM)
 	{
 		Scriptor.error.report("Add table to DOM before working with rows");
@@ -4293,29 +4317,31 @@ Scriptor.DataView.prototype.deleteRow = function(identifier) {
 		}
 	}
 	
-	if (rowNdx != -1)
+	if (rowNdx != -1 && ui)
+	{
 		this._removeRowFromUI(rowNdx);
 	
-	if (this.selectedRow > this.rows.length -1)
-		this.selectedRow = -1;
-	else if (this.selectedRow >= rowNdx)
-		this.selectedRow--;
-	
-	if (this.multiselect)
-		for (var n=0; n < this.selectedRows.length; n++)
-		{
-			if (this.selectedRows[n] > this.rows.length -1)
+		if (this.selectedRow > this.rows.length -1)
+			this.selectedRow = -1;
+		else if (this.selectedRow >= rowNdx)
+			this.selectedRow--;
+		
+		if (this.multiselect)
+			for (var n=0; n < this.selectedRows.length; n++)
 			{
-				this.selectedRows.splice(n, 1);
-				n--;
+				if (this.selectedRows[n] > this.rows.length -1)
+				{
+					this.selectedRows.splice(n, 1);
+					n--;
+				}
+				else if (this.selectedRows[n] >= rowNdx)
+				{
+					this.selectedRows[n]--;
+				}
 			}
-			else if (this.selectedRows[n] >= rowNdx)
-			{
-				this.selectedRows[n]--;
-			}
-		}
-	
-	this._UIUpdateSelection();
+		
+		this._UIUpdateSelection();
+	}
 };
 
 /*
@@ -4691,11 +4717,26 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 	if (clear === undefined)
 		clear = false;
 	
+	// save selected rows as ids!
+	var savedSelectedRow = null;
+	if (this.selectedRow != -1)
+		savedSelectedRow = this.rows[this.selectedRow].id;
+		
+	var savedSelectedRows = [];
+	if (this.selectedRows.length)
+		for (var n=0; n < this.selectedRows.length; n++)
+			savedSelectedRows.push(this.rows[this.selectedRows[n]].id);
+	
 	if (!this._oldScrollTop)
 		this._oldScrollTop = this._cached.outer_body.scrollTop;
 		
 	if (clear)	// remove all rows, we're starting over!
+	{
+		this.selectedRow = -1;
+		this.selectedRows = [];
 		this._cached.rows_body.innerHTML = '';
+		this.rows = [];
+	}
 	
 	// remove all rows that were deleted in memory
 	var actualRows = this._cached.rows_body.getElementsByTagName('ul');
@@ -4709,65 +4750,56 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 		}
 	}
 	
-	// add rows that don't exist!
+	// add rows that don't exist and update existing ones!
 	for (var n=0; n < this.rows.length; n++) {		
 		if (!document.getElementById(this.divId+"_row_"+this.rows[n].id))
 		{
 			this._addRowToUI(n);
 		}
+		else
+		{
+			this._refreshRowInUi(this.rows[n].id);
+		}
 	}	
 	
-	// assign onclick events and search for complex formatted cells
-	/*for (var n=0; n < this.rows.length; n++) {
-		var rowId = this.rows[n].id;
+	// restorde previously selected rows where possible
+	if (!clear)
+	{
+		this.selectedRow = -1;
+		if (savedSelectedRow)
+		{
+			for (var n=0; n < this.rows.length; n++)
+			{
+				if (this.rows[n].id == savedSelectedRow)
+				{
+					this.selectedRow = n;
+					break;
+				}
+			}	
+		}
 		
-		if (this.multiselect)
-			Scriptor.event.attach(document.getElementById(this.divId + '_selectRow_' + rowId), 'click', Scriptor.bindAsEventListener(this.__markRow, this, n));
-			
-		for (var a=0; a < this.columns.length; a++) {
-			if (this.columns[a].show) {
-				Scriptor.event.attach(document.getElementById(this.divId + '_cell_' + rowId + '_' + a), 'click', Scriptor.bindAsEventListener(this.__selectRow, this, n));
-				
-				if (typeof(this.columns[a].Format) == 'function') {
-					var funcRet = this.columns[a].Format(this.rows[n][this.columns[a].Name]);
-					if (typeof(funcRet) != 'string')
-						document.getElementById(this.divId + '_cell_' + rowId + '_' + a).appendChild(funcRet);
+		this.selectedRows = [];
+		if (savedSelectedRows.length)
+		{
+			for (var a=0; a < savedSelectedRows.length; a++)
+			{
+				for (var n=0; n < this.rows.length; n++)
+				{
+					if (this.rows[n].id == savedSelectedRows[a])
+					{
+						this.selectedRows.push(n);
+						break;
+					}
 				}
 			}
 		}
-	}*/
-	
-	if (this.selectedRow >= this.rows.length)
-		this.selectedRow = -1;
-		
-	for (var n=0; n < this.selectedRows.length; n++) {
-		if (this.selectedRows[n] >= this.rows.length) {
-			this.selectedRows.splice(n, 1);
-			n--;
-		}	
 	}
 	
-	if (!clear)
-		this._UIUpdateSelection();
+	this._UIUpdateSelection();
 	
-	// TODO: update scrolling
-	/*if (this.selectedRow != -1) {
-		var windowMin = this._oldScrollTop ? this._oldScrollTop : 0;
-		var windowHeight = parseInt(targetTable.parentNode.style.height);
-		var step = (this.style.rowHeight + this.style.cellVerticalPadding) * this.selectedRow;
-		var windowMax = windowMin + windowHeight;
-		
-		if (step < windowMin || step > (windowMax - (this.style.rowHeight + this.style.cellVerticalPadding))) {
-			targetTable.parentNode.scrollTop = step;
-		}
-		else {
-			targetTable.parentNode.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
-		}
-	}
-	else {
-		targetTable.parentNode.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
-	}*/
-	
+	// Update scrolling
+	if (clear)
+		this._cached.outer_body.scrollTop = this._oldScrollTop ? this._oldScrollTop : 0;
 	
 	this.__refreshFooter();
 	
@@ -5652,12 +5684,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 		{
 			var root = data.getElementsByTagName('root').item(0);
 	
-			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
-			//   upgrade addRow, deleteRow to avoid using updateRows
-			// fake visible = false so we call updateRows only once
 			this.dataView.rows.length = 0;
-			this.dataView.updateRows(true);
-			
 			if (root.getAttribute('success') == '1')
 			{
 				var totRows = Number(root.getAttribute('totalrows'));
@@ -5685,7 +5712,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 						}
 					}
 					
-					this.dataView.addRow(this.dataView.createRow(tempR));
+					this.dataView.addRow(this.dataView.createRow(tempR), undefined, false);
 				}
 			}
 			else
@@ -5693,14 +5720,12 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				this.dataView.setMessage(root.getAttribute('errormessage'));
 			}
 			
+			this.dataView.updateRows();
+			
 		}
 		else	// json
 		{
-			// TODO: Add/Remove/Update rows instead of replacing the whole data structure
-			//   upgrade addRow, deleteRow to avoid using updateRows
-			// fake visible = false so we call updateRows only once
 			this.dataView.rows.length = 0;
-			this.dataView.updateRows(true);
 			
 			if (data.success)
 			{
@@ -5723,7 +5748,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 						tempR[colName] = dataTypes[cType](data.rows[n][colName]);	
 					}
 					
-					this.dataView.addRow(this.dataView.createRow(tempR));
+					this.dataView.addRow(this.dataView.createRow(tempR), undefined, false);
 				}
 			}
 			else
@@ -5731,6 +5756,7 @@ Scriptor.DataConnectors.DataViewConnector.prototype = {
 				this.dataView.setMessage(data.errormessage);
 			}
 			
+			this.dataView.updateRows();
 		}
 	},
 	
