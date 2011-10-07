@@ -3606,20 +3606,26 @@ var _151=0;
 var base=this.multiselect?2:0;
 var lis=this._cached.headerUl.getElementsByTagName("li");
 if(lis.length==(this.columns.length*2)+base){
-var _152=_4.element.getInnerBox(lis[base]);
-var _153=_152.left+_152.right+lis[base+1].offsetWidth;
-var _154=0;
+var _152=0;
+var _153=false;
+var _154=null;
+var _155=0;
 for(var n=0;n<this.columns.length;n++){
 if(this.columns[n].show){
-_154++;
+if(!_153){
+_154=_4.element.getInnerBox(lis[base+n]);
+_155=_154.left+_154.right+lis[base+n+1].offsetWidth;
+_153=true;
+}
+_152++;
 if(this.columns[n].percentWidth!==null){
-_151+=_ea+_153;
+_151+=_ea+_155;
 }else{
-_151+=this.columns[n].Width+_153;
+_151+=this.columns[n].Width+_155;
 }
 }
 }
-if(_150>=((_ea+_153)*_154)){
+if(_152&&_150>=((_ea+_155)*_152)){
 while(_151>_150){
 for(var n=0;n<this.columns.length;n++){
 if(this.columns[n].show&&this.columns[n].percentWidth===null&&this.columns[n].Width>_ea){
@@ -3638,11 +3644,11 @@ for(var n=0;n<this.columns.length;n++){
 lis[base+(n*2)].style.width=this.columns[n].Width+"px";
 }
 var rows=this._cached.rows_body.getElementsByTagName("ul");
-var _155=this.multiselect?1:0;
+var _156=this.multiselect?1:0;
 for(var a=0;a<rows.length;a++){
 var rLis=rows[a].getElementsByTagName("li");
 for(var n=0;n<this.columns.length;n++){
-rLis[_155+n].style.width=this.columns[n].Width+"px";
+rLis[_156+n].style.width=this.columns[n].Width+"px";
 }
 }
 }
@@ -3650,61 +3656,61 @@ rLis[_155+n].style.width=this.columns[n].Width+"px";
 }
 };
 _4.DataView.prototype._getHeadersWidth=function(){
-var _156=_2.getElementById(this.divId+"_optionsMenuBtn");
-var _157=_4.element.getOuterBox(_156);
-var _158=_4.element.getInnerBox(this._cached.headerUl);
-var _159=0;
+var _157=_2.getElementById(this.divId+"_optionsMenuBtn");
+var _158=_4.element.getOuterBox(_157);
+var _159=_4.element.getInnerBox(this._cached.headerUl);
+var _15a=0;
 if(this.multiselect){
 var lis=this._cached.headerUl.getElementsByTagName("li");
-_159=lis[0].offsetWidth+lis[1].offsetWidth;
+_15a=lis[0].offsetWidth+lis[1].offsetWidth;
 }
-return this._cached.headerUl.offsetWidth-_158.left-_159-(_156.offsetWidth+_157.left+_157.right);
+return this._cached.headerUl.offsetWidth-_159.left-_15a-(_157.offsetWidth+_158.left+_158.right);
 };
 _4.DataView.prototype.__calculateTotalWidth=function(){
-var _15a=0;
+var _15b=0;
 var cols=this._cached.headerUl.getElementsByTagName("li");
 for(var n=0;n<cols.length;n++){
-_15a+=cols[n].offsetWidth;
+_15b+=cols[n].offsetWidth;
 }
-return _15a;
+return _15b;
 };
-_4.DataView.prototype.__sort=function(_15b){
-var n,_15c,swap;
+_4.DataView.prototype.__sort=function(_15c){
+var n,_15d,swap;
 if(!this.orderBy){
 return;
 }
-for(n=_15b+1;n<this.rows.length;n++){
+for(n=_15c+1;n<this.rows.length;n++){
 var swap=false;
 var func=this.columns[this.__findColumn(this.orderBy)].Comparator;
 if(this.orderWay=="ASC"){
-swap=(typeof (func)=="function")?func(this.rows[_15b][this.orderBy],this.rows[n][this.orderBy])>0:(this.rows[_15b][this.orderBy]>this.rows[n][this.orderBy]);
+swap=(typeof (func)=="function")?func(this.rows[_15c][this.orderBy],this.rows[n][this.orderBy])>0:(this.rows[_15c][this.orderBy]>this.rows[n][this.orderBy]);
 }else{
-swap=(typeof (func)=="function")?func(this.rows[_15b][this.orderBy],this.rows[n][this.orderBy]<0):(this.rows[_15b][this.orderBy]<this.rows[n][this.orderBy]);
+swap=(typeof (func)=="function")?func(this.rows[_15c][this.orderBy],this.rows[n][this.orderBy]<0):(this.rows[_15c][this.orderBy]<this.rows[n][this.orderBy]);
 }
 if(swap){
-_15c=this.rows[_15b];
-this.rows[_15b]=this.rows[n];
-this.rows[n]=_15c;
-if(this.selectedRow==_15b){
+_15d=this.rows[_15c];
+this.rows[_15c]=this.rows[n];
+this.rows[n]=_15d;
+if(this.selectedRow==_15c){
 this.selectedRow=n;
 }else{
 if(this.selectedRow==n){
-this.selectedRow=_15b;
+this.selectedRow=_15c;
 }
 }
 for(var a=0;a<this.selectedRows.length;a++){
-if(this.selectedRows[a]==_15b){
+if(this.selectedRows[a]==_15c){
 this.selectedRows[a]=n;
 }else{
 if(this.selectedRows[a]==n){
-this.selectedRows[a]=_15b;
+this.selectedRows[a]=_15c;
 }
 }
 }
 }
 }
-if(_15b<this.rows.length-2){
-this.__sort(_15b+1);
+if(_15c<this.rows.length-2){
+this.__sort(_15c+1);
 }
 };
 _4.DataView.prototype.colum_exists=function(str){
@@ -3715,19 +3721,19 @@ return true;
 }
 return false;
 };
-_4.DataView.prototype.__getColumnSqlName=function(_15d){
+_4.DataView.prototype.__getColumnSqlName=function(_15e){
 for(var n=0;n<this.columns.length;n++){
-if(this.columns[n].Name==_15d){
+if(this.columns[n].Name==_15e){
 return this.columns[n].sqlName;
 }
 }
 return false;
 };
-_4.DataView.prototype.activateResizing=function(e,_15e){
+_4.DataView.prototype.activateResizing=function(e,_15f){
 if(!e){
 e=_1.event;
 }
-this.resColumnId=_15e;
+this.resColumnId=_15f;
 var x;
 if(typeof (e.pageX)=="number"){
 x=e.pageX;
@@ -3738,7 +3744,7 @@ x=(e.clientX+_2.documentElement.scrollLeft);
 x=0;
 }
 }
-this.resizingFrom=this.columns[_15e].Width;
+this.resizingFrom=this.columns[_15f].Width;
 this.resizingXCache=x;
 _4.event.attach(_2,"mousemove",this._mouseMoveBind=_4.bindAsEventListener(this.doResizing,this));
 _4.event.attach(_2,"mouseup",this._mouseUpBind=_4.bindAsEventListener(this.deactivateResizing,this));
@@ -3772,78 +3778,78 @@ x=(e.clientX+_2.documentElement.scrollLeft);
 x=0;
 }
 }
-var _15f=Math.abs(this.resizingXCache-x);
-var _160=(this.resizingXCache<x)?true:false;
+var _160=Math.abs(this.resizingXCache-x);
+var _161=(this.resizingXCache<x)?true:false;
 this.resizingXCache=x;
-var _161=this.resColumnId;
-var _162=_161;
-for(n=_161+1;n<this.columns.length;n++){
+var _162=this.resColumnId;
+var _163=_162;
+for(n=_162+1;n<this.columns.length;n++){
 if(this.columns[n].show){
-_162=n;
+_163=n;
 break;
 }
 }
-var _163=false;
 var _164=false;
-if(!_160){
-if((this.columns[_161].Width-_15f)>0){
-this.columns[_161].Width-=_15f;
-_163=true;
-}
-}else{
-var _165=this.__calculateTotalWidth();
-if((_165+_15f)<this._cached.headerUl.offsetWidth){
-this.columns[_161].Width+=_15f;
-_163=true;
-}else{
-if(_162!=_161){
-if((this.columns[_162].Width-_15f)>0){
-this.columns[_161].Width+=_15f;
-this.columns[_162].Width-=_15f;
-_163=true;
+var _165=false;
+if(!_161){
+if((this.columns[_162].Width-_160)>0){
+this.columns[_162].Width-=_160;
 _164=true;
 }
+}else{
+var _166=this.__calculateTotalWidth();
+if((_166+_160)<this._cached.headerUl.offsetWidth){
+this.columns[_162].Width+=_160;
+_164=true;
+}else{
+if(_163!=_162){
+if((this.columns[_163].Width-_160)>0){
+this.columns[_162].Width+=_160;
+this.columns[_163].Width-=_160;
+_164=true;
+_165=true;
 }
 }
 }
-var _166=this._cached.headerUl;
-if(_166){
-var cols=_166.getElementsByTagName("li");
-var _167=(this.multiselect?2:0);
-var ndx=_167+(_161*2);
-cols[ndx].style.width=this.columns[_161].Width+"px";
-if(_164){
-ndx+=2;
+}
+var _167=this._cached.headerUl;
+if(_167){
+var cols=_167.getElementsByTagName("li");
+var _168=(this.multiselect?2:0);
+var ndx=_168+(_162*2);
 cols[ndx].style.width=this.columns[_162].Width+"px";
+if(_165){
+ndx+=2;
+cols[ndx].style.width=this.columns[_163].Width+"px";
 }
 }
 var rows=this._cached.rows_body.getElementsByTagName("ul");
 for(var n=0;n<rows.length;n++){
 var cols=rows[n].getElementsByTagName("li");
-var _167=(this.multiselect?1:0);
-var _168=this.columns[_161].Width;
-cols[_167+(_161)].style.width=_168+"px";
-if(_164){
-cols[_167+(_161)+1].style.width=this.columns[_162].Width+"px";
+var _168=(this.multiselect?1:0);
+var _169=this.columns[_162].Width;
+cols[_168+(_162)].style.width=_169+"px";
+if(_165){
+cols[_168+(_162)+1].style.width=this.columns[_163].Width+"px";
 }
 }
 };
-_4.DataView.prototype.addDataType=function(name,_169){
+_4.DataView.prototype.addDataType=function(name,_16a){
 if(typeof (name)!="string"){
 _4.error.report("Invalid data type name.");
 return;
 }
-if(typeof (_169)!="object"){
+if(typeof (_16a)!="object"){
 _4.error.report("Invalid data type constructor.");
 return;
 }else{
-if(typeof (_169.toString)!="function"){
+if(typeof (_16a.toString)!="function"){
 _4.error.report("Data type constructor missing toString method.");
 return;
 }
 }
 if(!_ee[name]){
-_ee[name]=_169;
+_ee[name]=_16a;
 }else{
 _4.error.report("Tried to instantiate a data type but data type was already defined");
 }
@@ -3852,22 +3858,22 @@ if(_4.DataConnectors===_3){
 _4.DataConnectors={};
 }
 _4.DataConnectors.DataViewConnector=function(opts){
-var _16a={dataView:null,api:null,method:"POST",type:"json",parameters:""};
-_4.mixin(_16a,opts);
-if(!_16a.dataView){
+var _16b={dataView:null,api:null,method:"POST",type:"json",parameters:""};
+_4.mixin(_16b,opts);
+if(!_16b.dataView){
 _4.error.report("Must provide dataView reference to dataViewConnector object.");
 return;
 }
-if(typeof (_16a.api)!="string"||_16a.api==""){
+if(typeof (_16b.api)!="string"||_16b.api==""){
 _4.error.report("Invalid Api string.");
 return;
 }
-this.api=_16a.api;
-this.dataView=_16a.dataView;
-this.parameters=_16a.parameters;
+this.api=_16b.api;
+this.dataView=_16b.dataView;
+this.parameters=_16b.parameters;
 this.type="json";
-if(_16a.type){
-switch(_16a.type.toLowerCase()){
+if(_16b.type){
+switch(_16b.type.toLowerCase()){
 case ("xml"):
 this.type="xml";
 break;
@@ -3878,8 +3884,8 @@ break;
 }
 }
 this.method="POST";
-if(typeof (_16a.method)=="string"){
-this.method=_16a.method.toUpperCase()=="POST"?"POST":"GET";
+if(typeof (_16b.method)=="string"){
+this.method=_16b.method.toUpperCase()=="POST"?"POST":"GET";
 }
 _4.event.attach(this.dataView,"onrefresh",_4.bind(this._onRefresh,this));
 this.httpRequest=new _4.httpRequest({ApiCall:this.api,method:this.method,Type:this.type,onError:_4.bind(this._onError,this),onLoad:_4.bind(this._onLoad,this)});
@@ -3887,14 +3893,14 @@ this.httpRequest=new _4.httpRequest({ApiCall:this.api,method:this.method,Type:th
 _4.DataConnectors.DataViewConnector.prototype={_onRefresh:function(e){
 this.dataView.setLoading(true);
 this.dataView.__refreshFooter();
-var _16b="orderby="+this.dataView.orderBy+"&orderway="+this.dataView.orderWay;
+var _16c="orderby="+this.dataView.orderBy+"&orderway="+this.dataView.orderWay;
 if(this.dataView.paginating){
-_16b+="&limit="+(this.dataView.rowsPerPage*this.dataView.curPage)+","+((this.dataView.rowsPerPage*this.dataView.curPage)+this.dataView.rowsPerPage);
+_16c+="&limit="+(this.dataView.rowsPerPage*this.dataView.curPage)+","+((this.dataView.rowsPerPage*this.dataView.curPage)+this.dataView.rowsPerPage);
 }
 if(this.parameters){
-_16b+="&"+this.parameters;
+_16c+="&"+this.parameters;
 }
-this.httpRequest.send(_16b);
+this.httpRequest.send(_16c);
 _4.event.cancel(e);
 },_onLoad:function(data){
 this.dataView.setLoading(false);
@@ -3902,22 +3908,22 @@ if(this.type=="xml"){
 var root=data.getElementsByTagName("root").item(0);
 this.dataView.rows.length=0;
 if(root.getAttribute("success")=="1"){
-var _16c=Number(root.getAttribute("totalrows"));
-if(!isNaN(_16c)){
-this.dataView.totalRows=_16c;
+var _16d=Number(root.getAttribute("totalrows"));
+if(!isNaN(_16d)){
+this.dataView.totalRows=_16d;
 }
 var rows=root.getElementsByTagName("row");
 for(var n=0;n<rows.length;n++){
-var _16d={};
+var _16e={};
 var cols=rows[n].getElementsByTagName("column");
 for(var a=0;a<cols.length;a++){
-var _16e=cols[a].getAttribute("name");
-if(_16e&&cols[a].firstChild){
-var _16f=this.dataView.__findColumn(_16e)!=-1?this.dataView.columns[this.dataView.__findColumn(_16e)].Type:"alpha";
-_16d[_16e]=_ee[_16f](cols[a].firstChild.data);
+var _16f=cols[a].getAttribute("name");
+if(_16f&&cols[a].firstChild){
+var _170=this.dataView.__findColumn(_16f)!=-1?this.dataView.columns[this.dataView.__findColumn(_16f)].Type:"alpha";
+_16e[_16f]=_ee[_170](cols[a].firstChild.data);
 }
 }
-this.dataView.addRow(this.dataView.createRow(_16d),_3,false);
+this.dataView.addRow(this.dataView.createRow(_16e),_3,false);
 }
 }else{
 this.dataView.setMessage(root.getAttribute("errormessage"));
@@ -3926,81 +3932,81 @@ this.dataView.updateRows();
 }else{
 this.dataView.rows.length=0;
 if(data.success){
-var _16c=Number(data.totalrows);
-if(!isNaN(_16c)){
-this.dataView.totalRows=_16c;
+var _16d=Number(data.totalrows);
+if(!isNaN(_16d)){
+this.dataView.totalRows=_16d;
 }
 for(var n=0;n<data.rows.length;n++){
-var _16d={};
-for(var _16e in data.rows[n]){
-var _16f=this.dataView.__findColumn(_16e)!=-1?this.dataView.columns[this.dataView.__findColumn(_16e)].Type:"alpha";
-_16d[_16e]=_ee[_16f](data.rows[n][_16e]);
+var _16e={};
+for(var _16f in data.rows[n]){
+var _170=this.dataView.__findColumn(_16f)!=-1?this.dataView.columns[this.dataView.__findColumn(_16f)].Type:"alpha";
+_16e[_16f]=_ee[_170](data.rows[n][_16f]);
 }
-this.dataView.addRow(this.dataView.createRow(_16d),_3,false);
+this.dataView.addRow(this.dataView.createRow(_16e),_3,false);
 }
 }else{
 this.dataView.setMessage(data.errormessage);
 }
 this.dataView.updateRows();
 }
-},_onError:function(_170){
+},_onError:function(_171){
 this.dataView.setLoading(false);
-this.dataView.setMessage("Error: Unable to load dataView object (HTTP status: "+_170+")");
+this.dataView.setMessage("Error: Unable to load dataView object (HTTP status: "+_171+")");
 }};
 _4.DataView.prototype.lang={"noRows":"No rows to show.","rows":"rows.","row":"row.","pageStart":"Page ","pageMiddle":" of ","pageEnd":" Go to page: ","pageGo":"Go","pagePrev":"<< Previous","pageNext":"Next >>","refresh":"Refresh","of":"of"};
-var _171=function(opts){
-var _172={id:null,parentId:0,parent:null,Name:""};
-_4.mixin(_172,opts);
-this.treeView=_172.treeView;
-this.id=_172.id!==null?_172.id:this.treeView.getNextNodeId();
-this.parentId=_172.parentId;
-this.Name=String(_172.Name);
+var _172=function(opts){
+var _173={id:null,parentId:0,parent:null,Name:""};
+_4.mixin(_173,opts);
+this.treeView=_173.treeView;
+this.id=_173.id!==null?_173.id:this.treeView.getNextNodeId();
+this.parentId=_173.parentId;
+this.Name=String(_173.Name);
 this.expanded=false;
 this.childNodes=[];
-this.parentNode=_172.parent;
+this.parentNode=_173.parent;
 };
-_171.prototype={searchNode:function(id){
+_172.prototype={searchNode:function(id){
 var n;
 var srch=null;
-var _173=0;
+var _174=0;
 for(n=0;n<this.childNodes.length;n++){
 if(this.childNodes[n].id==id){
 srch=this.childNodes[n];
 break;
 }
 }
-while(!srch&&_173<this.childNodes.length){
-srch=this.childNodes[_173].searchNode(id);
-_173++;
+while(!srch&&_174<this.childNodes.length){
+srch=this.childNodes[_174].searchNode(id);
+_174++;
 }
 return srch;
 },updateChildrenNodes:function(){
-var _174=_2.getElementById(this.treeView.divId+"_"+this.id+"_branch");
-var _175=_4.getInactiveLocation();
+var _175=_2.getElementById(this.treeView.divId+"_"+this.id+"_branch");
+var _176=_4.getInactiveLocation();
 for(var i=0;i<this.childNodes.length;i++){
 var node=_2.createElement("li");
 node.id=this.treeView.divId+"_"+this.childNodes[i].id;
-_174.appendChild(node);
-var _176="";
-var _177=this.childNodes[i].childNodes.length;
-if(_177){
-_176+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_expandable\" href=\""+_175+"\" class=\"";
-_176+=(this.childNodes[i].expanded?"treeViewCollapsableNode":"treeViewExpandableNode")+"\"></a>";
+_175.appendChild(node);
+var _177="";
+var _178=this.childNodes[i].childNodes.length;
+if(_178){
+_177+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_expandable\" href=\""+_176+"\" class=\"";
+_177+=(this.childNodes[i].expanded?"treeViewCollapsableNode":"treeViewExpandableNode")+"\"></a>";
 }
-_176+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_selectNode\" ";
-if(!_177){
-_176+="class=\"treeViewSingleNode\" ";
+_177+="<a id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_selectNode\" ";
+if(!_178){
+_177+="class=\"treeViewSingleNode\" ";
 }
-_176+="href=\""+_175+"\">"+this.childNodes[i].Name+"</a>";
-if(_177){
-_176+="<ul id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_branch\"></ul>";
+_177+="href=\""+_176+"\">"+this.childNodes[i].Name+"</a>";
+if(_178){
+_177+="<ul id=\""+this.treeView.divId+"_"+this.childNodes[i].id+"_branch\"></ul>";
 }
-node.innerHTML=_176;
-if(_177){
+node.innerHTML=_177;
+if(_178){
 _4.event.attach(_2.getElementById(this.treeView.divId+"_"+this.childNodes[i].id+"_expandable"),"click",_4.bind(this.treeView._expandNode,this.treeView,this.childNodes[i].id));
 }
 _4.event.attach(_2.getElementById(this.treeView.divId+"_"+this.childNodes[i].id+"_selectNode"),"click",_4.bind(this.treeView._selectNode,this.treeView,this.childNodes[i].id));
-if(_177){
+if(_178){
 this.childNodes[i].updateChildrenNodes();
 }
 }
@@ -4008,9 +4014,9 @@ this.childNodes[i].updateChildrenNodes();
 return "[Name: "+this.Name+", ParentId: "+this.parentId+", Children: "+this.childNodes.length+"]";
 }};
 _4.TreeView=function(opts){
-var _178={canHaveChildren:false,hasInvalidator:true};
-_4.mixin(_178,opts);
-var cmp=_76.get(_178);
+var _179={canHaveChildren:false,hasInvalidator:true};
+_4.mixin(_179,opts);
+var cmp=_76.get(_179);
 _4.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.TreeView";
 this.DOMAddedImplementation=function(){
@@ -4038,7 +4044,7 @@ _4.event.registerCustomEvent(this,"onblur");
 _4.event.registerCustomEvent(this,"onrefresh");
 _4.event.registerCustomEvent(this,"oncontentupdated");
 _4.event.registerCustomEvent(this,"onselect");
-this.masterNode=new _171({id:0,parentId:0,parent:null,Name:"root",treeView:this});
+this.masterNode=new _172({id:0,parentId:0,parent:null,Name:"root",treeView:this});
 this.nextNodeId=1;
 this._registeredEvents=[];
 this._templateRendered=false;
@@ -4059,10 +4065,10 @@ this.updateNodes();
 }
 };
 _4.TreeView.prototype.getNextNodeId=function(){
-var _179=true;
-while(_179){
+var _17a=true;
+while(_17a){
 if(this.masterNode.searchNode(this.nextNodeId)===null){
-_179=false;
+_17a=false;
 }else{
 this.nextNodeId++;
 }
@@ -4100,131 +4106,131 @@ _2.getElementById(this.divId+"_message").parentNode.removeChild(_2.getElementByI
 _2.getElementById(this.divId+"_0_branch").style.display="";
 }else{
 _2.getElementById(this.divId+"_0_branch").style.display="none";
-var _17a;
+var _17b;
 if(!_2.getElementById(this.divId+"_message")){
-_17a=_2.createElement("div");
-_17a.id=this.divId+"_message";
-_17a.className="treeViewMessageDiv";
-this.target.appendChild(_17a);
+_17b=_2.createElement("div");
+_17b.id=this.divId+"_message";
+_17b.className="treeViewMessageDiv";
+this.target.appendChild(_17b);
 }else{
-_17a=_2.getElementById(this.divId+"_message");
+_17b=_2.getElementById(this.divId+"_message");
 }
-_17a.innerHTML=msg;
+_17b.innerHTML=msg;
 }
 };
-_4.TreeView.prototype._expandNode=function(e,_17b){
+_4.TreeView.prototype._expandNode=function(e,_17c){
 if(!e){
 e=_1.event;
 }
-var node=this.searchNode(_17b);
+var node=this.searchNode(_17c);
 if(node.expanded){
 node.expanded=false;
-_2.getElementById(this.divId+"_"+_17b+"_expandable").className="treeViewExpandableNode";
-_2.getElementById(this.divId+"_"+_17b+"_branch").style.display="none";
+_2.getElementById(this.divId+"_"+_17c+"_expandable").className="treeViewExpandableNode";
+_2.getElementById(this.divId+"_"+_17c+"_branch").style.display="none";
 }else{
 node.expanded=true;
-_2.getElementById(this.divId+"_"+_17b+"_expandable").className="treeViewCollapsableNode";
-_2.getElementById(this.divId+"_"+_17b+"_branch").style.display="block";
+_2.getElementById(this.divId+"_"+_17c+"_expandable").className="treeViewCollapsableNode";
+_2.getElementById(this.divId+"_"+_17c+"_branch").style.display="block";
 }
 _4.event.cancel(e);
 return false;
 };
-_4.TreeView.prototype._selectNode=function(e,_17c){
+_4.TreeView.prototype._selectNode=function(e,_17d){
 if(!e){
 e=_1.event;
 }
 if(this.selectedNode!==null){
-var _17d=this.searchNode(this.selectedNode);
-_4.className.remove(_2.getElementById(this.divId+"_"+_17d.id+"_selectNode"),"treeViewSelectedNode");
+var _17e=this.searchNode(this.selectedNode);
+_4.className.remove(_2.getElementById(this.divId+"_"+_17e.id+"_selectNode"),"treeViewSelectedNode");
 }
-if(this.selectedNode!=_17c){
-var _17d=this.searchNode(_17c);
-_4.className.add(_2.getElementById(this.divId+"_"+_17d.id+"_selectNode"),"treeViewSelectedNode");
+if(this.selectedNode!=_17d){
+var _17e=this.searchNode(_17d);
+_4.className.add(_2.getElementById(this.divId+"_"+_17e.id+"_selectNode"),"treeViewSelectedNode");
 }
-this.selectedNode=(this.selectedNode==_17c)?null:_17c;
+this.selectedNode=(this.selectedNode==_17d)?null:_17d;
 _4.event.cancel(e,true);
 return false;
 };
-_4.TreeView.prototype.addNode=function(opts,_17e,ndx){
-var _17f=(_17e==0)?this.masterNode:this.searchNode(_17e);
-if(_17f){
-var _180={treeView:this,parentId:_17e,parent:_17f,Name:""};
-_4.mixin(_180,opts);
-if(ndx>=0&&ndx<_17f.childNodes.length){
-_17f.childNodes.splice(ndx,0,new _171(_180));
+_4.TreeView.prototype.addNode=function(opts,_17f,ndx){
+var _180=(_17f==0)?this.masterNode:this.searchNode(_17f);
+if(_180){
+var _181={treeView:this,parentId:_17f,parent:_180,Name:""};
+_4.mixin(_181,opts);
+if(ndx>=0&&ndx<_180.childNodes.length){
+_180.childNodes.splice(ndx,0,new _172(_181));
 }else{
-_17f.childNodes.push(new _171(_180));
+_180.childNodes.push(new _172(_181));
 }
 if(this.inDOM){
 this.updateNodes();
 }
 }
 };
-_4.TreeView.prototype.deleteNode=function(_181){
-if(_181==0||_181=="0"){
+_4.TreeView.prototype.deleteNode=function(_182){
+if(_182==0||_182=="0"){
 return;
 }
-this._searchAndDelete(_181,this.masterNode);
+this._searchAndDelete(_182,this.masterNode);
 if(this.inDOM){
 this.updateNodes();
 }
 };
-_4.TreeView.prototype._searchAndDelete=function(_182,node){
-var _183=false;
-if(typeof (_182)=="number"||typeof (_182)=="string"){
+_4.TreeView.prototype._searchAndDelete=function(_183,node){
+var _184=false;
+if(typeof (_183)=="number"||typeof (_183)=="string"){
 for(var n=0;n<node.childNodes.length;n++){
-if(node.childNodes[n].id==_182){
+if(node.childNodes[n].id==_183){
 if(this.selectedNode==node.childNodes[n].id){
 this.selectedNode=null;
 }
 node.childNodes.splice(n,1);
-_183=true;
+_184=true;
 break;
 }
 }
 }else{
 for(var n=0;n<node.childNodes.length;n++){
-if(node.childNodes[n]==_182){
+if(node.childNodes[n]==_183){
 if(this.selectedNode==node.childNodes[n].id){
 this.selectedNode=null;
 }
 node.childNodes.splice(n,1);
-_183=true;
+_184=true;
 break;
 }
 }
 }
-if(!_183){
+if(!_184){
 for(var n=0;n<node.childNodes.length;n++){
-var done=this._searchAndDelete(node.childNodes[n],_182);
+var done=this._searchAndDelete(node.childNodes[n],_183);
 if(done){
-_183=done;
+_184=done;
 break;
 }
 }
 }
-return _183;
+return _184;
 };
 if(_4.DataConnectors===_3){
 _4.DataConnectors={};
 }
 _4.DataConnectors.TreeViewConnector=function(opts){
-var _184={treeView:null,api:null,method:"POST",type:"json",parameters:""};
-_4.mixin(_184,opts);
-if(!_184.treeView){
+var _185={treeView:null,api:null,method:"POST",type:"json",parameters:""};
+_4.mixin(_185,opts);
+if(!_185.treeView){
 _4.error.report("Must provide treeView reference to treeViewConnector object.");
 return;
 }
-if(typeof (_184.api)!="string"||_184.api==""){
+if(typeof (_185.api)!="string"||_185.api==""){
 _4.error.report("Invalid Api string.");
 return;
 }
-this.api=_184.api;
-this.treeView=_184.treeView;
-this.parameters=_184.parameters;
+this.api=_185.api;
+this.treeView=_185.treeView;
+this.parameters=_185.parameters;
 this.type="json";
-if(_184.type){
-switch(_184.type.toLowerCase()){
+if(_185.type){
+switch(_185.type.toLowerCase()){
 case ("xml"):
 this.type="xml";
 break;
@@ -4235,8 +4241,8 @@ break;
 }
 }
 this.method="POST";
-if(typeof (_184.method)=="string"){
-this.method=_184.method.toUpperCase()=="POST"?"POST":"GET";
+if(typeof (_185.method)=="string"){
+this.method=_185.method.toUpperCase()=="POST"?"POST":"GET";
 }
 _4.event.attach(this.treeView,"onrefresh",_4.bind(this._onRefresh,this));
 this.httpRequest=new _4.httpRequest({ApiCall:this.api,method:this.method,Type:this.type,onError:_4.bind(this._onError,this),onLoad:_4.bind(this._onLoad,this)});
@@ -4250,20 +4256,20 @@ this.treeView.setLoading(false);
 if(this.type=="xml"){
 var root=data.getElementsByTagName("root").item(0);
 delete this.treeView.masterNode;
-this.treeView.masterNode=new _171({id:0,parentId:0,parent:null,Name:"root",treeView:this.treeView});
+this.treeView.masterNode=new _172({id:0,parentId:0,parent:null,Name:"root",treeView:this.treeView});
 this.treeView.nextNodeId=1;
 this.treeView.updateNodes();
 if(root.getAttribute("success")=="1"){
-var _185=this._fetchNodes(root);
-if(_185.length){
-this._addNodesFromXml(_185,0);
+var _186=this._fetchNodes(root);
+if(_186.length){
+this._addNodesFromXml(_186,0);
 }
 }else{
 this.treeView.setMessage(root.getAttribute("errormessage"));
 }
 }else{
 delete this.treeView.masterNode;
-this.treeView.masterNode=new _171({id:0,parentId:0,parent:null,Name:"root",treeView:this.treeView});
+this.treeView.masterNode=new _172({id:0,parentId:0,parent:null,Name:"root",treeView:this.treeView});
 this.treeView.nextNodeId=1;
 this.treeView.updateNodes();
 if(data.success){
@@ -4282,49 +4288,49 @@ ret.push(elem.childNodes[n]);
 }
 }
 return ret;
-},_addNodesFromXml:function(_186,_187){
-for(var n=0;n<_186.length;n++){
+},_addNodesFromXml:function(_187,_188){
+for(var n=0;n<_187.length;n++){
 var id=null;
-if(_186[n].getAttribute("id")){
-id=_186[n].getAttribute("id");
+if(_187[n].getAttribute("id")){
+id=_187[n].getAttribute("id");
 }
-var _188=_186[n].getElementsByTagName("label")[0];
-if(_188){
-labelStr=_188.firstChild.data;
-}
-var _189=_186[n].getElementsByTagName("node");
-this.treeView.addNode({Name:labelStr,id:id},_187);
+var _189=_187[n].getElementsByTagName("label")[0];
 if(_189){
-this._addNodesFromXml(this._fetchNodes(_186[n]),id);
+labelStr=_189.firstChild.data;
+}
+var _18a=_187[n].getElementsByTagName("node");
+this.treeView.addNode({Name:labelStr,id:id},_188);
+if(_18a){
+this._addNodesFromXml(this._fetchNodes(_187[n]),id);
 }
 }
-},_addNodesFromJson:function(_18a,_18b){
-for(var n=0;n<_18a.length;n++){
-this.treeView.addNode({Name:_18a[n].label,id:_18a[n].id},_18b);
-if(_18a[n].nodes){
-this._addNodesFromJson(_18a[n].nodes,_18a[n].id);
+},_addNodesFromJson:function(_18b,_18c){
+for(var n=0;n<_18b.length;n++){
+this.treeView.addNode({Name:_18b[n].label,id:_18b[n].id},_18c);
+if(_18b[n].nodes){
+this._addNodesFromJson(_18b[n].nodes,_18b[n].id);
 }
 }
-},_onError:function(_18c){
+},_onError:function(_18d){
 this.treeView.setLoading(false);
-this.treeView.setMessage("Error: Unable to load treeView object (HTTP status: "+_18c+")");
+this.treeView.setMessage("Error: Unable to load treeView object (HTTP status: "+_18d+")");
 }};
 _4.CalendarView=function(opts){
-var _18d=new Date();
-var _18e={canHaveChildren:true,hasInvalidator:true,multiselect:false,month:_18d.getMonth(),year:_18d.getFullYear(),disabledBefore:null,disabledAfter:null,disabledDays:[false,false,false,false,false,false,false],disabledDates:[]};
-_4.mixin(_18e,opts);
-var cmp=_76.get(_18e);
+var _18e=new Date();
+var _18f={canHaveChildren:true,hasInvalidator:true,multiselect:false,month:_18e.getMonth(),year:_18e.getFullYear(),disabledBefore:null,disabledAfter:null,disabledDays:[false,false,false,false,false,false,false],disabledDates:[]};
+_4.mixin(_18f,opts);
+var cmp=_76.get(_18f);
 _4.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.CalendarView";
 this.selectedDates=[];
-this.multiSelect=_18e.multiselect;
+this.multiSelect=_18f.multiselect;
 this.advanced=false;
-this.curMonth=(!isNaN(Number(_18e.month))&&_18e.month>=0&&_18e.month<12)?_18e.month:_18d.getMonth();
-this.curYear=(!isNaN(Number(_18e.year))&&_18e.year>0)?_18e.year:new _18d.getFullYear();
-this.disabledBefore=_18e.disabledBefore;
-this.disabledAfter=_18e.disabledAfter;
-this.disabledDays=_18e.disabledDays;
-this.disabledDates=_18e.disabledDates;
+this.curMonth=(!isNaN(Number(_18f.month))&&_18f.month>=0&&_18f.month<12)?_18f.month:_18e.getMonth();
+this.curYear=(!isNaN(Number(_18f.year))&&_18f.year>0)?_18f.year:new _18e.getFullYear();
+this.disabledBefore=_18f.disabledBefore;
+this.disabledAfter=_18f.disabledAfter;
+this.disabledDays=_18f.disabledDays;
+this.disabledDates=_18f.disabledDates;
 this.markedDates=[];
 this.hookedTo=null;
 this._registeredEvents=[];
@@ -4360,28 +4366,28 @@ this.canHaveChildren=false;
 };
 _4.CalendarView.prototype.renderTemplate=function(){
 if(!this._templateRendered){
-var _18f="<div class=\"calendarViewWrapper\"><div class=\"calendarViewHeader\" id=\""+this.divId+"_header\"></div>";
-_18f+="<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"calendarViewBody\" id=\""+this.divId+"_body\"></table>";
-_18f+="<div class=\"calendarViewAdvanced\" style=\"display: none;\" id=\""+this.divId+"_advanced\">";
-var _190=new Date();
+var _190="<div class=\"calendarViewWrapper\"><div class=\"calendarViewHeader\" id=\""+this.divId+"_header\"></div>";
+_190+="<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"calendarViewBody\" id=\""+this.divId+"_body\"></table>";
+_190+="<div class=\"calendarViewAdvanced\" style=\"display: none;\" id=\""+this.divId+"_advanced\">";
+var _191=new Date();
 if(this.selectedDates.length){
-_190=this.selectedDates[0];
+_191=this.selectedDates[0];
 }
-_18f+="<p><label for=\""+this.divId+"DaySelector\">"+this.lang.day+"</label>";
-_18f+="<input type=\"text\" id=\""+this.divId+"DaySelector\" value=\""+_190.getDate()+"\" /></p>";
-_18f+="<p><label for=\""+this.divId+"MonthSelector\">"+this.lang.month+"</label>";
-_18f+="<select id=\""+this.divId+"MonthSelector\">";
+_190+="<p><label for=\""+this.divId+"DaySelector\">"+this.lang.day+"</label>";
+_190+="<input type=\"text\" id=\""+this.divId+"DaySelector\" value=\""+_191.getDate()+"\" /></p>";
+_190+="<p><label for=\""+this.divId+"MonthSelector\">"+this.lang.month+"</label>";
+_190+="<select id=\""+this.divId+"MonthSelector\">";
 for(var n=0;n<12;n++){
-_18f+="<option value=\""+n+"\""+(_190.getMonth()==n?" selected=\"selected\"":"")+">"+this.lang.longMonths[n]+"</option>";
+_190+="<option value=\""+n+"\""+(_191.getMonth()==n?" selected=\"selected\"":"")+">"+this.lang.longMonths[n]+"</option>";
 }
-_18f+="</select></p>";
-_18f+="<p><label for=\""+this.divId+"YearSelector\">"+this.lang.year+"</label>";
-_18f+="<input type=\"text\" id=\""+this.divId+"YearSelector\" value=\""+_190.getFullYear()+"\" /></p>";
-_18f+="<p><input type=\"button\" class=\"calendarBtn calendarAccept\" id=\""+this.divId+"_advancedAccept\" value=\""+this.lang.accept+"\"> ";
-_18f+="<input type=\"button\" class=\"calendarBtn calendarCancel\" id=\""+this.divId+"_advancedCancel\" value=\""+this.lang.cancel+"\"></p>";
-_18f+="</div>";
-_18f+="<div class=\"calendarViewFooter\" id=\""+this.divId+"_footer\"></div></div>";
-this.cmpTarget.innerHTML=_18f;
+_190+="</select></p>";
+_190+="<p><label for=\""+this.divId+"YearSelector\">"+this.lang.year+"</label>";
+_190+="<input type=\"text\" id=\""+this.divId+"YearSelector\" value=\""+_191.getFullYear()+"\" /></p>";
+_190+="<p><input type=\"button\" class=\"calendarBtn calendarAccept\" id=\""+this.divId+"_advancedAccept\" value=\""+this.lang.accept+"\"> ";
+_190+="<input type=\"button\" class=\"calendarBtn calendarCancel\" id=\""+this.divId+"_advancedCancel\" value=\""+this.lang.cancel+"\"></p>";
+_190+="</div>";
+_190+="<div class=\"calendarViewFooter\" id=\""+this.divId+"_footer\"></div></div>";
+this.cmpTarget.innerHTML=_190;
 this._templateRendered=true;
 if(this.inDOM&&this._registeredEvents.length==0){
 this.DOMAddedImplementation();
@@ -4393,59 +4399,59 @@ if(!this.inDOM){
 _4.error.report("Can't update data on non visible calendarView object.");
 return;
 }
-var _191=_2.getElementById(this.divId+"_body");
-_191.style.display="";
+var _192=_2.getElementById(this.divId+"_body");
+_192.style.display="";
 _2.getElementById(this.divId+"_advanced").style.display="none";
 this.advanced=false;
-_191.innerHTML="";
-var _192=_2.createElement("thead");
-var _193,_194,_195,tmpA;
-var _193=_2.createElement("tr");
+_192.innerHTML="";
+var _193=_2.createElement("thead");
+var _194,_195,_196,tmpA;
+var _194=_2.createElement("tr");
 for(var n=0;n<7;n++){
-_194=_2.createElement("th");
-_194.appendChild(_2.createTextNode(this.lang.shortDays[n]));
+_195=_2.createElement("th");
+_195.appendChild(_2.createTextNode(this.lang.shortDays[n]));
+_194.appendChild(_195);
+}
 _193.appendChild(_194);
-}
 _192.appendChild(_193);
-_191.appendChild(_192);
-var _196=new Date();
-var _197=new Date(this.curYear,this.curMonth,1,0,0,0,0);
-var _198=new Date(_197.getTime());
-_198.setMonth(_198.getMonth()+1);
-var _199=_197.getDay();
-var _19a=0;
-var _19b=_2.createElement("tbody");
-var _193=_2.createElement("tr");
-while(_19a<_199){
-_195=_2.createElement("td");
-_195.appendChild(_2.createTextNode(" "));
-_193.appendChild(_195);
-_19a++;
+var _197=new Date();
+var _198=new Date(this.curYear,this.curMonth,1,0,0,0,0);
+var _199=new Date(_198.getTime());
+_199.setMonth(_199.getMonth()+1);
+var _19a=_198.getDay();
+var _19b=0;
+var _19c=_2.createElement("tbody");
+var _194=_2.createElement("tr");
+while(_19b<_19a){
+_196=_2.createElement("td");
+_196.appendChild(_2.createTextNode(" "));
+_194.appendChild(_196);
+_19b++;
 }
-while(_197<_198){
-_195=_2.createElement("td");
-_195.setAttribute("align","left");
-_195.setAttribute("valign","top");
+while(_198<_199){
+_196=_2.createElement("td");
+_196.setAttribute("align","left");
+_196.setAttribute("valign","top");
 tmpA=_2.createElement("a");
 tmpA.setAttribute("href",_4.getInactiveLocation());
-tmpA.appendChild(_2.createTextNode(_197.getDate()));
-var _19c=false;
-if(this.isEqual(_197,_196)){
-_19c=true;
-}
+tmpA.appendChild(_2.createTextNode(_198.getDate()));
 var _19d=false;
-if(this.isDisabledDate(_197)){
+if(this.isEqual(_198,_197)){
 _19d=true;
-if(_19c){
+}
+var _19e=false;
+if(this.isDisabledDate(_198)){
+_19e=true;
+if(_19d){
 tmpA.className="calendarDisabled calendarToday";
 }else{
 tmpA.className="calendarDisabled";
 }
 }
 for(var n=0;n<this.markedDates.length;n++){
-if(this.isEqual(_197,this.markedDates[n])){
-_19d=true;
-if(_19c){
+if(this.isEqual(_198,this.markedDates[n])){
+_19e=true;
+if(_19d){
 tmpA.className="calendarMarked calendarToday";
 }else{
 tmpA.className="calendarMarked";
@@ -4453,39 +4459,39 @@ tmpA.className="calendarMarked";
 }
 }
 for(var n=0;n<this.selectedDates.length;n++){
-if(this.isEqual(_197,this.selectedDates[n])){
-_19d=true;
-if(_19c){
+if(this.isEqual(_198,this.selectedDates[n])){
+_19e=true;
+if(_19d){
 tmpA.className="calendarSelected calendarToday";
 }else{
 tmpA.className="calendarSelected";
 }
 }
 }
-if(!_19d&&_19c){
+if(!_19e&&_19d){
 tmpA.className="calendarToday";
 }
-_195.appendChild(tmpA);
-_193.appendChild(_195);
-_4.event.attach(tmpA,"onclick",_4.bind(this.selectDate,this,_197.getDate()));
-_197.setDate(_197.getDate()+1);
-_19a++;
-if(_19a>6){
-_19b.appendChild(_193);
-_193=_2.createElement("tr");
-_19a=0;
+_196.appendChild(tmpA);
+_194.appendChild(_196);
+_4.event.attach(tmpA,"onclick",_4.bind(this.selectDate,this,_198.getDate()));
+_198.setDate(_198.getDate()+1);
+_19b++;
+if(_19b>6){
+_19c.appendChild(_194);
+_194=_2.createElement("tr");
+_19b=0;
 }
 }
-if(_19a>0){
-_19b.appendChild(_193);
-while(_19a<7){
-_195=_2.createElement("td");
-_195.appendChild(_2.createTextNode(" "));
-_193.appendChild(_195);
-_19a++;
+if(_19b>0){
+_19c.appendChild(_194);
+while(_19b<7){
+_196=_2.createElement("td");
+_196.appendChild(_2.createTextNode(" "));
+_194.appendChild(_196);
+_19b++;
 }
 }
-_191.appendChild(_19b);
+_192.appendChild(_19c);
 this.__refreshHeader();
 this.__refreshFooter();
 };
@@ -4494,15 +4500,15 @@ if(!this.inDOM){
 _4.error.report("Can't update calendar on non visible calendarView object.");
 return;
 }
-var _19e=_2.getElementById(this.divId+"_header");
-_19e.innerHTML="";
-var _19f=_4.getInactiveLocation();
-var _1a0="<ul><li class=\"calendarViewLeft\"><a class=\"calendarViewPrev\" title=\""+this.lang.prevMonth+"\" id=\""+this.divId+"_prevMonth\" href=\""+_19f+"\"> </a></li>";
-_1a0+="<li class=\"calendarViewLeft\"><a class=\"calendarAdvanced\" title=\""+this.lang.advanced+"\" id=\""+this.divId+"_viewAdvanced\" href=\""+_19f+"\"> </a></li>";
-_1a0+="<li class=\"calendarViewRight\"><a class=\"calendarViewNext\" title=\""+this.lang.nextMonth+"\" id=\""+this.divId+"_nextMonth\" href=\""+_19f+"\"> </a></li>";
-_1a0+="<li><p class=\"calendarViewMonth\">"+this.lang.longMonths[this.curMonth]+" "+this.curYear+"</p></li>";
-_1a0+="</ul>";
-_19e.innerHTML=_1a0;
+var _19f=_2.getElementById(this.divId+"_header");
+_19f.innerHTML="";
+var _1a0=_4.getInactiveLocation();
+var _1a1="<ul><li class=\"calendarViewLeft\"><a class=\"calendarViewPrev\" title=\""+this.lang.prevMonth+"\" id=\""+this.divId+"_prevMonth\" href=\""+_1a0+"\"> </a></li>";
+_1a1+="<li class=\"calendarViewLeft\"><a class=\"calendarAdvanced\" title=\""+this.lang.advanced+"\" id=\""+this.divId+"_viewAdvanced\" href=\""+_1a0+"\"> </a></li>";
+_1a1+="<li class=\"calendarViewRight\"><a class=\"calendarViewNext\" title=\""+this.lang.nextMonth+"\" id=\""+this.divId+"_nextMonth\" href=\""+_1a0+"\"> </a></li>";
+_1a1+="<li><p class=\"calendarViewMonth\">"+this.lang.longMonths[this.curMonth]+" "+this.curYear+"</p></li>";
+_1a1+="</ul>";
+_19f.innerHTML=_1a1;
 _4.event.attach(_2.getElementById(this.divId+"_prevMonth"),"onclick",_4.bind(this.goPrevMonth,this));
 _4.event.attach(_2.getElementById(this.divId+"_viewAdvanced"),"onclick",_4.bind(this.setAdvanced,this));
 _4.event.attach(_2.getElementById(this.divId+"_nextMonth"),"onclick",_4.bind(this.goNextMonth,this));
@@ -4512,16 +4518,16 @@ if(!this.inDOM){
 _4.error.report("Can't update calendar on non visible calendarView object.");
 return;
 }
-var _1a1=_2.getElementById(this.divId+"_footer");
-_1a1.innerHTML="";
-var _1a2="<p><a class=\"calendarGoHome\" title=\""+this.lang.homeDate+"\" href=\""+_4.getInactiveLocation()+"\" id=\""+this.divId+"_goHome\"> </a>";
+var _1a2=_2.getElementById(this.divId+"_footer");
+_1a2.innerHTML="";
+var _1a3="<p><a class=\"calendarGoHome\" title=\""+this.lang.homeDate+"\" href=\""+_4.getInactiveLocation()+"\" id=\""+this.divId+"_goHome\"> </a>";
 if(this.selectedDates.length){
 if(this.selectedDates.length==1){
 var text=this.lang.oneSelection;
 text+=this.lang.shortDays[this.selectedDates[0].getDay()];
 text+=" "+this.selectedDates[0].getDate()+" ";
 text+=this.lang.shortMonths[this.selectedDates[0].getMonth()];
-_1a2+=text;
+_1a3+=text;
 }else{
 var text=this.lang.multipleSelection;
 for(var n=0;n<this.selectedDates.length;n++){
@@ -4532,12 +4538,12 @@ text+=this.lang.shortDays[this.selectedDates[n].getDay()];
 text+=" "+this.selectedDates[n].getDate()+" ";
 text+=this.lang.shortMonths[this.selectedDates[n].getMonth()];
 }
-_1a2+=text;
+_1a3+=text;
 }
 }else{
-_1a2+=this.lang.noSelection+"</p>";
+_1a3+=this.lang.noSelection+"</p>";
 }
-_1a1.innerHTML=_1a2;
+_1a2.innerHTML=_1a3;
 _4.event.attach(_2.getElementById(this.divId+"_goHome"),"onclick",_4.bind(this.goHomeDate,this));
 };
 _4.CalendarView.prototype.setAdvanced=function(e){
@@ -4546,13 +4552,13 @@ e=_1.event;
 }
 _2.getElementById(this.divId+"_body").style.display="none";
 _2.getElementById(this.divId+"_advanced").style.display="block";
-var _1a3=new Date();
+var _1a4=new Date();
 if(this.selectedDates.length){
-_1a3=this.selectedDates[0];
+_1a4=this.selectedDates[0];
 }
-_2.getElementById(this.divId+"DaySelector").value=_1a3.getDate();
-_2.getElementById(this.divId+"MonthSelector").selectedIndex=_1a3.getMonth();
-_2.getElementById(this.divId+"YearSelector").value=_1a3.getFullYear();
+_2.getElementById(this.divId+"DaySelector").value=_1a4.getDate();
+_2.getElementById(this.divId+"MonthSelector").selectedIndex=_1a4.getMonth();
+_2.getElementById(this.divId+"YearSelector").value=_1a4.getFullYear();
 this.advanced=true;
 _4.event.cancel(e);
 return false;
@@ -4566,38 +4572,38 @@ _4.CalendarView.prototype.selectAdvanced=function(e){
 if(!e){
 e=_1.event;
 }
-var _1a4=_2.getElementById(this.divId+"DaySelector").value;
-var _1a5=_2.getElementById(this.divId+"MonthSelector").value;
-var _1a6=_2.getElementById(this.divId+"YearSelector").value;
-if(isNaN(Number(_1a4))){
+var _1a5=_2.getElementById(this.divId+"DaySelector").value;
+var _1a6=_2.getElementById(this.divId+"MonthSelector").value;
+var _1a7=_2.getElementById(this.divId+"YearSelector").value;
+if(isNaN(Number(_1a5))){
 alert(this.lang.error1);
 _4.event.cancel(e,true);
 return false;
 }
-if(isNaN(Number(_1a6))){
+if(isNaN(Number(_1a7))){
 alert(this.lang.error2);
 _4.event.cancel(e,true);
 return false;
 }
-var _1a7=new Date(_1a6,_1a5,_1a4);
-if(_1a7.getMonth()!=_1a5){
+var _1a8=new Date(_1a7,_1a6,_1a5);
+if(_1a8.getMonth()!=_1a6){
 alert(this.lang.error1);
 _4.event.cancel(e,true);
 return false;
 }
-if(this.isDisabledDate(_1a7)){
+if(this.isDisabledDate(_1a8)){
 alert(this.lang.error3);
 _4.event.cancel(e,true);
 return false;
 }
-var _1a8={selecting:_1a7,selectedDates:this.selectedDates};
-_1a8=_4.event.fire(this,"onselect",_1a8);
-if(_1a8.returnValue==false){
+var _1a9={selecting:_1a8,selectedDates:this.selectedDates};
+_1a9=_4.event.fire(this,"onselect",_1a9);
+if(_1a9.returnValue==false){
 _4.event.cancel(e,true);
 return false;
 }
 this.selectedDates.length=0;
-this.selectedDates[0]=_1a7;
+this.selectedDates[0]=_1a8;
 this.goHomeDate(e);
 _4.event.cancel(e,true);
 return false;
@@ -4606,17 +4612,17 @@ _4.CalendarView.prototype.selectDate=function(e,date){
 if(!e){
 e=_1.event;
 }
-var _1a9=new Date(this.curYear,this.curMonth,date);
-var _1aa={selecting:_1a9,selectedDates:this.selectedDates};
-_1aa=_4.event.fire(this,"onselect",_1aa);
-if(_1aa.returnValue==false){
+var _1aa=new Date(this.curYear,this.curMonth,date);
+var _1ab={selecting:_1aa,selectedDates:this.selectedDates};
+_1ab=_4.event.fire(this,"onselect",_1ab);
+if(_1ab.returnValue==false){
 _4.event.cancel(e,true);
 return false;
 }
-if(!this.isDisabledDate(_1a9)){
+if(!this.isDisabledDate(_1aa)){
 if(!this.multiSelect){
 this.selectedDates.length=0;
-this.selectedDates[0]=_1a9;
+this.selectedDates[0]=_1aa;
 }else{
 _4.error.report("Error: multiselect function not implemented.");
 _4.event.cancel(e,true);
@@ -4664,8 +4670,8 @@ return true;
 }
 return false;
 };
-_4.CalendarView.prototype.isEqual=function(_1ab,_1ac){
-if(_1ab.getFullYear()==_1ac.getFullYear()&&_1ab.getMonth()==_1ac.getMonth()&&_1ab.getDate()==_1ac.getDate()){
+_4.CalendarView.prototype.isEqual=function(_1ac,_1ad){
+if(_1ac.getFullYear()==_1ad.getFullYear()&&_1ac.getMonth()==_1ad.getMonth()&&_1ac.getDate()==_1ad.getDate()){
 return true;
 }else{
 return false;
@@ -4701,25 +4707,25 @@ _4.CalendarView.prototype.goHomeDate=function(e){
 if(!e){
 e=_1.event;
 }
-var _1ad;
+var _1ae;
 if(this.selectedDates.length){
-_1ad=this.selectedDates[0];
+_1ae=this.selectedDates[0];
 }else{
-_1ad=new Date();
+_1ae=new Date();
 }
-this.curMonth=_1ad.getMonth();
-this.curYear=_1ad.getFullYear();
+this.curMonth=_1ae.getMonth();
+this.curYear=_1ae.getFullYear();
 this.updateDates();
 _4.event.cancel(e,true);
 return false;
 };
-_4.CalendarView.prototype.hook=function(_1ae){
+_4.CalendarView.prototype.hook=function(_1af){
 var elem=null;
-if(typeof (_1ae)=="string"){
-elem=_2.getElementById(_1ae);
+if(typeof (_1af)=="string"){
+elem=_2.getElementById(_1af);
 }else{
-if(_4.isHTMLElement(_1ae)){
-elem=_1ae;
+if(_4.isHTMLElement(_1af)){
+elem=_1af;
 }
 }
 if(elem){
@@ -4779,11 +4785,11 @@ _4.event.detach(_2,"onclick",this._hideHookedBind);
 };
 _4.CalendarView.prototype.assignToHooked=function(){
 var date=this.selectedDates[0];
-var _1af=this.hookedTo;
+var _1b0=this.hookedTo;
 if(this.lang.isFrenchDateFormat){
-_1af.value=date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
+_1b0.value=date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
 }else{
-_1af.value=(date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear();
+_1b0.value=(date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear();
 }
 this.Hide();
 if(this._hideHookedBind){
@@ -4791,18 +4797,18 @@ _4.event.detach(_2,"onclick",this._hideHookedBind);
 }
 };
 _4.CalendarView.prototype.getDateFromStr=function(str){
-var _1b0=str.split("/");
+var _1b1=str.split("/");
 var ret;
-if(!isNaN(Number(_1b0[0]))&&!isNaN(Number(_1b0[1]))&&!isNaN(Number(_1b0[2]))){
+if(!isNaN(Number(_1b1[0]))&&!isNaN(Number(_1b1[1]))&&!isNaN(Number(_1b1[2]))){
 if(this.lang.isFrenchDateFormat){
-if(_1b0[1]>0&&_1b0[1]<13&&_1b0[0]>0&&_1b0[0]<32&&_1b0[2]>0){
-ret=new Date(_1b0[2],_1b0[1]-1,_1b0[0],0,0,0);
+if(_1b1[1]>0&&_1b1[1]<13&&_1b1[0]>0&&_1b1[0]<32&&_1b1[2]>0){
+ret=new Date(_1b1[2],_1b1[1]-1,_1b1[0],0,0,0);
 }else{
 ret=new Date();
 }
 }else{
-if(_1b0[0]>0&&_1b0[0]<13&&_1b0[1]>0&&_1b0[1]<32&&_1b0[2]>0){
-ret=new Date(_1b0[2],_1b0[1]-1,_1b0[0],0,0,0);
+if(_1b1[0]>0&&_1b1[0]<13&&_1b1[1]>0&&_1b1[1]<32&&_1b1[2]>0){
+ret=new Date(_1b1[2],_1b1[1]-1,_1b1[0],0,0,0);
 }else{
 ret=new Date();
 }
@@ -4813,22 +4819,22 @@ ret=new Date();
 return ret;
 };
 _4.CalendarView.prototype.lang={shortDays:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],longDays:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],shortMonths:["Jan","Feb","Mar","Apr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec"],longMonths:["January","February","March","April","May","June","July","Agoust","September","October","November","December"],noSelection:"No date selected",oneSelection:"Date: ",multipleSelection:"Dates: ",prevMonth:"Previous Month",nextMonth:"Next Month",advanced:"Select month and year",homeDate:"Go to selection date or today",day:"Day:",month:"Month:",year:"Year:",accept:"Accept",cancel:"Cancel",error1:"The date field entered is invalid.",error2:"The year field entered is invalid.",error3:"The selected date is not available.",isFrenchDateFormat:false};
-var _1b1=function(_1b2,path,name){
-this.thumbnail=_1b2;
+var _1b2=function(_1b3,path,name){
+this.thumbnail=_1b3;
 this.path=path;
 this.name=name;
 };
 _4.GalleryView=function(opts){
-var _1b3={canHaveChildren:true,hasInvalidator:true,thumbWidth:154,thumbHeight:184,showNames:true,fixedThumbSize:true};
-_4.mixin(_1b3,opts);
-var cmp=_76.get(_1b3);
+var _1b4={canHaveChildren:true,hasInvalidator:true,thumbWidth:154,thumbHeight:184,showNames:true,fixedThumbSize:true};
+_4.mixin(_1b4,opts);
+var cmp=_76.get(_1b4);
 _4.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.GalleryView";
 this.selectedImage=-1;
-this.showNames=_1b3.showNames;
-this.fixedThumbSize=_1b3.fixedThumbSize;
-this.thumbWidth=_1b3.thumbWidth;
-this.thumbHeight=_1b3.thumbHeight;
+this.showNames=_1b4.showNames;
+this.fixedThumbSize=_1b4.fixedThumbSize;
+this.thumbWidth=_1b4.thumbWidth;
+this.thumbHeight=_1b4.thumbHeight;
 this.images=[];
 this.DOMAddedImplementation=function(){
 this.updateImages();
@@ -4852,28 +4858,28 @@ _4.className.add(this.cmpTarget,"galleryView");
 this.canHaveChildren=false;
 };
 _4.GalleryView.prototype.addImage=function(opts){
-var _1b4={thumbnail:null,path:null,name:null,insertIndex:this.images.length};
-_4.mixin(_1b4,opts);
-if(!_1b4.thumbnail){
+var _1b5={thumbnail:null,path:null,name:null,insertIndex:this.images.length};
+_4.mixin(_1b5,opts);
+if(!_1b5.thumbnail){
 _4.error.report("Missing thumbnail information for galleryView image");
 return;
 }
-if(_1b4.insertIndex==this.images.length){
-this.images.push(new _1b1(_1b4.thumbnail,_1b4.path,_1b4.name));
+if(_1b5.insertIndex==this.images.length){
+this.images.push(new _1b2(_1b5.thumbnail,_1b5.path,_1b5.name));
 }else{
-this.images.splice(_1b4.insertIndex,0,new _1b1(_1b4.thumbnail,_1b4.path,_1b4.name));
+this.images.splice(_1b5.insertIndex,0,new _1b2(_1b5.thumbnail,_1b5.path,_1b5.name));
 }
 if(this.inDOM){
 this.updateImages();
 }
 };
-_4.GalleryView.prototype.deleteImage=function(_1b5){
-if(typeof (_1b5)=="number"){
-this.images.splice(_1b5,1);
+_4.GalleryView.prototype.deleteImage=function(_1b6){
+if(typeof (_1b6)=="number"){
+this.images.splice(_1b6,1);
 }else{
-if(typeof (_1b5)=="object"){
+if(typeof (_1b6)=="object"){
 for(var n=0;n<this.images.length;n++){
-if(this.images[n]==_1b5){
+if(this.images[n]==_1b6){
 this.images.splice(n,1);
 break;
 }
@@ -4907,15 +4913,15 @@ this.target.removeChild(_2.getElementById(this.divId+"_message"));
 _4.className.remove(this.cmpTarget,"galleryViewMessage");
 }else{
 _4.className.add(this.cmpTarget,"galleryViewMessage");
-var _1b6;
+var _1b7;
 if(!_2.getElementById(this.divId+"_message")){
-_1b6=_2.createElement("p");
-_1b6.id=this.divId+"_message";
-this.target.appendChild(_1b6);
+_1b7=_2.createElement("p");
+_1b7.id=this.divId+"_message";
+this.target.appendChild(_1b7);
 }else{
-_1b6=_2.getElementById(this.divId+"_message");
+_1b7=_2.getElementById(this.divId+"_message");
 }
-_1b6.innerHTML=msg;
+_1b7.innerHTML=msg;
 }
 };
 _4.GalleryView.prototype.updateImages=function(){
@@ -4924,23 +4930,23 @@ _4.error.report("Can't update images on non visible galleryView object.");
 return;
 }
 this.cmpTarget.innerHTML="";
-var _1b7="";
+var _1b8="";
 for(var n=0;n<this.images.length;n++){
-_1b7+="<div id=\""+this.divId+"_envelop_"+n+"\" ";
+_1b8+="<div id=\""+this.divId+"_envelop_"+n+"\" ";
 if(this.fixedThumbSize){
-_1b7+="style=\"width: "+this.thumbWidth+"px; height: "+this.thumbHeight+"px; overflow: hidden;\"";
+_1b8+="style=\"width: "+this.thumbWidth+"px; height: "+this.thumbHeight+"px; overflow: hidden;\"";
 }
 if(this.selectedImage==n){
-_1b7+="class=\"gvSelectedImage\" ";
+_1b8+="class=\"gvSelectedImage\" ";
 }
-_1b7+=">";
-_1b7+="<img id=\""+this.divId+"_img_"+n+"\" src=\""+this.images[n].thumbnail+"\" />";
+_1b8+=">";
+_1b8+="<img id=\""+this.divId+"_img_"+n+"\" src=\""+this.images[n].thumbnail+"\" />";
 if(this.showNames&&this.images[n].name){
-_1b7+="<p>"+this.images[n].name+"</p>";
+_1b8+="<p>"+this.images[n].name+"</p>";
 }
-_1b7+="</div>";
+_1b8+="</div>";
 }
-this.cmpTarget.innerHTML=_1b7;
+this.cmpTarget.innerHTML=_1b8;
 for(var n=0;n<this.images.length;n++){
 _4.event.attach(_2.getElementById(this.divId+"_img_"+n),"onclick",_4.bindAsEventListener(this._selectImage,this,n));
 }
@@ -4948,19 +4954,19 @@ if(this.selectedImage>=this.images.length){
 this.selectedImage=-1;
 }
 };
-_4.GalleryView.prototype._selectImage=function(e,_1b8){
+_4.GalleryView.prototype._selectImage=function(e,_1b9){
 if(!e){
 e=_1.event;
 }
 e.selectedImage=this.selectedImage;
-e.selecting=_1b8;
+e.selecting=_1b9;
 e=_4.event.fire(this,"onselect",e);
 if(e.returnValue==false){
 _4.event.cancel(e,true);
 return false;
 }
 var imgs=this.cmpTarget.getElementsByTagName("img");
-if(_1b8!=-1){
+if(_1b9!=-1){
 if(this.selectedImage!=-1){
 for(var a=0;a<imgs.length;a++){
 if(imgs[a].parentNode.className=="gvSelectedImage"){
@@ -4969,11 +4975,11 @@ break;
 }
 }
 }
-if(this.selectedImage==_1b8){
+if(this.selectedImage==_1b9){
 this.selectedImage=-1;
 }else{
-this.selectedImage=_1b8;
-imgs[_1b8].parentNode.className="gvSelectedImage";
+this.selectedImage=_1b9;
+imgs[_1b9].parentNode.className="gvSelectedImage";
 }
 }
 _4.event.cancel(e);
@@ -4983,22 +4989,22 @@ if(_4.DataConnectors===_3){
 _4.DataConnectors={};
 }
 _4.DataConnectors.GalleryViewConnector=function(opts){
-var _1b9={galleryView:null,api:null,method:"POST",type:"json",parameters:""};
-_4.mixin(_1b9,opts);
-if(!_1b9.galleryView){
+var _1ba={galleryView:null,api:null,method:"POST",type:"json",parameters:""};
+_4.mixin(_1ba,opts);
+if(!_1ba.galleryView){
 _4.error.report("Must provide galleryView reference to galleryViewConnector object.");
 return;
 }
-if(typeof (_1b9.api)!="string"||_1b9.api==""){
+if(typeof (_1ba.api)!="string"||_1ba.api==""){
 _4.error.report("Invalid Api string.");
 return;
 }
-this.api=_1b9.api;
-this.galleryView=_1b9.galleryView;
-this.parameters=_1b9.parameters;
+this.api=_1ba.api;
+this.galleryView=_1ba.galleryView;
+this.parameters=_1ba.parameters;
 this.type="json";
-if(_1b9.type){
-switch(_1b9.type.toLowerCase()){
+if(_1ba.type){
+switch(_1ba.type.toLowerCase()){
 case ("xml"):
 this.type="xml";
 break;
@@ -5009,8 +5015,8 @@ break;
 }
 }
 this.method="POST";
-if(typeof (_1b9.method)=="string"){
-this.method=_1b9.method.toUpperCase()=="POST"?"POST":"GET";
+if(typeof (_1ba.method)=="string"){
+this.method=_1ba.method.toUpperCase()=="POST"?"POST":"GET";
 }
 _4.event.attach(this.galleryView,"onrefresh",_4.bind(this._onRefresh,this));
 this.httpRequest=new _4.httpRequest({ApiCall:this.api,method:this.method,Type:this.type,onError:_4.bind(this._onError,this),onLoad:_4.bind(this._onLoad,this)});
@@ -5025,39 +5031,39 @@ if(this.type=="xml"){
 var root=data.getElementsByTagName("root").item(0);
 this.galleryView.images.length=0;
 if(root.getAttribute("success")=="1"){
-var _1ba=root.getElementsByTagName("image");
-for(var n=0;n<_1ba.length;n++){
-var _1bb=_1ba.item(n).getElementsByTagName("thumbnail");
-var path=_1ba.item(n).getElementsByTagName("path");
-var name=_1ba.item(n).getElementsByTagName("name");
-var _1bc="";
+var _1bb=root.getElementsByTagName("image");
+for(var n=0;n<_1bb.length;n++){
+var _1bc=_1bb.item(n).getElementsByTagName("thumbnail");
+var path=_1bb.item(n).getElementsByTagName("path");
+var name=_1bb.item(n).getElementsByTagName("name");
 var _1bd="";
 var _1be="";
-if(_1bb.length){
-if(_1bb.item(0).firstChild){
-_1bc=_1bb.item(0).firstChild.data;
+var _1bf="";
+if(_1bc.length){
+if(_1bc.item(0).firstChild){
+_1bd=_1bc.item(0).firstChild.data;
 }
 }
 if(path.length){
 if(path.item(0).firstChild){
-_1bd=path.item(0).firstChild.data;
+_1be=path.item(0).firstChild.data;
 }
 }
 if(name.length){
 if(name.item(0).firstChild){
-_1be=name.item(0).firstChild.data;
+_1bf=name.item(0).firstChild.data;
 }
 }
-this.galleryView.images.push(new _1b1(_1bc,_1bd,_1be));
-var _1bf=_1ba.item(n).getElementsByTagName("param");
-if(_1bf.length){
-for(var a=0;a<_1bf.length;a++){
-var _1c0=_1bf.item(a).getAttribute("name");
-var _1c1="";
-if(_1bf.item(a).firstChild){
-_1c1=_1bf.item(a).firstChild.data;
+this.galleryView.images.push(new _1b2(_1bd,_1be,_1bf));
+var _1c0=_1bb.item(n).getElementsByTagName("param");
+if(_1c0.length){
+for(var a=0;a<_1c0.length;a++){
+var _1c1=_1c0.item(a).getAttribute("name");
+var _1c2="";
+if(_1c0.item(a).firstChild){
+_1c2=_1c0.item(a).firstChild.data;
 }
-this.galleryView.images[this.galleryView.images.length-1][_1c0]=_1c1;
+this.galleryView.images[this.galleryView.images.length-1][_1c1]=_1c2;
 }
 }
 }
@@ -5071,13 +5077,13 @@ this.galleryView.updateImages();
 this.galleryView.images.length=0;
 if(data.success){
 for(var n=0;n<data.images.length;n++){
-var _1bc=data.images[n].thumbnail;
-var _1bd=data.images[n].path;
-var _1be=data.images[n].name;
-this.galleryView.images.push(new _1b1(_1bc,_1bd,_1be));
-for(var _1c2 in data.images[n]){
-if(_1c2!="thumbnail"&&_1c2!="path"&&_1c2!="name"){
-this.galleryView.images[this.galleryView.images.length-1][_1c2]=data.images[n][_1c2];
+var _1bd=data.images[n].thumbnail;
+var _1be=data.images[n].path;
+var _1bf=data.images[n].name;
+this.galleryView.images.push(new _1b2(_1bd,_1be,_1bf));
+for(var _1c3 in data.images[n]){
+if(_1c3!="thumbnail"&&_1c3!="path"&&_1c3!="name"){
+this.galleryView.images[this.galleryView.images.length-1][_1c3]=data.images[n][_1c3];
 }
 }
 }
@@ -5088,14 +5094,14 @@ if(this.galleryView.inDOM){
 this.galleryView.updateImages();
 }
 }
-},_onError:function(_1c3){
+},_onError:function(_1c4){
 this.galleryView.setLoading(false);
-this.galleryView.setMessage("Error: Unable to load galleryView object (HTTP status: "+_1c3+")");
+this.galleryView.setMessage("Error: Unable to load galleryView object (HTTP status: "+_1c4+")");
 }};
 _4.Toolbar=function(opts){
-var _1c4={canHaveChildren:true,hasInvalidator:true};
-_4.mixin(_1c4,opts);
-var cmp=_76.get(_1c4);
+var _1c5={canHaveChildren:true,hasInvalidator:true};
+_4.mixin(_1c5,opts);
+var cmp=_76.get(_1c5);
 _4.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.Toolbar";
 _4.event.init(this);
@@ -5133,50 +5139,50 @@ this.resizeImplementation=function(){
 if(this._showingExtraButtons){
 this.hideDropDown();
 }
-var _1c5=this.cmpTarget.offsetWidth;
-var _1c6=_1c5;
-var _1c7=parseInt(_4.className.getComputedProperty(this._moreSpan,"margin-left"));
-var _1c8=parseInt(_4.className.getComputedProperty(this._moreSpan,"margin-right"));
-_1c5-=(this._moreSpan.offsetWidth+_1c7+_1c8);
-var _1c9=0;
-var _1ca=false;
+var _1c6=this.cmpTarget.offsetWidth;
+var _1c7=_1c6;
+var _1c8=parseInt(_4.className.getComputedProperty(this._moreSpan,"margin-left"));
+var _1c9=parseInt(_4.className.getComputedProperty(this._moreSpan,"margin-right"));
+_1c6-=(this._moreSpan.offsetWidth+_1c8+_1c9);
+var _1ca=0;
+var _1cb=false;
 for(var n=0;n<this.cmpTarget.childNodes.length;n++){
-var _1cb=this.cmpTarget.childNodes[n];
-var _1cc=parseInt(_4.className.getComputedProperty(_1cb,"margin-left"));
-var _1cd=parseInt(_4.className.getComputedProperty(_1cb,"margin-right"));
-if(isNaN(_1cc)){
-_1cc=0;
-}
+var _1cc=this.cmpTarget.childNodes[n];
+var _1cd=parseInt(_4.className.getComputedProperty(_1cc,"margin-left"));
+var _1ce=parseInt(_4.className.getComputedProperty(_1cc,"margin-right"));
 if(isNaN(_1cd)){
 _1cd=0;
 }
-_1c9+=_1cb.offsetWidth+_1cc+_1cd;
-if(n==this.cmpTarget.childNodes.length-1){
-_1c5=_1c6;
+if(isNaN(_1ce)){
+_1ce=0;
 }
-if(_1c9>=_1c5){
+_1ca+=_1cc.offsetWidth+_1cd+_1ce;
+if(n==this.cmpTarget.childNodes.length-1){
+_1c6=_1c7;
+}
+if(_1ca>=_1c6){
 if(!this._showingMore){
 this.showMore();
 }
-if(!_1ca){
+if(!_1cb){
 this._extraBtns=n;
-_1ca=true;
+_1cb=true;
 }
-_4.className.remove(_1cb,"jsToolbarLast");
-_1cb.style.visibility="hidden";
+_4.className.remove(_1cc,"jsToolbarLast");
+_1cc.style.visibility="hidden";
 if(n>0){
 _4.className.add(this.buttons[n-1].target,"jsToolbarLast");
 }
 }else{
 if(n<this.buttons.length-1){
-_4.className.remove(_1cb,"jsToolbarLast");
+_4.className.remove(_1cc,"jsToolbarLast");
 }else{
-_4.className.add(_1cb,"jsToolbarLast");
+_4.className.add(_1cc,"jsToolbarLast");
 }
-_1cb.style.visibility="visible";
+_1cc.style.visibility="visible";
 }
 }
-if(_1c9<_1c5){
+if(_1ca<_1c6){
 if(this._showingMore){
 this.hideMore();
 }
@@ -5202,13 +5208,13 @@ this._extraButtons.className="jsComponent jsContextMenu jsToolbarExtraPanel jsTo
 _4.body().appendChild(this._extraButtons);
 };
 _4.Toolbar.prototype.addButton=function(opts,ndx){
-var _1ce={label:"",id:this.getNextBtnId(),className:"",onclick:null,onContentAdded:null,target:null};
-_4.mixin(_1ce,opts);
-_1ce.target=_2.createElement("span");
-_1ce.target.id=this.divId+"_btn_"+_1ce.id;
-var _1cf="";
-if(typeof (_1ce.onContentAdded)!="function"){
-_1cf="<a"+(_1ce.className?" class=\""+_1ce.className+"\" ":"")+" href=\""+_4.getInactiveLocation()+"\">"+_1ce.label+"</a>";
+var _1cf={label:"",id:this.getNextBtnId(),className:"",onclick:null,onContentAdded:null,target:null};
+_4.mixin(_1cf,opts);
+_1cf.target=_2.createElement("span");
+_1cf.target.id=this.divId+"_btn_"+_1cf.id;
+var _1d0="";
+if(typeof (_1cf.onContentAdded)!="function"){
+_1d0="<a"+(_1cf.className?" class=\""+_1cf.className+"\" ":"")+" href=\""+_4.getInactiveLocation()+"\">"+_1cf.label+"</a>";
 }
 if(ndx===_3){
 ndx=this.buttons.length;
@@ -5221,24 +5227,24 @@ if(ndx==0){
 if(this.buttons.length){
 _4.className.remove(this.buttons[0].target,"jsToolbarFirst");
 }
-_1ce.target.className="jsToolbarFirst";
+_1cf.target.className="jsToolbarFirst";
 }
 if(ndx==this.buttons.length){
 if(this.buttons.length){
 _4.className.remove(this.buttons[this.buttons.length-1].target,"jsToolbarLast");
 }
-_4.className.add(_1ce.target,"jsToolbarLast");
+_4.className.add(_1cf.target,"jsToolbarLast");
 }
 if(ndx==this.buttons.length){
-this.buttons.push(_1ce);
-this.cmpTarget.appendChild(_1ce.target);
+this.buttons.push(_1cf);
+this.cmpTarget.appendChild(_1cf.target);
 }else{
 if(ndx==0){
-this.buttons.splice(ndx,0,_1ce);
+this.buttons.splice(ndx,0,_1cf);
 }
-this.cmpTarget.insertBefore(_1ce.target,this.cmpTarget.childNodes[ndx]);
+this.cmpTarget.insertBefore(_1cf.target,this.cmpTarget.childNodes[ndx]);
 }
-_1ce.target.innerHTML=_1cf;
+_1cf.target.innerHTML=_1d0;
 if(this.inDOM){
 this.addClickEvent(this.buttons[ndx]);
 this.resize();
@@ -5256,35 +5262,35 @@ this._registeredEvents.push(_4.event.attach(btn.target.firstChild,"onclick",btn.
 }
 };
 _4.Toolbar.prototype.getNextBtnId=function(){
-var _1d0=true;
-while(_1d0){
-_1d0=false;
-var _1d1=this.nextBtnId++;
+var _1d1=true;
+while(_1d1){
+_1d1=false;
+var _1d2=this.nextBtnId++;
 for(var n=0;n<this.buttons.length;n++){
-if(this.buttons[n].id==_1d1){
-_1d0=true;
+if(this.buttons[n].id==_1d2){
+_1d1=true;
 break;
 }
 }
 }
-return _1d1;
+return _1d2;
 };
-_4.Toolbar.prototype.removeButton=function(_1d2){
+_4.Toolbar.prototype.removeButton=function(_1d3){
 var ndx=null;
-if(typeof (_1d2)=="number"){
+if(typeof (_1d3)=="number"){
 ndx=ref;
 }else{
-if(typeof (_1d2)=="string"){
+if(typeof (_1d3)=="string"){
 for(var n=0;n<this.buttons.length;n++){
-if(this.buttons[n].id==_1d2){
+if(this.buttons[n].id==_1d3){
 ndx=n;
 break;
 }
 }
 }else{
-if(typeof (_1d2)=="object"){
+if(typeof (_1d3)=="object"){
 for(var n=0;n<this.buttons.length;n++){
-if(this.buttons[n]===_1d2){
+if(this.buttons[n]===_1d3){
 ndx=n;
 break;
 }
@@ -5406,110 +5412,110 @@ String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=functio
 return this.valueOf();
 };
 }
-var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,_1d3=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,_1d4,meta={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r","\"":"\\\"","\\":"\\\\"},rep;
-function _1d5(_1d6){
-_1d3.lastIndex=0;
-return _1d3.test(_1d6)?"\""+_1d6.replace(_1d3,function(a){
+var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,_1d4=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,_1d5,meta={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r","\"":"\\\"","\\":"\\\\"},rep;
+function _1d6(_1d7){
+_1d4.lastIndex=0;
+return _1d4.test(_1d7)?"\""+_1d7.replace(_1d4,function(a){
 var c=meta[a];
 return typeof c==="string"?c:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4);
-})+"\"":"\""+_1d6+"\"";
+})+"\"":"\""+_1d7+"\"";
 };
-function str(key,_1d7){
-var i,k,v,_1d8,mind=gap,_1d9,_1da=_1d7[key];
-if(_1da&&typeof _1da==="object"&&typeof _1da.toJSON==="function"){
-_1da=_1da.toJSON(key);
+function str(key,_1d8){
+var i,k,v,_1d9,mind=gap,_1da,_1db=_1d8[key];
+if(_1db&&typeof _1db==="object"&&typeof _1db.toJSON==="function"){
+_1db=_1db.toJSON(key);
 }
 if(typeof rep==="function"){
-_1da=rep.call(_1d7,key,_1da);
+_1db=rep.call(_1d8,key,_1db);
 }
-switch(typeof _1da){
+switch(typeof _1db){
 case "string":
-return _1d5(_1da);
+return _1d6(_1db);
 case "number":
-return isFinite(_1da)?String(_1da):"null";
+return isFinite(_1db)?String(_1db):"null";
 case "boolean":
 case "null":
-return String(_1da);
+return String(_1db);
 case "object":
-if(!_1da){
+if(!_1db){
 return "null";
 }
-gap+=_1d4;
-_1d9=[];
-if(Object.prototype.toString.apply(_1da)==="[object Array]"){
-_1d8=_1da.length;
-for(i=0;i<_1d8;i+=1){
-_1d9[i]=str(i,_1da)||"null";
+gap+=_1d5;
+_1da=[];
+if(Object.prototype.toString.apply(_1db)==="[object Array]"){
+_1d9=_1db.length;
+for(i=0;i<_1d9;i+=1){
+_1da[i]=str(i,_1db)||"null";
 }
-v=_1d9.length===0?"[]":gap?"[\n"+gap+_1d9.join(",\n"+gap)+"\n"+mind+"]":"["+_1d9.join(",")+"]";
+v=_1da.length===0?"[]":gap?"[\n"+gap+_1da.join(",\n"+gap)+"\n"+mind+"]":"["+_1da.join(",")+"]";
 gap=mind;
 return v;
 }
 if(rep&&typeof rep==="object"){
-_1d8=rep.length;
-for(i=0;i<_1d8;i+=1){
+_1d9=rep.length;
+for(i=0;i<_1d9;i+=1){
 k=rep[i];
 if(typeof k==="string"){
-v=str(k,_1da);
+v=str(k,_1db);
 if(v){
-_1d9.push(_1d5(k)+(gap?": ":":")+v);
+_1da.push(_1d6(k)+(gap?": ":":")+v);
 }
 }
 }
 }else{
-for(k in _1da){
-if(Object.hasOwnProperty.call(_1da,k)){
-v=str(k,_1da);
+for(k in _1db){
+if(Object.hasOwnProperty.call(_1db,k)){
+v=str(k,_1db);
 if(v){
-_1d9.push(_1d5(k)+(gap?": ":":")+v);
+_1da.push(_1d6(k)+(gap?": ":":")+v);
 }
 }
 }
 }
-v=_1d9.length===0?"{}":gap?"{\n"+gap+_1d9.join(",\n"+gap)+"\n"+mind+"}":"{"+_1d9.join(",")+"}";
+v=_1da.length===0?"{}":gap?"{\n"+gap+_1da.join(",\n"+gap)+"\n"+mind+"}":"{"+_1da.join(",")+"}";
 gap=mind;
 return v;
 }
 };
 if(typeof JSON.stringify!=="function"){
-JSON.stringify=function(_1db,_1dc,_1dd){
+JSON.stringify=function(_1dc,_1dd,_1de){
 var i;
 gap="";
-_1d4="";
-if(typeof _1dd==="number"){
-for(i=0;i<_1dd;i+=1){
-_1d4+=" ";
+_1d5="";
+if(typeof _1de==="number"){
+for(i=0;i<_1de;i+=1){
+_1d5+=" ";
 }
 }else{
-if(typeof _1dd==="string"){
-_1d4=_1dd;
+if(typeof _1de==="string"){
+_1d5=_1de;
 }
 }
-rep=_1dc;
-if(_1dc&&typeof _1dc!=="function"&&(typeof _1dc!=="object"||typeof _1dc.length!=="number")){
+rep=_1dd;
+if(_1dd&&typeof _1dd!=="function"&&(typeof _1dd!=="object"||typeof _1dd.length!=="number")){
 throw new Error("JSON.stringify");
 }
-return str("",{"":_1db});
+return str("",{"":_1dc});
 };
 }
 if(typeof JSON.parse!=="function"){
-JSON.parse=function(text,_1de){
+JSON.parse=function(text,_1df){
 var j;
-function walk(_1df,key){
-var k,v,_1e0=_1df[key];
-if(_1e0&&typeof _1e0==="object"){
-for(k in _1e0){
-if(Object.hasOwnProperty.call(_1e0,k)){
-v=walk(_1e0,k);
+function walk(_1e0,key){
+var k,v,_1e1=_1e0[key];
+if(_1e1&&typeof _1e1==="object"){
+for(k in _1e1){
+if(Object.hasOwnProperty.call(_1e1,k)){
+v=walk(_1e1,k);
 if(v!==undefined){
-_1e0[k]=v;
+_1e1[k]=v;
 }else{
-delete _1e0[k];
+delete _1e1[k];
 }
 }
 }
 }
-return _1de.call(_1df,key,_1e0);
+return _1df.call(_1e0,key,_1e1);
 };
 cx.lastIndex=0;
 if(cx.test(text)){
@@ -5519,7 +5525,7 @@ return "\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4);
 }
 if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){
 j=eval("("+text+")");
-return typeof _1de==="function"?walk({"":j},""):j;
+return typeof _1df==="function"?walk({"":j},""):j;
 }
 throw new SyntaxError("JSON.parse");
 };

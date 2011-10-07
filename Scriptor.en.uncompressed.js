@@ -5280,15 +5280,24 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function() {
 		// perform calculations only if columns are in DOM
 		if (lis.length == (this.columns.length*2) + base)
 		{
-			// lets get the difference between a column's width and its actual width in DOM
-			var colBox = Scriptor.element.getInnerBox(lis[base]);
-			var widthDiff = colBox.left+colBox.right+lis[base+1].offsetWidth;
+			// number of visible columns
 			var visibleLength = 0;
+			var widthDiffCalculated = false;
+			var colBox = null;
+			var widthDiff = 0;
 			
 			for (var n=0; n < this.columns.length; n++)
 			{
 				if (this.columns[n].show)
 				{
+					if (!widthDiffCalculated)
+					{
+						// lets get the difference between a column's width and its actual width in DOM
+						colBox = Scriptor.element.getInnerBox(lis[base+n]);
+						widthDiff = colBox.left+colBox.right+lis[base+n+1].offsetWidth;
+						widthDiffCalculated = true;
+					}
+					
 					visibleLength++;
 					if (this.columns[n].percentWidth !== null)
 					{
@@ -5302,7 +5311,7 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function() {
 			}
 			
 			// do this only if there is room for columns to shrink!
-			if (headersWidth >= ((MIN_COLUMN_WIDTH + widthDiff) * visibleLength))
+			if (visibleLength && headersWidth >= ((MIN_COLUMN_WIDTH + widthDiff) * visibleLength))
 				while (totalWidth > headersWidth)
 				{
 					// columns are too wide
