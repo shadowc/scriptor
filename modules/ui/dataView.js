@@ -8,6 +8,9 @@
 * This object is part of the scriptor framework
 */
 
+// minimum allowed column width
+var MIN_COLUMN_WIDTH = 20;
+
 /*
 * dataColumn:
 * Object for each of the dataView columns. Add to dataView via the addColumn method
@@ -48,7 +51,29 @@ var dataColumn = function(opts) {
 	this.Name = localOpts.Name;
 	this.Type = (typeof(dataTypes[localOpts.Type]) != 'undefined') ? localOpts.Type : 'alpha';
 	this.show = localOpts.show;
-	this.Width = isNaN(Number(localOpts.Width)) ? 80 : Number(localOpts.Width);
+	this.percentWidth = null;
+	if (!isNaN(Number(localOpts.Width)))
+	{
+		this.Width = Number(localOpts.Width);
+	}
+	else
+	{
+		if (typeof(localOpts.Width) == "string")
+		{
+			if (localOpts.Width.length > 2 && localOpts.Width.substr(localOpts.Width.length-2) == "px" &&
+				!isNaN(parseInt(localOpts.Width)))
+			{
+				this.Width = parseInt(localOpts.Width);
+			}
+			else if (localOpts.Width.length > 1 && localOpts.Width.substr(localOpts.Width.length-1) == "%" &&
+				!isNaN(parseInt(localOpts.Width)))
+			{
+				this.Width = MIN_COLUMN_WIDTH;
+				this.percentWidth = parseInt(localOpts.Width);
+			}
+		}
+	}
+	this.origWidth = this.Width;
 		
 	this.Format = localOpts.Format;
 	this.displayName = localOpts.displayName ? localOpts.displayName : localOpts.Name;
@@ -247,7 +272,7 @@ Scriptor.DataView = function(opts) {
 			
 			this._cached.outer_body.style.height = (this.height - offsetHeight) + 'px';
 			
-			// TODO: resize columns?
+			this._adjustColumnsWidth();
 		}
 	};
 	
@@ -610,6 +635,9 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 			this._addCellToUI(this.rows[n].id, column.Name, ndx);
 		}
 	}
+	
+	// restrict columns width if they're too wide for dataView to handle
+	this._adjustColumnsWidth();
 };
 
 /*
@@ -634,6 +662,8 @@ Scriptor.DataView.prototype._removeColumnFromUI = function(ndx) {
 			this._removeCellFromUI(this.rows[n].id, ndx);
 		}
 	}
+	
+	this._adjustColumnsWidth();
 };
 
 /*
@@ -1809,50 +1839,123 @@ Scriptor.DataView.prototype.toggleColumn = function(colNdx) {
 	}
 	
 	this.optionsMenu.checkItem(colNdx+2, this.columns[colNdx].show);
+	
+	this._adjustColumnsWidth();
 };
 
 /*
-* dataView.forceWidth()
-*  Use it to force the data viewport to a specific width. Will set the object width to
-*  the specified value and proportionally adjust the columns if needed to fill the horizontal area
-*  Use dataView.Show function instead, to force a width change
+* dataView._adjustColumnsWidth()
+*  Internal use only
 */
-Scriptor.DataView.prototype.forceWidth = function(w) {
-	// TODO: Deprecated?
-	/*if (isNaN(Number(w)))
-		return;
-	
-	var minWidth = this.__calculateMinWidth();
-	if (w < minWidth)
-		w = minWidth;
-	
-	this.Width = w;
-	var totalWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth + this.__calculateTotalWidth();
-	
-	while (totalWidth > this.Width) {
-		for (var n=0; n < this.columns.length; n++) {
-			if (this.columns[n].show) {
-				totalWidth -= 1;
-				this.columns[n].Width -= 1;
+Scriptor.DataView.prototype._adjustColumnsWidth = function() {
+	if (this.columns.length && this._cached)
+	{
+		var sizesChanged = false;
+		var headersWidth = this._getHeadersWidth();
+		
+		// reset columns to original width desired by the user
+		for (var n=0; n < this.columns.length; n++)
+		{
+			if (this.columns[n].Width != this.columns[n].origWidth)
+			{
+				sizesChanged = true;
+				this.columns[n].Width = this.columns[n].origWidth;
 			}
 		}
-	}*/
+		
+		var totalWidth = 0; // this is the total width of columns minus percentage width columns
+		var base = this.multiselect ? 2 : 0;
+		var lis = this._cached.headerUl.getElementsByTagName('li');
+		
+		// perform calculations only if columns are in DOM
+		if (lis.length == (this.columns.length*2) + base)
+		{
+			// lets get the difference between a column's width and its actual width in DOM
+			var colBox = Scriptor.element.getInnerBox(lis[base]);
+			var widthDiff = colBox.left+colBox.right+lis[base+1].offsetWidth;
+			var visibleLength = 0;
+			
+			for (var n=0; n < this.columns.length; n++)
+			{
+				if (this.columns[n].show)
+				{
+					visibleLength++;
+					if (this.columns[n].percentWidth !== null)
+					{
+						totalWidth += MIN_COLUMN_WIDTH + widthDiff;
+					}
+					else
+					{
+						totalWidth += this.columns[n].Width + widthDiff;
+					}
+				}
+			}
+			
+			// do this only if there is room for columns to shrink!
+			if (headersWidth >= ((MIN_COLUMN_WIDTH + widthDiff) * visibleLength))
+				while (totalWidth > headersWidth)
+				{
+					// columns are too wide
+					for (var n=0; n < this.columns.length; n++)
+					{
+						if (this.columns[n].show &&
+							this.columns[n].percentWidth === null &&
+							this.columns[n].Width > MIN_COLUMN_WIDTH)
+						{
+							sizesChanged = true;
+							this.columns[n].Width--;
+							totalWidth--;
+						}
+						
+						if (totalWidth == headersWidth)
+							break;
+					}
+				}
+			
+			// TODO: now use extra space to fill percentage columns
+			
+			// now adjust sizes in DOM
+			if (sizesChanged)
+			{
+				for (var n=0; n < this.columns.length; n++)
+				{
+					lis[base+(n*2)].style.width = this.columns[n].Width + 'px';
+				}
+				
+				var rows = this._cached.rows_body.getElementsByTagName('ul');
+				var rowsbase = this.multiselect ? 1 : 0;
+				for (var a=0; a < rows.length; a++)
+				{
+					var rLis = rows[a].getElementsByTagName('li');
+					
+					for (var n=0; n < this.columns.length; n++)
+					{
+						rLis[rowsbase+n].style.width = this.columns[n].Width + 'px';
+					}
+				}
+			}
+		}
+	}
 };
 
 /*
 * Internal use only
 */
-Scriptor.DataView.prototype.__calculateMinWidth = function()
+Scriptor.DataView.prototype._getHeadersWidth = function()
 {
-	// TODO: Deprecated?
-	/*var minWidth = this.style.objectHorizontalPadding + this.style.optionsIconWidth;
-	for (var n=0; n < this.columns.length; n++) {
-		minWidth += this.style.cellHorizontalPadding + this.style.sepWidth;
-	}
-	if (this.multiselect)
-		minWidth += this.style.multiSelectColumnWidth + this.style.cellHorizontalPadding + this.style.sepWidth;
+	var optionsMenuElem = document.getElementById(this.divId+'_optionsMenuBtn');
+	var menuBox = Scriptor.element.getOuterBox(optionsMenuElem);
+	var columnsBox = Scriptor.element.getInnerBox(this._cached.headerUl);
 	
-	return minWidth;*/
+	var multiselectWidth = 0;
+	
+	if (this.multiselect)
+	{
+		var lis = this._cached.headerUl.getElementsByTagName('li');
+		multiselectWidth = lis[0].offsetWidth + lis[1].offsetWidth;
+	}
+	
+	return this._cached.headerUl.offsetWidth - columnsBox.left - multiselectWidth - (optionsMenuElem.offsetWidth + menuBox.left + menuBox.right);
 };
 
 /*

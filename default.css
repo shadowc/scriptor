@@ -220,7 +220,6 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   margin:0;
   padding:0;
   overflow:hidden;
-  width:100%;
 }
 .dataViewToolbar ul li {
   float:left;
@@ -365,7 +364,8 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   width:20px;
   height:20px;
   top:0px;
-  right:2px;
+  right:0px;
+  margin-right:2px;
   background:transparent url(images/table-header-sep.png) no-repeat top left;
 }
 .dataViewHeaderMenu a {
