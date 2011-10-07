@@ -4035,9 +4035,11 @@ e=_1.event;
 var node=this.searchNode(_16f);
 if(node.expanded){
 node.expanded=false;
+_2.getElementById(this.divId+"_"+_16f+"_expandable").className="treeViewExpandableNode";
 _2.getElementById(this.divId+"_"+_16f+"_branch").style.display="none";
 }else{
 node.expanded=true;
+_2.getElementById(this.divId+"_"+_16f+"_expandable").className="treeViewCollapsableNode";
 _2.getElementById(this.divId+"_"+_16f+"_branch").style.display="block";
 }
 _4.event.cancel(e);

@@ -6063,11 +6063,13 @@ Scriptor.TreeView.prototype._expandNode = function(e, nodeId) {
 	if (node.expanded)
 	{
 		node.expanded = false;
+		document.getElementById(this.divId+'_'+nodeId+'_expandable').className = "treeViewExpandableNode";
 		document.getElementById(this.divId+'_'+nodeId+'_branch').style.display = 'none';
 	}
 	else
 	{
 		node.expanded = true;
+		document.getElementById(this.divId+'_'+nodeId+'_expandable').className = "treeViewCollapsableNode";
 		document.getElementById(this.divId+'_'+nodeId+'_branch').style.display = 'block';
 	}
 	
