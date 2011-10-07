@@ -4733,10 +4733,7 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 		
 	if (clear)	// remove all rows, we're starting over!
 	{
-		this.selectedRow = -1;
-		this.selectedRows = [];
-		this._cached.rows_body.innerHTML = '';
-		this.rows = [];
+		this._cached.rows_body.innerHTML = '';	
 	}
 	
 	// remove all rows that were deleted in memory

@@ -656,7 +656,8 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 .jsToolbar span {
   color:#333333;
   font-size:12px;
-  padding:0 6px 0 4px;
+  float:left;
+  padding:4px 6px 4px 4px;
   background:url(images/table-header-sep.png) no-repeat center right;
 }
 .jsToolbar span.jsToolbarLast { background-image:none; }

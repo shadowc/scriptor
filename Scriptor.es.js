@@ -3231,10 +3231,7 @@ if(!this._oldScrollTop){
 this._oldScrollTop=this._cached.outer_body.scrollTop;
 }
 if(_134){
-this.selectedRow=-1;
-this.selectedRows=[];
 this._cached.rows_body.innerHTML="";
-this.rows=[];
 }
 var _137=this._cached.rows_body.getElementsByTagName("ul");
 for(var n=0;n<_137.length;n++){
