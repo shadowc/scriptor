@@ -3616,7 +3616,12 @@ if(!_153){
 _154=_4.element.getInnerBox(lis[base+n]);
 _155=_154.left+_154.right+lis[base+n+1].offsetWidth;
 _153=true;
+break;
 }
+}
+}
+for(var n=0;n<this.columns.length;n++){
+if(this.columns[n].show){
 _152++;
 if(this.columns[n].percentWidth!==null){
 _151+=_ea+_155;

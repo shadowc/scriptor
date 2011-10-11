@@ -5296,8 +5296,15 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function() {
 						colBox = Scriptor.element.getInnerBox(lis[base+n]);
 						widthDiff = colBox.left+colBox.right+lis[base+n+1].offsetWidth;
 						widthDiffCalculated = true;
+						break;
 					}
-					
+				}
+			}
+			
+			for (var n=0; n < this.columns.length; n++)
+			{
+				if (this.columns[n].show)
+				{
 					visibleLength++;
 					if (this.columns[n].percentWidth !== null)
 					{
