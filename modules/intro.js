@@ -1,4 +1,4 @@
-/* Scriptor 3.0b
+/* Scriptor 2.1b2
   
   A tiny Javascript component library plus a few usefull functions
   

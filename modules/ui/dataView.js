@@ -268,7 +268,11 @@ Scriptor.DataView = function(opts) {
 				offsetHeight += this._cached.footer.offsetHeight + outerBox.top + outerBox.bottom;
 			}
 			
-			this._cached.outer_body.style.height = (this.height - offsetHeight) + 'px';
+			var bodyHeight = this.height !== null ? this.height - offsetHeight : 0;
+			if (bodyHeight < 0)
+				bodyHeight = 0;
+			
+			this._cached.outer_body.style.height = bodyHeight + 'px';
 			
 			this._adjustColumnsWidth();
 		}
@@ -1871,8 +1875,8 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 		var base = this.multiselect ? 2 : 0;
 		var lis = this._cached.headerUl.getElementsByTagName('li');
 		
-		// perform calculations only if columns are in DOM
-		if (lis.length == (this.columns.length*2) + base)
+		// perform calculations only if columns are in DOM and we have headersWidth
+		if (lis.length == (this.columns.length*2) + base && headersWidth > 0)
 		{
 			// number of visible columns
 			var visibleLength = 0;

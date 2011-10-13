@@ -4,7 +4,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 1,
-		instance : "beta 1",
+		instance : "beta 2",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -301,7 +301,7 @@ var Scriptor = {
 		getComputedProperty : function(el, property) {
 			if (window.getComputedStyle)	// DOM Implementation
 			{
-				var st = window.getComputedStyle(el);
+				var st = window.getComputedStyle(el, null);
 				if (st)
 				{
 					return st.getPropertyValue(property);
@@ -388,16 +388,16 @@ var Scriptor = {
 	// function to identify if obj is an html element
 	isHtmlElement : function(o) {
 		// some common comarisons that would break the further testing
-		var body = document.getElementsByTagName('body')[0];
 		var head = document.getElementsByTagName('head')[0];
-		if (o === body || o === head)
+		if (o === Scriptor.body() || o === head)
 			return true;
 		if (o == document || o === window)
 			return false;
 		if (!o)
 			return false;
 		
-		if (typeof(o.cloneNode) != 'function')
+		// cloneNode is an object in IE8
+		if (typeof(o.cloneNode) != 'function' && typeof(o.cloneNode) != 'object')
 			return false;	// if we can't clone it, it's not a node
 		
 		// normal testing for other nodes

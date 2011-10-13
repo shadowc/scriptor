@@ -665,7 +665,8 @@ var Component = {
 						if (ref.parent)
 							ref.parent.removeChild(ref);
 						
-						if (ref.target.parentNode)
+						// nodeType IE8 nasty bug!
+						if (ref.target.parentNode && ref.target.parentNode.nodeType !== 11)
 						{
 							ref.onDOMRemoved();
 							ref.target.parentNode.removeChild(ref.target);

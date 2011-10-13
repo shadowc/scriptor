@@ -1,4 +1,4 @@
-/* Scriptor 3.0b
+/* Scriptor 2.1b1
   
   A tiny Javascript component library plus a few usefull functions
   
@@ -316,7 +316,7 @@ var Scriptor = {
 		getComputedProperty : function(el, property) {
 			if (window.getComputedStyle)	// DOM Implementation
 			{
-				var st = window.getComputedStyle(el);
+				var st = window.getComputedStyle(el, null);
 				if (st)
 				{
 					return st.getPropertyValue(property);
@@ -403,16 +403,16 @@ var Scriptor = {
 	// function to identify if obj is an html element
 	isHtmlElement : function(o) {
 		// some common comarisons that would break the further testing
-		var body = document.getElementsByTagName('body')[0];
 		var head = document.getElementsByTagName('head')[0];
-		if (o === body || o === head)
+		if (o === Scriptor.body() || o === head)
 			return true;
 		if (o == document || o === window)
 			return false;
 		if (!o)
 			return false;
 		
-		if (typeof(o.cloneNode) != 'function')
+		// cloneNode is an object in IE8
+		if (typeof(o.cloneNode) != 'function' && typeof(o.cloneNode) != 'object')
 			return false;	// if we can't clone it, it's not a node
 		
 		// normal testing for other nodes
@@ -1917,7 +1917,8 @@ var Component = {
 						if (ref.parent)
 							ref.parent.removeChild(ref);
 						
-						if (ref.target.parentNode)
+						// nodeType IE8 nasty bug!
+						if (ref.target.parentNode && ref.target.parentNode.nodeType !== 11)
 						{
 							ref.onDOMRemoved();
 							ref.target.parentNode.removeChild(ref.target);
@@ -2471,7 +2472,7 @@ Scriptor.ContextMenu = function(opts)
 			}
 			else {
 				if (typeof(e.clientX) == 'number') {
-					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					x = (e.clientX + document.documentElement.scrollLeft);
 					y = (e.clientY + document.documentElement.scrollTop);
 				}
 				else {
@@ -3678,7 +3679,11 @@ Scriptor.DataView = function(opts) {
 				offsetHeight += this._cached.footer.offsetHeight + outerBox.top + outerBox.bottom;
 			}
 			
-			this._cached.outer_body.style.height = (this.height - offsetHeight) + 'px';
+			var bodyHeight = this.height !== null ? this.height - offsetHeight : 0;
+			if (bodyHeight < 0)
+				bodyHeight = 0;
+			
+			this._cached.outer_body.style.height = bodyHeight + 'px';
 			
 			this._adjustColumnsWidth();
 		}
@@ -5281,8 +5286,8 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 		var base = this.multiselect ? 2 : 0;
 		var lis = this._cached.headerUl.getElementsByTagName('li');
 		
-		// perform calculations only if columns are in DOM
-		if (lis.length == (this.columns.length*2) + base)
+		// perform calculations only if columns are in DOM and we have headersWidth
+		if (lis.length == (this.columns.length*2) + base && headersWidth > 0)
 		{
 			// number of visible columns
 			var visibleLength = 0;
@@ -6686,7 +6691,11 @@ Scriptor.CalendarView.prototype.updateDates = function() {
 	document.getElementById(this.divId+'_advanced').style.display = 'none';
 	this.advanced = false;
 	
-	targetTable.innerHTML = '';		
+	while (targetTable.firstChild)
+		targetTable.removeChild(targetTable.firstChild);
+		
+	// IE8 doesn't like this
+	//targetTable.innerHTML = '';		
 	
 	// using DOM functions here to overcome possible IE bugs when rendering large tables through innerHTML
 	// create table header

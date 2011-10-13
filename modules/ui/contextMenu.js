@@ -92,7 +92,7 @@ Scriptor.ContextMenu = function(opts)
 			}
 			else {
 				if (typeof(e.clientX) == 'number') {
-					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					x = (e.clientX + document.documentElement.scrollLeft);
 					y = (e.clientY + document.documentElement.scrollTop);
 				}
 				else {

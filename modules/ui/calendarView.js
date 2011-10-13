@@ -179,7 +179,11 @@ Scriptor.CalendarView.prototype.updateDates = function() {
 	document.getElementById(this.divId+'_advanced').style.display = 'none';
 	this.advanced = false;
 	
-	targetTable.innerHTML = '';		
+	while (targetTable.firstChild)
+		targetTable.removeChild(targetTable.firstChild);
+		
+	// IE8 doesn't like this
+	//targetTable.innerHTML = '';		
 	
 	// using DOM functions here to overcome possible IE bugs when rendering large tables through innerHTML
 	// create table header
