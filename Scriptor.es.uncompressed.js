@@ -18,8 +18,8 @@ window.Scriptor = (function(window, document, undefined) {
 var Scriptor = {
 	version : {
 		major : 2,
-		minor : 0,
-		instance : "beta 8",
+		minor : 1,
+		instance : "beta 1",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -3531,8 +3531,6 @@ var dataRow = function(columnCollection, initialData) {
 * to the constructor for that object. Such constructor must accept a string 
 * as its argument which is comming from the XML or JSON service to the object.
 *
-* TODO: You can define your custom dataTypes here and they will be automatically
-* implemented to the object as long as they have toString method and are comparable.
 */
 var dataTypes = {
 	'num' : Number,	// backwards compatibility
@@ -4006,6 +4004,9 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 	li2 = document.createElement('li');
 	li2.id = this.divId + '_sep_' + ndx;
 	liClassName = "dataViewFieldSep";
+	if (column.percentWidth !== null)
+		liClassName += " dataViewFieldSepNoResize";
+		
 	if (!column.show)
 		liClassName += " dataViewColumnHidden";
 	li2.className = liClassName;
@@ -5257,9 +5258,12 @@ Scriptor.DataView.prototype.toggleColumn = function(colNdx) {
 * dataView._adjustColumnsWidth()
 *  Internal use only
 */
-Scriptor.DataView.prototype._adjustColumnsWidth = function() {
+Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 	if (this.columns.length && this._cached)
 	{
+		if (forceUIChange === undefined)
+			forceUIChange = false;
+			
 		var sizesChanged = false;
 		var headersWidth = this._getHeadersWidth();
 		
@@ -5293,8 +5297,8 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function() {
 					if (!widthDiffCalculated)
 					{
 						// lets get the difference between a column's width and its actual width in DOM
-						colBox = Scriptor.element.getInnerBox(lis[base+n]);
-						widthDiff = colBox.left+colBox.right+lis[base+n+1].offsetWidth;
+						colBox = Scriptor.element.getInnerBox(lis[base+(n*2)]);
+						widthDiff = colBox.left+colBox.right+lis[base+(n*2)+1].offsetWidth;
 						widthDiffCalculated = true;
 						break;
 					}
@@ -5337,11 +5341,29 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function() {
 							break;
 					}
 				}
+			else
+				for (var n=0; n < this.columns.length; n++)
+				{
+					if (this.columns[n].show)
+					{
+						sizesChanged = true;
+						this.columns[n].Width = MIN_COLUMN_WIDTH;
+					}
+				}
 			
-			// TODO: now use extra space to fill percentage columns
+			// Now use extra space to fill percentage columns
+			var remainingWidth = headersWidth - totalWidth;
+			if (remainingWidth)
+				for (var n=0; n < this.columns.length; n++)
+				{
+					if (this.columns[n].percentWidth !== null)
+					{
+						this.columns[n].Width += remainingWidth * (this.columns[n].percentWidth / 100);
+					}
+				}
 			
 			// now adjust sizes in DOM
-			if (sizesChanged)
+			if (sizesChanged || forceUIChange)
 			{
 				for (var n=0; n < this.columns.length; n++)
 				{
@@ -5485,29 +5507,36 @@ Scriptor.DataView.prototype.__getColumnSqlName = function(colName) {
 Scriptor.DataView.prototype.activateResizing = function(e, colNdx) {
 	if (!e) e = window.event;
 	
-	// calculate the resized column
-	this.resColumnId = colNdx;
+	if (this.columns[colNdx].percentWidth === null)
+	{
+		// calculate the resized column
+		this.resColumnId = colNdx;
+		
+		// set x cache value for resizing
+		var x;
 	
-	// set x cache value for resizing
-	var x;
-
-	if (typeof(e.pageX) == 'number') {
-		x = e.pageX;
-	}
-	else {
-		if (typeof(e.clientX) == 'number') {
-			x = (e.clientX + document.documentElement.scrollLeft);
+		if (typeof(e.pageX) == 'number')
+		{
+			x = e.pageX;
 		}
-		else {
-			x = 0;
+		else
+		{
+			if (typeof(e.clientX) == 'number')
+			{
+				x = (e.clientX + document.documentElement.scrollLeft);
+			}
+			else
+			{	
+				x = 0;
+			}
 		}
+		
+		this.resizingFrom = this.columns[colNdx].Width;
+		this.resizingXCache = x;
+		
+		Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bindAsEventListener(this.doResizing, this));
+		Scriptor.event.attach(document, 'mouseup', this._mouseUpBind = Scriptor.bindAsEventListener(this.deactivateResizing, this));
 	}
-	
-	this.resizingFrom = this.columns[colNdx].Width;
-	this.resizingXCache = x;
-	
-	Scriptor.event.attach(document, 'mousemove', this._mouseMoveBind = Scriptor.bindAsEventListener(this.doResizing, this));
-	Scriptor.event.attach(document, 'mouseup', this._mouseUpBind = Scriptor.bindAsEventListener(this.deactivateResizing, this));
 	
 	Scriptor.event.cancel(e);
 	return false;
@@ -5540,96 +5569,49 @@ Scriptor.DataView.prototype.doResizing = function(e) {
 	// get delta x
 	var x;
 
-	if (typeof(e.pageX) == 'number') {
+	if (typeof(e.pageX) == 'number')
+	{
 		x = e.pageX;
 	}
-	else {
-		if (typeof(e.clientX) == 'number') {
+	else
+	{
+		if (typeof(e.clientX) == 'number')
+		{
 			x = (e.clientX + document.documentElement.scrollLeft);
 		}
-		else {
+		else
+		{
 			x = 0;
 		}
 	}
 	
 	var deltaX = Math.abs(this.resizingXCache - x);
 	var growing = (this.resizingXCache < x) ? true : false;
-	
 	this.resizingXCache = x;
+	
 	var colNdx = this.resColumnId;
-	
-	// get the next column in case resizing is needed
-	var nextActualColNdx = colNdx;
-	for (n = colNdx+1; n < this.columns.length; n++) {
-		if (this.columns[n].show) {
-			nextActualColNdx = n;
-			break;
-		}
-	}
-	
-	// getting a smaller column is easier (?)
 	var changedSize = false;
-	var changedNextColSize = false;
 	
-	if (!growing) {
-		// see if col can be shorter than it is
-		if ((this.columns[colNdx].Width - deltaX) > 0) {
-			this.columns[colNdx].Width -= deltaX;
-			changedSize = true;
-		}
-	}
-	else {
-		// see if there is space for col to grow
-		var totalWidth = this.__calculateTotalWidth();
-		
-		if ((totalWidth + deltaX) < this._cached.headerUl.offsetWidth) {	// there is space to grow
-			this.columns[colNdx].Width += deltaX;
-			changedSize = true;
-		}
-		else {	// no space
-			if (nextActualColNdx != colNdx) {	// not the last col shrink next col
-				if ((this.columns[nextActualColNdx].Width - deltaX) > 0) {
-					this.columns[colNdx].Width += deltaX;
-					this.columns[nextActualColNdx].Width -= deltaX;
-					changedSize = true;
-					changedNextColSize = true;
-				}
-			}
-		}
-	}
-	
-	// update dataView HTML header
-	var htmlHeader = this._cached.headerUl;
-	if (htmlHeader) {
-		var cols = htmlHeader.getElementsByTagName('li');
-		var offset = (this.multiselect ? 2 : 0);
-		
-		var ndx = offset + (colNdx*2);
-		
-		cols[ndx].style.width = this.columns[colNdx].Width + 'px'; 
-		
-		if (changedNextColSize) {
-			ndx += 2;
-			
-			cols[ndx].style.width = this.columns[nextActualColNdx].Width + 'px';
-		}
-	}
-		
-	// update row cells
-	var rows = this._cached.rows_body.getElementsByTagName('ul');
-	
-	for (var n=0; n < rows.length; n++)
+	if (!growing)
 	{
-		var cols = rows[n].getElementsByTagName('li');
-		var offset = (this.multiselect ? 1 : 0);
-		
-		var colWidth = this.columns[colNdx].Width;
-		
-		cols[offset+(colNdx)].style.width = colWidth + 'px';
-		
-		if (changedNextColSize) 
-			cols[offset+(colNdx)+1].style.width = this.columns[nextActualColNdx].Width + 'px';
+		// see if col can be shorter than allowed
+		if ((this.columns[colNdx].Width - deltaX) > MIN_COLUMN_WIDTH)
+		{
+			this.columns[colNdx].Width -= deltaX;
+			this.columns[colNdx].origWidth = this.columns[colNdx].Width;
+			changedSize = true;
+		}
 	}
+	else
+	{
+		// see if there is space for col to grow
+		this.columns[colNdx].Width += deltaX;
+		this.columns[colNdx].origWidth = this.columns[colNdx].Width;
+		changedSize = true;
+	}
+	
+	if (changedSize)
+		this._adjustColumnsWidth(true);
 };
 
 /*

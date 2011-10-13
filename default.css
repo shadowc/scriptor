@@ -235,6 +235,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   background:transparent url(images/table-header-sep.png) no-repeat top center;
 }
 .dataViewToolbar ul li.dataViewFieldSep { cursor:col-resize; }
+.dataViewToolbar ul li.dataViewFieldSep.dataViewFieldSepNoResize { cursor:default; }
 .dataViewPaginationHeader {
   background:transparent;
   border-bottom:1px solid #b0b0b0;
