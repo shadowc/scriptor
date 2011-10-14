@@ -1,4 +1,4 @@
-/* Scriptor 2.1b1
+/* Scriptor 2.1b3
   
   A tiny Javascript component library plus a few usefull functions
   
@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 1,
-		instance : "beta 1",
+		instance : "beta 3",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -2486,7 +2486,9 @@ Scriptor.ContextMenu = function(opts)
 			x = x-this.width;
 		if (y + this.height > Scriptor.body().offsetHeight)
 			y = y-this.height;
-			
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		
 		this.y = y;
 		this.x = x;
 		this.updateSize();
@@ -3685,7 +3687,7 @@ Scriptor.DataView = function(opts) {
 			
 			this._cached.outer_body.style.height = bodyHeight + 'px';
 			
-			this._adjustColumnsWidth();
+			this._adjustColumnsWidth(true);
 		}
 	};
 	
@@ -8219,7 +8221,7 @@ Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 			}
 			else {
 				if (typeof(e.clientX) == 'number') {
-					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					x = (e.clientX + document.documentElement.scrollLeft);
 					y = (e.clientY + document.documentElement.scrollTop);
 				}
 				else {
@@ -8234,6 +8236,9 @@ Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 		if (y + this._extraButtons.offsetHeight > Scriptor.body().offsetHeight)
 			y = y-this._extraButtons.offsetHeight;
 			
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		
 		this._extraButtons.style.top = y + 'px';
 		this._extraButtons.style.left = x + 'px';
 		

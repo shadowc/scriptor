@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2,_3){
-var _4={version:{major:2,minor:1,instance:"beta 1",toString:function(){
+var _4={version:{major:2,minor:1,instance:"beta 3",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_5,_6){
 if(arguments.length>2){
@@ -1779,6 +1779,12 @@ x=x-this.width;
 if(y+this.height>_4.body().offsetHeight){
 y=y-this.height;
 }
+if(x<0){
+x=0;
+}
+if(y<0){
+y=0;
+}
 this.y=y;
 this.x=x;
 this.updateSize();
@@ -2531,7 +2537,7 @@ if(_fc<0){
 _fc=0;
 }
 this._cached.outer_body.style.height=_fc+"px";
-this._adjustColumnsWidth();
+this._adjustColumnsWidth(true);
 }
 };
 this.DOMAddedImplementation=function(){
@@ -5348,7 +5354,7 @@ x=e.pageX;
 y=e.pageY;
 }else{
 if(typeof (e.clientX)=="number"){
-x=(e.clientX+_2.documentElement.scrollLeft)-this.Width;
+x=(e.clientX+_2.documentElement.scrollLeft);
 y=(e.clientY+_2.documentElement.scrollTop);
 }else{
 x=0;
@@ -5361,6 +5367,12 @@ x=x-this._extraButtons.offsetWidth;
 }
 if(y+this._extraButtons.offsetHeight>_4.body().offsetHeight){
 y=y-this._extraButtons.offsetHeight;
+}
+if(x<0){
+x=0;
+}
+if(y<0){
+y=0;
 }
 this._extraButtons.style.top=y+"px";
 this._extraButtons.style.left=x+"px";

@@ -404,7 +404,7 @@ Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 			}
 			else {
 				if (typeof(e.clientX) == 'number') {
-					x = (e.clientX + document.documentElement.scrollLeft) - this.Width;
+					x = (e.clientX + document.documentElement.scrollLeft);
 					y = (e.clientY + document.documentElement.scrollTop);
 				}
 				else {
@@ -419,6 +419,9 @@ Scriptor.Toolbar.prototype.onDropdownClick = function(e) {
 		if (y + this._extraButtons.offsetHeight > Scriptor.body().offsetHeight)
 			y = y-this._extraButtons.offsetHeight;
 			
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		
 		this._extraButtons.style.top = y + 'px';
 		this._extraButtons.style.left = x + 'px';
 		

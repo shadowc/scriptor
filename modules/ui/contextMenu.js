@@ -106,7 +106,9 @@ Scriptor.ContextMenu = function(opts)
 			x = x-this.width;
 		if (y + this.height > Scriptor.body().offsetHeight)
 			y = y-this.height;
-			
+		if (x < 0) x = 0;
+		if (y < 0) y = 0;
+		
 		this.y = y;
 		this.x = x;
 		this.updateSize();

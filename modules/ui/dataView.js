@@ -274,7 +274,7 @@ Scriptor.DataView = function(opts) {
 			
 			this._cached.outer_body.style.height = bodyHeight + 'px';
 			
-			this._adjustColumnsWidth();
+			this._adjustColumnsWidth(true);
 		}
 	};
 	
