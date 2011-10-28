@@ -343,6 +343,8 @@ var Component = {
 				if (this.target) {
 					this.__updatePosition();
 					
+					this.resizeImplementation.apply(this, arguments);
+					
 					if (this.components.length)
 					{
 						// get the component's padding if any
@@ -554,8 +556,6 @@ var Component = {
 							}
 						}
 					}
-					
-					this.resizeImplementation.apply(this, arguments);
 					
 					Scriptor.event.fire(this, 'onresize');
 						

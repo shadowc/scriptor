@@ -154,19 +154,41 @@
 			
 			LeftTopComponent.addButton({
 				id : "dummyBtn",
-				label : "Some Button",
+				label : "Test Effect",
 				onclick : function() {
-					alert("Some button clicked");
+					var startP = LeftTopComponent.height;
+					var endP = (LeftTopComponent.height == 30) ? 60 : 30;
+					
+					var effect = Scriptor.effects.scheduleEffect({
+						elem : LeftTopComponent,
+						property : ['height'],
+						start : [startP],
+						end : [endP],
+						unit : [0],
+						step : Scriptor.bind(LeftMainComponent.resize, LeftMainComponent),
+						callback : Scriptor.bind(LeftMainComponent.resize, LeftMainComponent),
+						duration: 200
+					});
+					
+					Scriptor.effects.startAll();
 				}
 			});
 			
 			LeftTopComponent.addButton({
 				id : "dummyBtn2",
-				label : "Some Other Button",
+				label : "Show Dialog",
 				onclick : function() {
-					alert("Some other button clicked");
+					TestComponent.invalidate();
+					MyDialog.show();
 				}
 			});
+			
+			MyDialog = new Scriptor.Dialog({
+				width : 300,
+				height : 400
+			});
+			
+			MyDialog.setContent('<input type="button" onclick="javascript:MyDialog.hide();TestComponent.revalidate()" value="Close Me" style="display: block; margin: 60px auto;" />');
 			
 			LeftComponent = new Scriptor.TabContainer({
 				region : "center",

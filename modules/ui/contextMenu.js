@@ -10,14 +10,11 @@
 *
 * A menu that can be shown on rightClick (or clicking on an icon or link)
 *
-* div: The div id or element in which to render the menu
-*
 * options are:
 * 	items : an array of item objects in the form { label : "label", onclick : callback }
 * 	  will form the menu system, if label == "sep", it will render a separator
 * 	  (see addItem for details)
 *
-* 	 width: the width of the context menu
 */
 Scriptor.ContextMenu = function(opts)
 {

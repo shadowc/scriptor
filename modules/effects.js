@@ -4,18 +4,18 @@ var _effectGenerateId = function() {
 	return 'q' + (_effectsLastId++);
 };
 
+var requestAnimFrame = (window.requestAnimationFrame    || 
+	window.webkitRequestAnimationFrame || 
+	window.mozRequestAnimationFrame    || 
+	window.oRequestAnimationFrame      || 
+	window.msRequestAnimationFrame     || 
+	null);
+
 Scriptor.effects = {
 	effectsQueue : {},
 	lastId : 0,
 	intervalId : null,
 	started : false,
-	
-	requestAnimFrame : (/*window.requestAnimationFrame    || 
-					window.webkitRequestAnimationFrame || 
-					window.mozRequestAnimationFrame    || 
-					window.oRequestAnimationFrame      || 
-					window.msRequestAnimationFrame     || */
-					null),
 	
 	scheduleEffect : function(opts) {
 		var queueId = _effectGenerateId();
@@ -33,10 +33,10 @@ Scriptor.effects = {
 			
 		if (!this.started)
 		{
-			if (this.requestAnimFrame)
-				this.requestAnimFrame(Scriptor.bind(this.loop, this));
+			if (requestAnimFrame)
+				requestAnimFrame(this.loop);
 			else
-				this.intervalId = setInterval(Scriptor.bind(this.loop, this), 10);
+				this.intervalId = setInterval(this.loop, 10);
 				
 			this.started = true;
 		}
@@ -80,15 +80,33 @@ Scriptor.effects = {
 	
 	cancel : function(fId) {
 		var effectInstance = this.effectsQueue[fId];
-		for (var n=0; n < effectInstance.property.length; n++) 
-			effectInstance.elem.style[effectInstance.property[n]] = effectInstance.end[n] + effectInstance.unit[n];
 		
-		if (typeof(effectInstance.callback) == 'function') {
-			setTimeout(jsOs.bind(this.callBackAndDestroy, this, fId), 10);
-		}
-		else {
-			delete this.effectsQueue[fId];
-			this.checkInterval();
+		if (effectInstance)
+		{
+			effectInstance.started = false;
+			for (var n=0; n < effectInstance.property.length; n++)
+			{
+				var prop = effectInstance.property[n];
+				if (prop.substr(0,6) == 'style.')
+				{
+					effectInstance.elem.style[prop.substr(6)] = effectInstance.end[n] + effectInstance.unit[n];
+				}
+				else
+				{
+					if (typeof(effectInstance.setAttribute) == 'function')
+						effectInstance.elem.setAttribute(prop, effectInstance.end[n] + effectInstance.unit[n]);
+					else
+						effectInstance.elem[prop] = effectInstance.end[n] + effectInstance.unit[n];							
+				}
+			}
+			
+			if (typeof(effectInstance.callback) == 'function') {
+				this.callBackAndDestroy(fId);
+			}
+			else {
+				delete this.effectsQueue[fId];
+				this.checkInterval();
+			}
 		}
 	},
 	
@@ -100,33 +118,53 @@ Scriptor.effects = {
 		}
 	},
 	
-	loop : function(curTime) {
-		if (typeof(curTime) == 'undefined')
-			curTime = new Date().getTime();
+	loop : function() {
+		var curTime = new Date().getTime();
 		
-		for (var fId in this.effectsQueue) {
-			var effectInstance = this.effectsQueue[fId];
+		for (var fId in Scriptor.effects.effectsQueue)
+		{
+			var effectInstance = Scriptor.effects.effectsQueue[fId];
 			
-			if (effectInstance.started) {
+			if (effectInstance.started)
+			{
 				if (effectInstance.startTime == null)
 					effectInstance.startTime = curTime;
-					
-				if ((effectInstance.startTime + effectInstance.duration) <= curTime) {
-					this.cancel(fId);
+				
+				if ((effectInstance.startTime + effectInstance.duration) <= curTime)
+				{
+					Scriptor.effects.cancel(fId);
 				}
-				else {
+				else
+				{
 					var curPercentile = (curTime - effectInstance.startTime) / effectInstance.duration;
 					
-					for (var n=0; n < effectInstance.property.length; n++) {
+					for (var n=0; n < effectInstance.property.length; n++)
+					{
 						var curPos = effectInstance.start[n] + ((effectInstance.end[n] - effectInstance.start[n]) * curPercentile);
 						
-						effectInstance.elem.style[effectInstance.property[n]] = curPos + effectInstance.unit[n];
+						var prop = effectInstance.property[n];
+						if (prop.substr(0,6) == 'style.')
+						{
+							effectInstance.elem.style[prop.substr(6)] = curPos + effectInstance.unit[n];
+						}
+						else
+						{
+							if (typeof(effectInstance.setAttribute) == 'function')
+								effectInstance.elem.setAttribute(prop, curPos + effectInstance.unit[n]);
+							else
+								effectInstance.elem[prop] = curPos + effectInstance.unit[n];							
+						}
+					}
+					
+					if (typeof(effectInstance.step) == 'function')
+					{
+						effectInstance.step(curTime);
 					}
 				}
 			}
 		}
 		
-		this.checkGoOn();
+		Scriptor.effects.checkGoOn();
 	},
 	
 	checkInterval : function() {
@@ -158,8 +196,8 @@ Scriptor.effects = {
 			
 			if (loops)
 			{
-				if (this.requestAnimFrame)
-					this.requestAnimFrame(Scriptor.bind(this.loop, this));
+				if (requestAnimFrame)
+					requestAnimFrame(this.loop);
 			}
 		}
 	},
@@ -173,6 +211,7 @@ Scriptor.effects = {
 			unit : [],
 			duration : 500,
 			callback : null,
+			step : null,
 			//system
 			started : false,
 			startTime : null

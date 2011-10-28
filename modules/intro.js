@@ -11,5 +11,5 @@
   http://github.com/shadowc/scriptor
 */
 
-window.Scriptor = (function(window, document, undefined) {
+window.Scriptor = (function(document, undefined) {
 	

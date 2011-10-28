@@ -1,6 +1,6 @@
 
 	return Scriptor;
-})(window, document);
+})(document);
 
 // local support for JSON parsing
 // JSON implementation for unsupported browsers

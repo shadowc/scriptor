@@ -40,7 +40,6 @@ div.jsComponent.jsComponentChild {
 }
 div.jsComponentInvalidator {
   position:absolute;
-  z-index:1000;
   width:100%;
   height:100%;
   top:0;
@@ -701,3 +700,16 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 }
 .jsToolbarExtraPanel span a:hover { text-decoration:underline; }
 .jsToolbarExtraPanel.jsToolbarExtraPanelHidden { visibility:hidden; }
+.jsComponent.jsDialog {
+  background:#ffffff;
+  border:1px solid #aaaaaa;
+  position:absolute;
+  border-radius:4px;
+  -webkit-border-radius:4px;
+  -webkit-background-clip:padding-box;
+  -moz-border-radius:4px;
+  -webkit-box-shadow:1px 1px 5px #cccccc;
+  -moz-box-shadow:1px 1px 5px #cccccc;
+  box-shadow:1px 1px 5px #cccccc;
+}
+.jsComponent.jsDialog.jsComponentFocused { border:1px solid #888888; }
