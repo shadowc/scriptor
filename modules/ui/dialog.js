@@ -53,25 +53,6 @@ Scriptor.Dialog = function(opts)
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
 	
-	// create component
-	this.create();
-	Scriptor.className.add(this.target, "jsDialog");
-	Scriptor.body().appendChild(this.target);
-	
-	this._titlePanel = document.createElement('div');
-	this._titlePanel.id = this.divId + '_title';
-	this._titlePanel.className = 'jsDialogTitle';
-	
-	if (this.title)
-		this._titlePanel.innerHTML = this.title
-	else
-		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
-	this.target.insertBefore(this._titlePanel, this.cmpTarget);
-	
-	this.resize();
-	
-	this.onDOMAdded();
-	
 	// redefine component implementation
 	/*
 	* We need to redefine show / hide for dialogs in order to provide animations!
@@ -79,9 +60,9 @@ Scriptor.Dialog = function(opts)
 	this.resizeImplementation = function() {
 		var innerBox = Scriptor.element.getInnerBox(this.target);
 		
-		var titleHeight = parseInt(Scriptor.className.getComputedProperty(this._titlePanel, 'height'));
+		var titleHeight = this._titlePanel.offsetHeight;
 		
-		this.cmpTarget.style.height = (this.height - titleHeight - innerBox.top - innerBox.bottom) + 'px';
+		this.cmpTarget.style.height = (this.title ? ((this.height - titleHeight - innerBox.top - innerBox.bottom) + 'px') : "100%");
 	};
 	
 	this.showing = false;
@@ -188,4 +169,121 @@ Scriptor.Dialog = function(opts)
 		
 		Scriptor.event.fire(this, 'onhide');
 	};
+	
+	// create component
+	this.create();
+	Scriptor.className.add(this.target, "jsDialog");
+	Scriptor.body().appendChild(this.target);
+	
+	this._titlePanel = document.createElement('div');
+	this._titlePanel.id = this.divId + '_title';
+	this._titlePanel.className = 'jsDialogTitle';
+	
+	if (this.title)
+		this._titlePanel.innerHTML = '<span id="'+this.divId+'_titleText">'+this.title+'</span><span id="'+this.divId+'_closeHandle" class="jsDialogClose"></span>';
+	else
+		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
+	this.target.insertBefore(this._titlePanel, this.cmpTarget);
+	
+	if (!this.closable)
+	{
+		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	}
+	
+	this.resize();
+	this.onDOMAdded();
+	
+	// add drag events to title
+	Scriptor.event.attach(this._titlePanel, 'onmousedown', Scriptor.bindAsEventListener(this._startDragging, this));
+	this._dragMoveEvent = null;
+	this._dragDropEvent = null;
+	this._cacheX = 0;
+	this._cacheY = 0;
+	
+	// add close button event handle after we redefine hide
+	Scriptor.event.attach(document.getElementById(this.divId+'_closeHandle'), 'onclick', Scriptor.bind(this.hide, this));
+	
+	// TODO: Resizable!
+};
+
+Scriptor.Dialog.prototype._startDragging = function(e) {
+	if (!e)	e = window.event;
+	
+	this._dragMoveEvent = Scriptor.event.attach(document, 'onmousemove', Scriptor.bindAsEventListener(this._moveDrag, this));
+	this._dragDropEvent = Scriptor.event.attach(document, 'onmouseup', Scriptor.bindAsEventListener(this._stopDragging, this));
+	
+	// calculate x, y
+	var x = 0, y = 0;
+	
+	if (e)
+	{
+		if (typeof(e.pageX) == 'number') {
+			x = e.pageX;
+			y = e.pageY;
+		}
+		else {
+			if (typeof(e.clientX) == 'number') {
+				x = (e.clientX + document.documentElement.scrollLeft);
+				y = (e.clientY + document.documentElement.scrollTop);
+			}
+			else {
+				x = 0;
+				y = 0;
+			}
+		}
+	}
+	
+	this._cacheX = x;
+	this._cacheY = y;
+	
+	Scriptor.event.cancel(e, true);
+};
+
+Scriptor.Dialog.prototype._moveDrag = function(e) {
+	if (!e)	e = window.event;
+	
+	// calculate x, y
+	var x = 0, y = 0;
+	
+	if (e)
+	{
+		if (typeof(e.pageX) == 'number') {
+			x = e.pageX;
+			y = e.pageY;
+		}
+		else {
+			if (typeof(e.clientX) == 'number') {
+				x = (e.clientX + document.documentElement.scrollLeft);
+				y = (e.clientY + document.documentElement.scrollTop);
+			}
+			else {
+				x = 0;
+				y = 0;
+			}
+		}
+	}
+	
+	var deltaX = x - this._cacheX;
+	var deltaY = y - this._cacheY;
+	
+	this.x += deltaX;
+	this.y += deltaY;
+	this.__updatePosition();
+	
+	this._cacheX = x;
+	this._cacheY = y;
+	
+	Scriptor.event.cancel(e, true);
+};
+
+Scriptor.Dialog.prototype._stopDragging = function(e) {
+	if (!e)	e = window.event;
+	
+	Scriptor.event.detach(this._dragMoveEvent);
+	Scriptor.event.detach(this._dragDropEvent);
+	
+	this._dragMoveEvent = null;
+	this._dragDropEvent = null;
+	
+	Scriptor.event.cancel(e, true);
 };

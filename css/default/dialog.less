@@ -4,10 +4,48 @@
 	border: 1px solid @panelBorderColor;
 	position: absolute;
 	.borderRadius();
-	.boxShadow(1px; 1px; 5px; #CCC);
+	.boxShadow(1px; 1px; 5px; #777);
 	
 	&.jsComponentFocused {
 		border: 1px solid @panelBorderColorFocus;
+	}
+	
+	.jsDialogTitle {
+		@blue: #1D6E95;
+		@lightblue: lighten(@blue, 20%);
+		
+		padding: 4px 22px 4px 6px;
+		
+		color: #FFF;
+		text-shadow: -1px -1px 0 #333;
+		
+		background: @blue;
+		.insetShadow(1px;1px;3px;@lightblue);
+		border-bottom: 1px solid darken(@blue, 10%);
+		
+		cursor: pointer;
+		
+		&.jsDialogTitleHidden {
+			display: none;
+		}
+	}
+	
+	.jsDialogClose {
+		background: url("images/close-btn.png") no-repeat 0 0;
+		display: block;
+		height: 12px;
+		position: absolute;
+		right: 6px;
+		top: 8px;
+		width: 12px;
+		
+		&:hover {
+			background: url("images/close-btn.png") no-repeat 0 -12px;
+		}
+		
+		&.jsDialogCloseHidden {
+			display: none;
+		}
 	}
 }
 

@@ -708,8 +708,31 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
   -webkit-border-radius:4px;
   -webkit-background-clip:padding-box;
   -moz-border-radius:4px;
-  -webkit-box-shadow:1px 1px 5px #cccccc;
-  -moz-box-shadow:1px 1px 5px #cccccc;
-  box-shadow:1px 1px 5px #cccccc;
+  -webkit-box-shadow:1px 1px 5px #777777;
+  -moz-box-shadow:1px 1px 5px #777777;
+  box-shadow:1px 1px 5px #777777;
 }
 .jsComponent.jsDialog.jsComponentFocused { border:1px solid #888888; }
+.jsComponent.jsDialog .jsDialogTitle {
+  padding:4px 22px 4px 6px;
+  color:#ffffff;
+  text-shadow:-1px -1px 0 #333333;
+  background:#1d6e95;
+  -webkit-box-shadow:inset 1px 1px 3px #3ea7da;
+  -moz-box-shadow:inset 1px 1px 3px #3ea7da;
+  box-shadow:inset 1px 1px 3px #3ea7da;
+  border-bottom:1px solid #154e6a;
+  cursor:pointer;
+}
+.jsComponent.jsDialog .jsDialogTitle.jsDialogTitleHidden { display:none; }
+.jsComponent.jsDialog .jsDialogClose {
+  background:url("images/close-btn.png") no-repeat 0 0;
+  display:block;
+  height:12px;
+  position:absolute;
+  right:6px;
+  top:8px;
+  width:12px;
+}
+.jsComponent.jsDialog .jsDialogClose:hover { background:url("images/close-btn.png") no-repeat 0 -12px; }
+.jsComponent.jsDialog .jsDialogClose.jsDialogCloseHidden { display:none; }

@@ -185,10 +185,12 @@
 			
 			MyDialog = new Scriptor.Dialog({
 				width : 300,
-				height : 400
+				height : 100,
+				title: "Test Dialog"
 			});
 			
-			MyDialog.setContent('<input type="button" onclick="javascript:MyDialog.hide();TestComponent.revalidate()" value="Close Me" style="display: block; margin: 60px auto;" />');
+			MyDialog.setContent('<input type="button" onclick="javascript:MyDialog.hide();" value="Close Me" style="display: block; margin: 20px auto;" />');
+			Scriptor.event.attach(MyDialog, 'onhide', function() { TestComponent.revalidate(); });
 			
 			LeftComponent = new Scriptor.TabContainer({
 				region : "center",
