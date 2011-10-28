@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2){
-var _3={version:{major:2,minor:2,instance:"alpha 2",toString:function(){
+var _3={version:{major:2,minor:2,instance:"beta 1",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_4,_5){
 if(arguments.length>2){

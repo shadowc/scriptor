@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 2,
-		instance : "alpha 2",
+		instance : "beta 1",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
