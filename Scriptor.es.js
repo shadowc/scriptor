@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2){
-var _3={version:{major:2,minor:2,instance:"beta 1",toString:function(){
+var _3={version:{major:2,minor:2,instance:"beta 2",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_4,_5){
 if(arguments.length>2){
@@ -5552,7 +5552,7 @@ var cmp=_82.get(_1db);
 _3.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.Dialog";
 this.centerOnShow=_1db.centerOnShow?true:false;
-this.closable=_1db.centerOnShow?true:false;
+this.closable=_1db.closable?true:false;
 this.title=_1db.title;
 _3.event.init(this);
 _3.event.registerCustomEvent(this,"onbeforeshow");

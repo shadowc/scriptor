@@ -37,7 +37,7 @@ Scriptor.Dialog = function(opts)
 	this.CMP_SIGNATURE = "Scriptor.ui.Dialog";
 	
 	this.centerOnShow = localOpts.centerOnShow ? true : false;
-	this.closable = localOpts.centerOnShow ? true : false;
+	this.closable = localOpts.closable ? true : false;
 	this.title = localOpts.title;
 	
 	// initialize events!

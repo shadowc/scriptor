@@ -19,7 +19,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 2,
-		instance : "beta 1",
+		instance : "beta 2",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -8547,7 +8547,7 @@ Scriptor.Dialog = function(opts)
 	this.CMP_SIGNATURE = "Scriptor.ui.Dialog";
 	
 	this.centerOnShow = localOpts.centerOnShow ? true : false;
-	this.closable = localOpts.centerOnShow ? true : false;
+	this.closable = localOpts.closable ? true : false;
 	this.title = localOpts.title;
 	
 	// initialize events!
