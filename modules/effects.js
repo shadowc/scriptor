@@ -48,10 +48,10 @@ Scriptor.effects = {
 			
 		if (!this.started)
 		{
-			if (this.requestAnimFrame)
-				this.requestAnimFrame(Scriptor.bind(this.loop, this));
+			if (requestAnimFrame)
+				requestAnimFrame(this.loop);
 			else
-				this.intervalId = setInterval(Scriptor.bind(this.loop, this), 10);
+				this.intervalId = setInterval(this.loop, 10);
 				
 			this.started = true;
 		}

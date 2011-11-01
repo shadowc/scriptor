@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2){
-var _3={version:{major:2,minor:2,instance:"beta 2",toString:function(){
+var _3={version:{major:2,minor:2,instance:"beta 3",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_4,_5){
 if(arguments.length>2){
@@ -930,10 +930,10 @@ if(this.effectsQueue[fId]){
 this.effectsQueue[fId].started=true;
 }
 if(!this.started){
-if(this.requestAnimFrame){
-this.requestAnimFrame(_3.bind(this.loop,this));
+if(_76){
+_76(this.loop);
 }else{
-this.intervalId=setInterval(_3.bind(this.loop,this),10);
+this.intervalId=setInterval(this.loop,10);
 }
 this.started=true;
 }
