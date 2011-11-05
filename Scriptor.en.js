@@ -1,5 +1,5 @@
 window.Scriptor=(function(_1,_2){
-var _3={version:{major:2,minor:2,instance:"beta 3",toString:function(){
+var _3={version:{major:2,minor:2,instance:"beta 4",toString:function(){
 return this.major+"."+this.minor+" "+this.instance;
 }},bind:function(_4,_5){
 if(arguments.length>2){
@@ -2060,13 +2060,22 @@ _3.event.registerCustomEvent(this,"oncreate");
 _3.event.registerCustomEvent(this,"onresize");
 _3.event.registerCustomEvent(this,"onfocus");
 _3.event.registerCustomEvent(this,"onblur");
+var _cb="";
+if(_1.getElementById(this.divId)){
+var _cc=_1.getElementById(this.divId);
+_cb=_cc.innerHTML;
+_cc.innerHTML="";
+}
 this.create();
+if(_cb){
+this.setContent(_cb);
+}
 _3.className.add(this.target,"jsPanel");
 };
-_3.TabContainer=function(_cb){
-var _cc={canHaveChildren:true,hasInvalidator:true};
-_3.mixin(_cc,_cb);
-var cmp=_82.get(_cc);
+_3.TabContainer=function(_cd){
+var _ce={canHaveChildren:true,hasInvalidator:true};
+_3.mixin(_ce,_cd);
+var cmp=_82.get(_ce);
 _3.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.TabContainer";
 _3.event.init(this);
@@ -2085,47 +2094,47 @@ _3.event.registerCustomEvent(this,"ontabclosed");
 this._tabs=[];
 this._selectedTabId=null;
 this.resizeImplementation=function(){
-var _cd=this._tabList.cmpTarget.offsetWidth;
-var _ce=_cd;
+var _cf=this._tabList.cmpTarget.offsetWidth;
+var _d0=_cf;
 if(this._tabsContextMenu.visible){
 this._tabsContextMenu.checkMenu();
 }
-var _cf=_1.getElementById(this._tabList.divId+"_more");
-if(_cf){
-var _d0=parseInt(_3.className.getComputedProperty(_cf,"margin-left"));
-var _d1=parseInt(_3.className.getComputedProperty(_cf,"margin-right"));
-_cd-=(_cf.offsetWidth+_d0+_d1);
+var _d1=_1.getElementById(this._tabList.divId+"_more");
+if(_d1){
+var _d2=parseInt(_3.className.getComputedProperty(_d1,"margin-left"));
+var _d3=parseInt(_3.className.getComputedProperty(_d1,"margin-right"));
+_cf-=(_d1.offsetWidth+_d2+_d3);
 }
-var _d2=0;
-var _d3=false;
+var _d4=0;
+var _d5=false;
 for(var n=0;n<this._tabList.cmpTarget.childNodes.length;n++){
-var _d4=this._tabList.cmpTarget.childNodes[n];
-var _d5=parseInt(_3.className.getComputedProperty(_d4,"margin-left"));
-var _d6=parseInt(_3.className.getComputedProperty(_d4,"margin-right"));
-if(isNaN(_d5)){
-_d5=0;
+var _d6=this._tabList.cmpTarget.childNodes[n];
+var _d7=parseInt(_3.className.getComputedProperty(_d6,"margin-left"));
+var _d8=parseInt(_3.className.getComputedProperty(_d6,"margin-right"));
+if(isNaN(_d7)){
+_d7=0;
 }
-if(isNaN(_d6)){
-_d6=0;
+if(isNaN(_d8)){
+_d8=0;
 }
-_d2+=_d4.offsetWidth+_d5+_d6;
+_d4+=_d6.offsetWidth+_d7+_d8;
 if(n==this._tabList.cmpTarget.childNodes.length-1){
-_cd=_ce;
+_cf=_d0;
 }
-if(_d2>=_cd){
+if(_d4>=_cf){
 if(!this._tabList._showingMore){
 this._tabList.showMore();
 }
-if(!_d3){
+if(!_d5){
 this._tabList._extraTabs=n;
-_d3=true;
+_d5=true;
 }
-_d4.style.visibility="hidden";
+_d6.style.visibility="hidden";
 }else{
-_d4.style.visibility="visible";
+_d6.style.visibility="visible";
 }
 }
-if(_d2<_cd){
+if(_d4<_cf){
 if(this._tabList._showingMore){
 this._tabList.hideMore();
 }
@@ -2139,20 +2148,20 @@ this._tabsContextMenu.destroy();
 this.create();
 _3.className.add(this.target,"jsTabContainer");
 this._tabsContextMenu=new _3.ContextMenu();
-this._tabList=new _d7({id:this.divId+"_tabList",region:"top",className:"jsTabList"});
+this._tabList=new _d9({id:this.divId+"_tabList",region:"top",className:"jsTabList"});
 this.addChild(this._tabList);
-this._pageContainer=new _d8({id:this.divId+"_pageContainer",region:"center",className:"jsPageContainer"});
+this._pageContainer=new _da({id:this.divId+"_pageContainer",region:"center",className:"jsPageContainer"});
 this.addChild(this._pageContainer);
 this._canHaveChildren=false;
 };
-_3.TabContainer.prototype.addTab=function(_d9,_da,ndx){
+_3.TabContainer.prototype.addTab=function(_db,_dc,ndx){
 if(!this.inDOM){
 _3.error.report("TabContainer must be added to DOM before adding tabs!");
 return;
 }
-var _db={title:"",paneId:_da.divId,pane:_da,closable:false};
-_3.mixin(_db,_d9);
-if(!_db.pane||!_db.pane.CMP_SIGNATURE||!_db.pane.created){
+var _dd={title:"",paneId:_dc.divId,pane:_dc,closable:false};
+_3.mixin(_dd,_db);
+if(!_dd.pane||!_dd.pane.CMP_SIGNATURE||!_dd.pane.created){
 return;
 }
 if(typeof (ndx)=="undefined"){
@@ -2162,48 +2171,48 @@ if(ndx<0||ndx>this._tabs.length){
 ndx=this._tabs.length;
 }
 }
-var _dc=new _dd(_db);
+var _de=new _df(_dd);
 if(ndx<this._tabs.length){
-this._tabs.splice(ndx,0,_dc);
+this._tabs.splice(ndx,0,_de);
 }else{
-this._tabs.push(_dc);
+this._tabs.push(_de);
 }
-var _de=this._tabList.cmpTarget.childNodes;
-var _df=_1.createElement("div");
-_df.id=_dc.paneId+"_tablabel";
-_df.className="jsTabLabel";
-if(_dc.closable){
-_3.className.add(_df,"jsTabClosable");
+var _e0=this._tabList.cmpTarget.childNodes;
+var _e1=_1.createElement("div");
+_e1.id=_de.paneId+"_tablabel";
+_e1.className="jsTabLabel";
+if(_de.closable){
+_3.className.add(_e1,"jsTabClosable");
 }
 if(this._tabs.length==1){
-this._selectedTabId=_dc.paneId;
-_3.className.add(_df,"jsTabSelected");
+this._selectedTabId=_de.paneId;
+_3.className.add(_e1,"jsTabSelected");
 }
-_df.innerHTML="<span>"+_dc.title+"</span>"+"<span class=\"jsTabCloseBtn\" id=\""+_dc.paneId+"_closeHandler\"> </span>";
+_e1.innerHTML="<span>"+_de.title+"</span>"+"<span class=\"jsTabCloseBtn\" id=\""+_de.paneId+"_closeHandler\"> </span>";
 if(ndx==this._tabs.length-1){
-this._tabList.cmpTarget.appendChild(_df);
+this._tabList.cmpTarget.appendChild(_e1);
 }else{
-this._tabList.cmpTarget.insertBefore(_df,_de[ndx]);
+this._tabList.cmpTarget.insertBefore(_e1,_e0[ndx]);
 }
-this._pageContainer.addPage(_dc.pane);
+this._pageContainer.addPage(_de.pane);
 this._pageContainer.activate(this._selectedTabId);
-var _e0=_1.getElementById(_dc.paneId+"_closeHandler");
-if(!_dc.closable){
-_3.className.add(_e0,"jsTabCloseHidden");
+var _e2=_1.getElementById(_de.paneId+"_closeHandler");
+if(!_de.closable){
+_3.className.add(_e2,"jsTabCloseHidden");
 }else{
-_3.className.add(_df,"jsTabClosable");
+_3.className.add(_e1,"jsTabClosable");
 }
-_3.event.attach(_df,"onclick",_3.bindAsEventListener(this.selectTab,this,_dc.paneId));
-_3.event.attach(_e0,"onclick",_3.bindAsEventListener(this.closeTab,this,_dc.paneId));
+_3.event.attach(_e1,"onclick",_3.bindAsEventListener(this.selectTab,this,_de.paneId));
+_3.event.attach(_e2,"onclick",_3.bindAsEventListener(this.closeTab,this,_de.paneId));
 this.resize();
 };
-_3.TabContainer.prototype.removeTab=function(ref,_e1){
+_3.TabContainer.prototype.removeTab=function(ref,_e3){
 if(!this.inDOM){
 _3.error.report("TabContainer must be added to DOM before removing tabs!");
 return;
 }
-if(typeof (_e1)=="undefined"){
-_e1=true;
+if(typeof (_e3)=="undefined"){
+_e3=true;
 }
 var ndx=null;
 if(typeof (ref)=="number"){
@@ -2228,14 +2237,14 @@ break;
 }
 }
 if(ndx!==null){
-var _e2=false;
+var _e4=false;
 if(this._selectedTabId==this._tabs[ndx].paneId){
-var _e2=true;
+var _e4=true;
 }
 this._tabList.cmpTarget.removeChild(this._tabList.cmpTarget.childNodes[ndx]);
-this._pageContainer.removePage(this._tabs[ndx].pane,_e1);
+this._pageContainer.removePage(this._tabs[ndx].pane,_e3);
 this._tabs.splice(ndx,1);
-if(_e2){
+if(_e4){
 if(this._tabs[ndx]){
 this._selectedTabId=this._tabs[ndx].paneId;
 }else{
@@ -2312,7 +2321,7 @@ return this._tabs[n].pane;
 }
 return null;
 };
-_3.TabContainer.prototype.setTitle=function(ref,_e3){
+_3.TabContainer.prototype.setTitle=function(ref,_e5){
 var ndx=null;
 if(typeof (ref)=="number"){
 ndx=ref;
@@ -2336,11 +2345,11 @@ break;
 }
 }
 if(ndx!==null){
-this._tabList.cmpTarget.childNodes[ndx].firstChild.innerHTML=_e3;
+this._tabList.cmpTarget.childNodes[ndx].firstChild.innerHTML=_e5;
 this.resize();
 }
 };
-_3.TabContainer.prototype.setClosable=function(ref,_e4){
+_3.TabContainer.prototype.setClosable=function(ref,_e6){
 if(!this.inDOM){
 _3.error.report("TabContainer must be added to DOM before calling to setClosable!");
 return;
@@ -2368,14 +2377,14 @@ break;
 }
 }
 if(ndx!==null){
-var _e5=this._tabList.cmpTarget.childNodes[ndx];
-var _e6=_1.getElementById(this._tabs[ndx].paneId+"_closeHandler");
-if(_e4){
-_3.className.add(_e5,"jsTabClosable");
-_3.className.remove(_e6,"jsTabCloseHidden");
+var _e7=this._tabList.cmpTarget.childNodes[ndx];
+var _e8=_1.getElementById(this._tabs[ndx].paneId+"_closeHandler");
+if(_e6){
+_3.className.add(_e7,"jsTabClosable");
+_3.className.remove(_e8,"jsTabCloseHidden");
 }else{
-_3.className.remove(_e5,"jsTabClosable");
-_3.className.add(_e6,"jsTabCloseHidden");
+_3.className.remove(_e7,"jsTabClosable");
+_3.className.add(_e8,"jsTabCloseHidden");
 }
 this.resize();
 }
@@ -2426,18 +2435,18 @@ _3.event.cancel(e,true);
 return false;
 };
 _3.TabContainer.prototype._updateExtraTabsContextMenu=function(){
-var _e7=this._tabs.length-this._tabList._extraTabs;
-if(this._tabsContextMenu.items.length!=_e7){
-if(this._tabsContextMenu.items.length>_e7){
-while(this._tabsContextMenu.items.length>_e7){
+var _e9=this._tabs.length-this._tabList._extraTabs;
+if(this._tabsContextMenu.items.length!=_e9){
+if(this._tabsContextMenu.items.length>_e9){
+while(this._tabsContextMenu.items.length>_e9){
 this._tabsContextMenu.removeItem(0);
 }
 }else{
-for(var n=0;n<_e7-this._tabsContextMenu.items.length;n++){
-var _e8=this._tabList._extraTabs+n;
-this._tabsContextMenu.addItem({label:this._tabs[_e8].title,onclick:_3.bindAsEventListener(function(e,_e9,_ea){
-this.selectTab(_e9);
-},this,_e8,this._tabList._extraTabs)},0);
+for(var n=0;n<_e9-this._tabsContextMenu.items.length;n++){
+var _ea=this._tabList._extraTabs+n;
+this._tabsContextMenu.addItem({label:this._tabs[_ea].title,onclick:_3.bindAsEventListener(function(e,_eb,_ec){
+this.selectTab(_eb);
+},this,_ea,this._tabList._extraTabs)},0);
 }
 }
 var ndx=null;
@@ -2452,10 +2461,10 @@ this._tabsContextMenu.checkItem(n,(n==ndx-this._tabList._extraTabs));
 }
 }
 };
-var _d7=function(_eb){
-var _ec={canHaveChildren:true,hasInvalidator:false};
-_3.mixin(_ec,_eb);
-var cmp=_82.get(_ec);
+var _d9=function(_ed){
+var _ee={canHaveChildren:true,hasInvalidator:false};
+_3.mixin(_ee,_ed);
+var cmp=_82.get(_ee);
 _3.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.private.TabListObj";
 _3.event.init(this);
@@ -2472,15 +2481,15 @@ _3.event.registerCustomEvent(this,"onblur");
 this.create();
 this._extraTabs=0;
 this._showingMore=false;
-var _ed=_1.createElement("span");
-_ed.id=this.divId+"_more";
-_ed.className="jsTabListDropdown jsTabListDropdownHidden";
-this.target.appendChild(_ed);
-_ed.innerHTML=" ";
+var _ef=_1.createElement("span");
+_ef.id=this.divId+"_more";
+_ef.className="jsTabListDropdown jsTabListDropdownHidden";
+this.target.appendChild(_ef);
+_ef.innerHTML=" ";
 _3.className.add(this.cmpTarget,"jsTabListInner");
-_3.event.attach(_ed,"onclick",_3.bindAsEventListener(this.onDropdownClick,this));
+_3.event.attach(_ef,"onclick",_3.bindAsEventListener(this.onDropdownClick,this));
 };
-_d7.prototype.onDropdownClick=function(e){
+_d9.prototype.onDropdownClick=function(e){
 if(!e){
 e=window.event;
 }
@@ -2488,22 +2497,22 @@ this.parent._tabsContextMenu.show(e);
 _3.event.cancel(e,true);
 return false;
 };
-_d7.prototype.showMore=function(){
+_d9.prototype.showMore=function(){
 if(!this._showingMore){
 _3.className.remove(_1.getElementById(this.divId+"_more"),"jsTabListDropdownHidden");
 this._showingMore=true;
 }
 };
-_d7.prototype.hideMore=function(){
+_d9.prototype.hideMore=function(){
 if(this._showingMore){
 _3.className.add(_1.getElementById(this.divId+"_more"),"jsTabListDropdownHidden");
 this._showingMore=false;
 }
 };
-var _d8=function(_ee){
-var _ef={canHaveChildren:true,hasInvalidator:false};
-_3.mixin(_ef,_ee);
-var cmp=_82.get(_ef);
+var _da=function(_f0){
+var _f1={canHaveChildren:true,hasInvalidator:false};
+_3.mixin(_f1,_f0);
+var cmp=_82.get(_f1);
 _3.mixin(this,cmp);
 this.CMP_SIGNATURE="Scriptor.ui.private.TabPageContainer";
 _3.event.init(this);
@@ -2519,81 +2528,81 @@ _3.event.registerCustomEvent(this,"onfocus");
 _3.event.registerCustomEvent(this,"onblur");
 this.create();
 };
-_d8.prototype.addPage=function(_f0){
-_3.className.add(_f0.target,"jsTabPage");
-this.addChild(_f0);
+_da.prototype.addPage=function(_f2){
+_3.className.add(_f2.target,"jsTabPage");
+this.addChild(_f2);
 };
-_d8.prototype.removePage=function(_f1,_f2){
-this.removeChild(_f1);
-if(_f2){
-_f1.destroy();
+_da.prototype.removePage=function(_f3,_f4){
+this.removeChild(_f3);
+if(_f4){
+_f3.destroy();
 }
 };
-_d8.prototype.activate=function(_f3){
+_da.prototype.activate=function(_f5){
 for(var n=0;n<this.components.length;n++){
 this.components[n].hide();
 }
 for(var n=0;n<this.components.length;n++){
-if(this.components[n].divId==_f3){
+if(this.components[n].divId==_f5){
 this.components[n].show();
 }
 }
 };
-var _dd=function(_f4){
-var _f5={title:"",paneId:null,pane:null,closable:false};
-_3.mixin(_f5,_f4);
-this.title=_f5.title;
-this.paneId=_f5.paneId;
-this.pane=_f5.pane;
-this.closable=_f5.closable;
+var _df=function(_f6){
+var _f7={title:"",paneId:null,pane:null,closable:false};
+_3.mixin(_f7,_f6);
+this.title=_f7.title;
+this.paneId=_f7.paneId;
+this.pane=_f7.pane;
+this.closable=_f7.closable;
 };
-var _f6=20;
-var _f7=function(_f8){
-var _f9={Name:null,Type:"alpha",show:true,Width:80,Format:null,displayName:null,sqlName:null,showToolTip:false,Comparator:null};
-_3.mixin(_f9,_f8);
-if(!_f9.Name){
+var _f8=20;
+var _f9=function(_fa){
+var _fb={Name:null,Type:"alpha",show:true,Width:80,Format:null,displayName:null,sqlName:null,showToolTip:false,Comparator:null};
+_3.mixin(_fb,_fa);
+if(!_fb.Name){
 _3.error.report("DataColumn, invalid column data provided to constructor");
 return;
 }
-this.Name=_f9.Name;
-this.Type=(typeof (_fa[_f9.Type])!="undefined")?_f9.Type:"alpha";
-this.show=_f9.show;
+this.Name=_fb.Name;
+this.Type=(typeof (_fc[_fb.Type])!="undefined")?_fb.Type:"alpha";
+this.show=_fb.show;
 this.percentWidth=null;
-if(!isNaN(Number(_f9.Width))){
-this.Width=Number(_f9.Width);
+if(!isNaN(Number(_fb.Width))){
+this.Width=Number(_fb.Width);
 }else{
-if(typeof (_f9.Width)=="string"){
-if(_f9.Width.length>2&&_f9.Width.substr(_f9.Width.length-2)=="px"&&!isNaN(parseInt(_f9.Width))){
-this.Width=parseInt(_f9.Width);
+if(typeof (_fb.Width)=="string"){
+if(_fb.Width.length>2&&_fb.Width.substr(_fb.Width.length-2)=="px"&&!isNaN(parseInt(_fb.Width))){
+this.Width=parseInt(_fb.Width);
 }else{
-if(_f9.Width.length>1&&_f9.Width.substr(_f9.Width.length-1)=="%"&&!isNaN(parseInt(_f9.Width))){
-this.Width=_f6;
-this.percentWidth=parseInt(_f9.Width);
+if(_fb.Width.length>1&&_fb.Width.substr(_fb.Width.length-1)=="%"&&!isNaN(parseInt(_fb.Width))){
+this.Width=_f8;
+this.percentWidth=parseInt(_fb.Width);
 }
 }
 }
 }
 this.origWidth=this.Width;
-this.Format=_f9.Format;
-this.displayName=_f9.displayName?_f9.displayName:_f9.Name;
-this.sqlName=_f9.sqlName?_f9.sqlName:_f9.Name;
-this.showToolTip=_f9.showToolTip;
-this.Compare=_f9.Compare;
+this.Format=_fb.Format;
+this.displayName=_fb.displayName?_fb.displayName:_fb.Name;
+this.sqlName=_fb.sqlName?_fb.sqlName:_fb.Name;
+this.showToolTip=_fb.showToolTip;
+this.Compare=_fb.Compare;
 };
-var _fb=function(_fc,_fd){
-_fd=_fd?_fd:{};
-for(var n=0;n<_fc.length;n++){
-var _fe=_fc[n].Name;
-var _ff=_fc[n].Type;
-this[_fe]=_fd[_fe]?_fa[_ff](_fd[_fe]):_fa[_ff]();
+var _fd=function(_fe,_ff){
+_ff=_ff?_ff:{};
+for(var n=0;n<_fe.length;n++){
+var name=_fe[n].Name;
+var type=_fe[n].Type;
+this[name]=_ff[name]?_fc[type](_ff[name]):_fc[type]();
 }
-for(var prop in _fd){
+for(var prop in _ff){
 if(this[prop]===_2){
-this[prop]=_fd[prop];
+this[prop]=_ff[prop];
 }
 }
 };
-var _fa={"num":Number,"number":Number,"alpha":String,"string":String,"date":function(str){
+var _fc={"num":Number,"number":Number,"alpha":String,"string":String,"date":function(str){
 if(!str){
 return "";
 }
@@ -2795,7 +2804,7 @@ break;
 return _10d;
 };
 _3.DataView.prototype.createColumn=function(opts){
-return new _f7(opts);
+return new _f9(opts);
 };
 _3.DataView.prototype.addColumn=function(_10e,ndx){
 if(this.__findColumn(_10e.Name)==-1){
@@ -2805,7 +2814,7 @@ ndx=this.columns.length;
 this.columns.splice(ndx,0,_10e);
 if(this.rows.length>0){
 for(var n=0;n<this.rows.length;n++){
-this.rows[n][_10e.Name]=_fa[_10e.Type]();
+this.rows[n][_10e.Name]=_fc[_10e.Type]();
 }
 }
 if(!this.orderBy&&_10e.show){
@@ -3062,7 +3071,7 @@ data=data?data:{};
 if(!data.id){
 data.id=this.getNextRowId();
 }
-return new _fb(this.columns,data);
+return new _fd(this.columns,data);
 };
 _3.DataView.prototype.addRow=function(_130,ndx,ui){
 if(ui===_2){
@@ -3780,16 +3789,16 @@ for(var n=0;n<this.columns.length;n++){
 if(this.columns[n].show){
 _15e++;
 if(this.columns[n].percentWidth!==null){
-_15d+=_f6+_161;
+_15d+=_f8+_161;
 }else{
 _15d+=this.columns[n].Width+_161;
 }
 }
 }
-if(_15e&&_15c>=((_f6+_161)*_15e)){
+if(_15e&&_15c>=((_f8+_161)*_15e)){
 while(_15d>_15c){
 for(var n=0;n<this.columns.length;n++){
-if(this.columns[n].show&&this.columns[n].percentWidth===null&&this.columns[n].Width>_f6){
+if(this.columns[n].show&&this.columns[n].percentWidth===null&&this.columns[n].Width>_f8){
 _15b=true;
 this.columns[n].Width--;
 _15d--;
@@ -3803,7 +3812,7 @@ break;
 for(var n=0;n<this.columns.length;n++){
 if(this.columns[n].show){
 _15b=true;
-this.columns[n].Width=_f6;
+this.columns[n].Width=_f8;
 }
 }
 }
@@ -3962,7 +3971,7 @@ this.resizingXCache=x;
 var _16f=this.resColumnId;
 var _170=false;
 if(!_16e){
-if((this.columns[_16f].Width-_16d)>_f6){
+if((this.columns[_16f].Width-_16d)>_f8){
 this.columns[_16f].Width-=_16d;
 this.columns[_16f].origWidth=this.columns[_16f].Width;
 _170=true;
@@ -3990,8 +3999,8 @@ _3.error.report("Data type constructor missing toString method.");
 return;
 }
 }
-if(!_fa[name]){
-_fa[name]=_171;
+if(!_fc[name]){
+_fc[name]=_171;
 }else{
 _3.error.report("Tried to instantiate a data type but data type was already defined");
 }
@@ -4062,7 +4071,7 @@ for(var a=0;a<cols.length;a++){
 var _176=cols[a].getAttribute("name");
 if(_176&&cols[a].firstChild){
 var _177=this.dataView.__findColumn(_176)!=-1?this.dataView.columns[this.dataView.__findColumn(_176)].Type:"alpha";
-_175[_176]=_fa[_177](cols[a].firstChild.data);
+_175[_176]=_fc[_177](cols[a].firstChild.data);
 }
 }
 this.dataView.addRow(this.dataView.createRow(_175),_2,false);
@@ -4082,7 +4091,7 @@ for(var n=0;n<data.rows.length;n++){
 var _175={};
 for(var _176 in data.rows[n]){
 var _177=this.dataView.__findColumn(_176)!=-1?this.dataView.columns[this.dataView.__findColumn(_176)].Type:"alpha";
-_175[_176]=_fa[_177](data.rows[n][_176]);
+_175[_176]=_fc[_177](data.rows[n][_176]);
 }
 this.dataView.addRow(this.dataView.createRow(_175),_2,false);
 }

@@ -4,7 +4,7 @@ var Scriptor = {
 	version : {
 		major : 2,
 		minor : 2,
-		instance : "beta 3",
+		instance : "beta 4",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}

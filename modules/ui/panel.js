@@ -29,7 +29,20 @@ Scriptor.Panel = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'onresize');
 	Scriptor.event.registerCustomEvent(this, 'onfocus');
 	Scriptor.event.registerCustomEvent(this, 'onblur');
+
+	// if the div exists and has contents, put them in the proper place
+	var tmpContents = '';
+	if (document.getElementById(this.divId))
+	{
+		var elem = document.getElementById(this.divId);
+		tmpContents = elem.innerHTML;
+		elem.innerHTML = '';
+	}
 	
 	this.create();
+
+	if (tmpContents)
+		this.setContent(tmpContents);
+
 	Scriptor.className.add(this.target, "jsPanel");
 };
