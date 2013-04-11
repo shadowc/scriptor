@@ -79,7 +79,7 @@ var dataColumn = function(opts) {
 	this.displayName = localOpts.displayName ? localOpts.displayName : localOpts.Name;
 	this.sqlName = localOpts.sqlName ? localOpts.sqlName : localOpts.Name;
 	this.showToolTip = localOpts.showToolTip;
-	this.Compare = localOpts.Compare;
+	this.Comparator = localOpts.Comparator;
 	
 };
 
@@ -154,7 +154,10 @@ var dataTypes = {
 		}
 		
 		return ret;
-	}
+	},
+	'object' : function (obj) {
+		return obj;
+	},
 };
 
 /*
@@ -199,6 +202,9 @@ Scriptor.DataView = function(opts) {
 	
 	this.rows = [];
 	this.columns = [];
+
+	this._ul = {};
+	this._li = {};
 	
 	this.selectedRow = -1;
 	this.selectedRows = [];
@@ -241,7 +247,6 @@ Scriptor.DataView = function(opts) {
 	this._registeredEvents = [];
 	
 	this.resizeImplementation = function() {
-		this._checkCache();
 		
 		if (this._cached)
 		{
@@ -279,7 +284,6 @@ Scriptor.DataView = function(opts) {
 	};
 	
 	this.DOMAddedImplementation = function() {
-		this._checkCache();
 		
 		if (this._cached)
 		{
@@ -299,7 +303,7 @@ Scriptor.DataView = function(opts) {
 			for (var n=0; n < this.columns.length; n++)
 				this._addColumnToUI(this.columns[n], n);
 			
-			this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_optionsMenuBtn'), 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.optionsMenuBtn, 'click', Scriptor.bindAsEventListener(this.showOptionsMenu, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
@@ -392,6 +396,21 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
 		
 		this.cmpTarget.innerHTML = dvTemplate;
+
+		this.inDOM = true;
+		this._cached = {};
+		var first = this.cmpTarget.firstChild;
+		if (this.paginating) {
+			this._cached.pagination_header = first;
+			first = first.nextSibling;
+		}
+
+		this._cached.header = first;
+		this._cached.headerUl = first.firstChild;
+		this._cached.optionsMenuBtn = first.firstChild.nextSibling;
+		this._cached.outer_body = first.nextSibling;
+		this._cached.rows_body = this._cached.outer_body.firstChild;
+		this._cached.footer =this._cached.outer_body.nextSibling;
 		
 		this._templateRendered = true;
 		// if the component had a present DOM element at the time of instantiation, we have called
@@ -683,6 +702,9 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 	
 	var newUl = document.createElement('ul');
 	newUl.id = this.divId + '_row_' + rowId;
+
+	this._ul = this._ul || {};
+	this._ul[newUl.id] = newUl;
 	
 	var check = false;
 	if (!this.multiselect) {
@@ -738,7 +760,7 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 			// we search for the next row id added to DOM
 			for (var n = rowNdx+1; n < this.rows.length; n++)
 			{
-				insertBefore = document.getElementById(this.divId + '_row_' + this.rows[n].id);
+				insertBefore = this._ul[this.divId + '_row_' + this.rows[n].id];
 				if (insertBefore)
 					break;
 			}
@@ -760,15 +782,17 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 * dataView._removeRowFromUI()
 *  Internal use only, to dynamically add/remove rows on UI
 */
-Scriptor.DataView.prototype._removeRowFromUI = function(rowNdx) {
-	if (rowNdx < 0 || rowNdx > this.rows.length-1)
+Scriptor.DataView.prototype._removeRowFromUI = function(rowId) {
+	if (typeof rowId === 'undefined') {
 		return;
+	}
 	
-	var rowId = this.rows[rowNdx].id;
-	var theRow = document.getElementById(this.divId + "_row_" + rowId);
+	var theRow = this._ul[this.divId + "_row_" + rowId];
 	
-	if (theRow)
+	if (theRow) {
 		this._cached.rows_body.removeChild(theRow);
+		delete this._ul[this.divId + "_row_" + rowId];
+	}
 		
 	this.__refreshFooter();
 };
@@ -778,7 +802,7 @@ Scriptor.DataView.prototype._refreshRowInUI = function(rowId) {
 	
 	if (row)
 	{
-		var theRow = document.getElementById(this.divId + "_row_" + rowId);
+		var theRow = this._ul[this.divId + "_row_" + rowId];
 	
 		if (theRow)
 		{
@@ -794,13 +818,15 @@ Scriptor.DataView.prototype._refreshRowInUI = function(rowId) {
 *  Internal use only, to dynamically add/remove cells on UI
 */
 Scriptor.DataView.prototype._addCellToUI = function(rowId, colName, ndx) {
-	var rowsUl = document.getElementById(this.divId + "_row_" + rowId);
+	var rowsUl = this._ul[this.divId + "_row_" + rowId];
 	if (rowsUl)	// just make sure the row is there
 	{
 		var cells = rowsUl.getElementsByTagName('li');
 		var li = document.createElement('li');
-		li.id = this.divId + '_cell_' + rowId + '_' + ndx
-		
+		li.id = this.divId + '_cell_' + rowId + '_' + ndx;
+		this._li = this._li || {};
+		this._li[li.id] = li;
+
 		var liClassName = "dataView" + this.columns[ndx].Type;
 		if (!this.columns[ndx].show)
 			liClassName += " dataViewCellHidden";
@@ -831,14 +857,12 @@ Scriptor.DataView.prototype._addCellToUI = function(rowId, colName, ndx) {
 */
 Scriptor.DataView.prototype._removeCellFromUI = function(rowId, ndx) {
 	var baseNdx = this.multiselect ? 1 : 0;
-	var rowsUl = document.getElementById(this.divId + "_row_" + rowId);
-	if (rowsUl)	// just make sure the row is there
-	{
-		var cells = rowsUl.getElementsByTagName('li');
-		
-		if (ndx >= 0 && (baseNdx+ndx) < cells.length)
-		{
+	var rowsUl = this._ul[this.divId + "_row_" + rowId];
+	if (rowsUl)	{ // just make sure the row is there
+	    var cell = this._li[this.divId + '_cell_' + rowId + '_' + ndx];
+		if (cell) { // just make sure the row is there
 			rowsUl.removeChild(cells[baseNdx+ndx]);
+			delete this._li[this.divId + '_cell_' + rowId + '_' + ndx];
 		}
 	}
 };
@@ -927,24 +951,27 @@ Scriptor.DataView.prototype.deleteRow = function(identifier, ui) {
 	}
 	
 	var rowNdx = -1;
-	
-	if (typeof(identifier) == 'number') {
-		rowNdx = identifier;
-		this.rows.splice(identifier,1);
-	}
-	
+	var rowId = undefined;
 	if (typeof(identifier) == 'object') {
-		for (var n=0; n < this.rows.length; n++) {
+		for (var n = 0; n < this.rows.length; ++n) {
 			if (this.rows[n] == identifier) {
+				rowId = this.rows[n].id;
+				rowNdx = n;
+				this.rows.splice(n, 1);
+			}
+		}
+	} else {
+		for (var n = 0; n < this.rows.length; ++n) {
+			if (this.rows[n].id == identifier) {
+				rowId = this.rows[n].id;
 				rowNdx = n;
 				this.rows.splice(n, 1);
 			}
 		}
 	}
 	
-	if (rowNdx != -1 && ui)
-	{
-		this._removeRowFromUI(rowNdx);
+	if (rowNdx != -1 && ui) {
+		this._removeRowFromUI(rowId);
 	
 		if (this.selectedRow > this.rows.length -1)
 			this.selectedRow = -1;
@@ -967,6 +994,26 @@ Scriptor.DataView.prototype.deleteRow = function(identifier, ui) {
 		
 		this._UIUpdateSelection();
 	}
+};
+
+/**
+ * dataView.updateRow
+ */
+Scriptor.DataView.prototype.updateRow = function(data) {
+	if (typeof data.id === 'undefined') {
+		return false;
+	}
+
+	for (var n = 0; n < this.rows.length; ++n) {
+		if (this.rows[n].id == identifier) {
+			this.rows[n] = data;
+			break;
+		}
+	}
+
+    this.updateRows();
+
+	return data.id;
 };
 
 /*
@@ -1047,12 +1094,12 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	
 	this.rows[rowNdx][columnName] = value;
 	
-	var cell = document.getElementById(this.divId + '_cell_' + rowId + '_' + colNdx);
+	var cell = this._li[this.divId + '_cell_' + rowId + '_' + colNdx];
 	
 	if (typeof(this.columns[colNdx].Format) == 'function') {
 		var funcRet = this.columns[colNdx].Format(value);
 		cell.innerHTML = '';
-		if (typeof(funcRet) == 'string')
+		if (typeof funcRet === 'string' || typeof funcRet === 'number')
 			cell.innerHTML = funcRet;
 		else
 			cell.appendChild(funcRet);		
@@ -1359,23 +1406,25 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 	if (clear)	// remove all rows, we're starting over!
 	{
 		this._cached.rows_body.innerHTML = '';	
+		this._ul = {};
+		this._li = {};
 	}
 	
 	// remove all rows that were deleted in memory
-	var actualRows = this._cached.rows_body.getElementsByTagName('ul');
-	for (var n=0; n < actualRows.length; n++)
-	{
-		var rowId = actualRows[n].id.substr(actualRows[n].id.lastIndexOf('_')+1);
+	var actualRows = this._ul;
+	for (var key in actualRows) {
+		var rowId = key.substr(actualRows[key].id.lastIndexOf('_') + 1);
 		if (!this.getById(rowId))	// row does not exist!
 		{
-			this._cached.rows_body.removeChild(actualRows[n]);
+			this._cached.rows_body.removeChild(actualRows[key]);
+			delete this._ul[key];
 			n--;
 		}
 	}
 	
 	// add rows that don't exist and update existing ones!
 	for (var n=0; n < this.rows.length; n++) {		
-		if (!document.getElementById(this.divId+"_row_"+this.rows[n].id))
+		if (!this._ul[this.divId+"_row_"+this.rows[n].id])
 		{
 			this._addRowToUI(n);
 		}
@@ -1778,7 +1827,7 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 		this.selectedRows.push(rowNdx)
 		this.selectedRow = rowNdx;
 				
-		var row = document.getElementById(this.divId + '_row_' + rowId);
+		var row = this._ul[this.divId + '_row_' + rowId];
 		Scriptor.className.add(row, "dataViewRowSelected");
 		
 	}
@@ -1791,7 +1840,7 @@ Scriptor.DataView.prototype.__markRow = function(e, rowNdx) {
 				else 
 					this.selectedRow = -1;
 			
-				var row = document.getElementById(this.divId + '_row_' + rowId);
+				var row = this._ul[this.divId + '_row_' + rowId];
 				Scriptor.className.remove(row, "dataViewRowSelected");
 				break;
 			}
@@ -1985,7 +2034,7 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 */
 Scriptor.DataView.prototype._getHeadersWidth = function()
 {
-	var optionsMenuElem = document.getElementById(this.divId+'_optionsMenuBtn');
+	var optionsMenuElem = this._cached.optionsMenuBtn;
 	var menuBox = Scriptor.element.getOuterBox(optionsMenuElem);
 	var columnsBox = Scriptor.element.getInnerBox(this._cached.headerUl);
 	
