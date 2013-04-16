@@ -227,6 +227,10 @@ Scriptor.DataView = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'oncontentupdated');
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	Scriptor.event.registerCustomEvent(this, 'oncolumnresize');
+
+	Scriptor.event.registerCustomEvent(this, 'oncellclick');
+	Scriptor.event.registerCustomEvent(this, 'onrowcontextmenu');
+	Scriptor.event.registerCustomEvent(this, 'onheadercellclick');
 	
 	this.orderBy = false;
 	this.orderWay = 'ASC';
@@ -307,6 +311,7 @@ Scriptor.DataView = function(opts) {
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'contextmenu', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
 			
 			this.updateRows(true);
 		}
@@ -1005,13 +1010,11 @@ Scriptor.DataView.prototype.updateRow = function(data) {
 	}
 
 	for (var n = 0; n < this.rows.length; ++n) {
-		if (this.rows[n].id == identifier) {
+		if (this.rows[n].id == data.id) {
 			this.rows[n] = data;
 			break;
 		}
 	}
-
-    this.updateRows();
 
 	return data.id;
 };
@@ -1597,6 +1600,15 @@ Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
 	}
 	else
 	{
+
+		while (target.nodeName.toLowerCase() != 'li') {
+			if (target == this._cached.rows_body)	// click out of range
+				return;
+
+			target = target.parentNode;
+		}
+		var cellId = target.id.substr(target.id.lastIndexOf('_')+1);
+
 		while (target.nodeName.toLowerCase() != 'ul')
 		{
 			if (target == this._cached.rows_body)	// click out of range
@@ -1615,6 +1627,20 @@ Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
 			}
 		}
 	}
+
+	e.row = {
+		data: this.rows[n],
+		index: rowId
+	};
+	e.cell = {
+		index: cellId
+	};
+
+	if (e.button === 2) {
+		Scriptor.event.fire(this, 'onrowcontextmenu', e);
+	} else {
+		Scriptor.event.fire(this, 'oncellclick', e);
+	}
 };
 
 /*
@@ -1626,6 +1652,8 @@ Scriptor.DataView.prototype._onHeaderColumnClicked = function(e) {
 	if (!e) e = window.event;
 	
 	var target = e.target || e.srcElement;
+
+	Scriptor.event.fire(this, 'onheadercellclick', e);
 	
 	if (target.nodeName.toLowerCase() == 'a')
 	{
@@ -2017,11 +2045,12 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 				var rowsbase = this.multiselect ? 1 : 0;
 				for (var a=0; a < rows.length; a++)
 				{
-					var rLis = rows[a].getElementsByTagName('li');
-					
-					for (var n=0; n < this.columns.length; n++)
-					{
-						rLis[rowsbase+n].style.width = this.columns[n].Width + 'px';
+					var rowId = rows[a].id.substr(rows[a].id.lastIndexOf('_')+1);
+					for (var n = rowsbase, lenn = this.columns.length, li; n < lenn; ++n) {
+						li = this._li[this.divId + '_cell_' + rowId + '_' + n];
+						if (li) {
+							li.style.width = this.columns[n].Width + 'px';
+						}
 					}
 				}
 			}
