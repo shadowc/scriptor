@@ -1011,7 +1011,7 @@ Scriptor.DataView.prototype.updateRow = function(data) {
 
 	for (var n = 0; n < this.rows.length; ++n) {
 		if (this.rows[n].id == data.id) {
-			this.rows[n] = data;
+			this.rows[n] = new dataRow(this.columns, data);
 			break;
 		}
 	}
@@ -1655,11 +1655,10 @@ Scriptor.DataView.prototype._onHeaderColumnClicked = function(e) {
 
 	Scriptor.event.fire(this, 'onheadercellclick', e);
 	
-	if (target.nodeName.toLowerCase() == 'a')
-	{
-		colNdx = Number(target.id.substr(target.id.lastIndexOf('_')+1));
-		if (!isNaN(colNdx))
-		{
+	if (target.nodeName.toLowerCase() == 'a') {
+		var colNdx = parseInt(target.id.substr(target.id.lastIndexOf('_') + 1), 10);
+
+		if (!isNaN(colNdx)) {
 			this.__setOrder(colNdx);
 		}
 		
@@ -2100,53 +2099,38 @@ Scriptor.DataView.prototype.__calculateTotalWidth = function()
 *  For internal use only. Use global function __setOrder instead.
 */
 Scriptor.DataView.prototype.__sort = function(start) {
-	var n, tempRow, swap;	
 	
-	if (!this.orderBy)
+	if (!this.orderBy) {
 		return;
-		
-	for (n = start+1; n < this.rows.length; n++) {
-		var swap = false;
-		var	func = this.columns[this.__findColumn(this.orderBy)].Comparator;
-		
-		if (this.orderWay == 'ASC') {
-			
-			swap = (typeof(func) == 'function') ?
-				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy]) > 0 : 
-				(this.rows[start][this.orderBy] > this.rows[n][this.orderBy]);
-		}
-		else {
-			swap = (typeof(func) == 'function') ?
-				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy] < 0) :
-				(this.rows[start][this.orderBy] < this.rows[n][this.orderBy]);
-		}
-		
-		if (swap) {
-			tempRow = this.rows[start];
-			this.rows[start] = this.rows[n];
-			this.rows[n] = tempRow;
-			
-			if (this.selectedRow == start) {
-				this.selectedRow = n;				
-			}
-			else {
-				if (this.selectedRow == n) {
-					this.selectedRow = start;					
-				}
-			}
-			
-			for (var a=0; a < this.selectedRows.length; a++) {
-				if (this.selectedRows[a] == start)
-					this.selectedRows[a] = n;
-				else
-					if (this.selectedRows[a] == n)
-						this.selectedRows[a] = start;
-			}
-		}
 	}
-	
-	if (start < this.rows.length -2)
-		this.__sort( start +1 );
+
+	var comparator, asc, desc;
+	var orderBy = this.orderBy;
+	var Comparator = this.columns[this.__findColumn(orderBy)].Comparator;
+
+	if (typeof Comparator === 'function' && this.orderWay === 'ASC') {
+		// Comparator and ASC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]) > 0;
+		};
+	} else if (typeof Comparator === 'function') {
+		// Comparator and DESC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]) < 0;
+		};
+	} else if (this.orderWay === 'ASC') {
+		// NO Comparator and ASC
+		comparator = function (a, b) {
+			return a[orderBy] > b[orderBy];
+		};
+	} else {
+		// NO Comparator and DESC
+		comparator = function (a, b) {
+			return a[orderBy] < b[orderBy];
+		};
+	}
+
+	this.rows.sort(comparator);
 };
 
 /*
