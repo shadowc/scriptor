@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es-AR">
+	<head>
+		<title>Scriptor test page</title>
+		<script language="javascript" type="text/javascript" src="Scriptor.en.uncompressed.js"></script>
+		<link rel="stylesheet" type="text/css" href="default.css" />
+
+	<script type="text/javascript">
+		Scriptor.addOnLoad(function() {
+
+		var obj = {
+			createGrid: function () {
+				var myDataView = new Scriptor.DataView({
+					resizable: false,
+					region: 'top',
+					style : 'height: 100%;',
+					multiselect: false,
+					id: 'friendGridPanel',
+					columns: [{
+						//"cellClasses":"playername cellLeft cellPointer",
+						Width: '100%',
+						Name : 'player',
+						Type : 'object',
+						displayName : 'friend_grid.column_player',
+						Format: function(friend) {
+							return '<img class="playerimg" style="width: 16px; height: 16px;" src=""/>&nbsp; asdf';
+						},
+						Comparator: function(a, b) {
+							return a.id > b.id;
+						} 
+					}, {
+						Name: 'rating',
+						Type : 'object',
+						Width: "40px",
+						//"headerClasses": "cellCenter",
+						displayName: "<span id='friend_grid_rating_header_label'>Rating</span>",
+						Format: function(friend) {
+							return friend.name || "";
+						},
+						Comparator: function(a, b) {
+							return a.rating > b.rating;
+					    } 
+					}, {
+						Name: 'status',
+						Type : 'object',
+						Width: '50px',
+						//"headerClasses": "cellCenter",
+						displayName: 'friend_grid.column_status',
+						Format: function(friend) {
+							return 'user_status.' + friend.status;
+						},
+						Comparator:  function(a, b) {
+							return a.status > b.status;
+						} 
+					}, {
+						Name: 'action',
+						Type : 'object',
+						Width: "60px",
+						displayName: 'friend_grid.column_action',
+						//"headerClasses": "cellCenter cellBold",
+						Format:  function(user) {
+							return '<a href="#" onclick="return false;">Play</a>';
+						},
+						Comparator: function(a, b) {
+							return 0;
+						}
+					}]
+				});
+
+				return myDataView;	
+			}
+		};
+
+		var grid = obj.createGrid();
+		var friend1 = {
+			id: 1,
+			status: 'online',
+			name: 'asdf',
+			rating: 1200
+		};
+		var item1 = {
+			id: 1,
+			player: friend1,
+			rating: friend1,
+			status: friend1,
+			action: friend1
+		};
+		var friend2 = {
+			id: 2,
+			status: 'offline',
+			name: 'qwer',
+			rating: 1300
+		};
+		var item2 = {
+			id: 2,
+			player: friend2,
+			rating: friend2,
+			status: friend2,
+			action: friend2
+		};
+
+		grid.addRow(grid.createRow(item1), undefined, false);
+		grid.addRow(grid.createRow(item2), undefined, false);
+      
+		var container = document.getElementById('container');
+		container.appendChild(grid.target);
+		grid.show();
+		grid.refresh();
+	});
+	</script>
+	
+	<style type="text/css">
+		body, html {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+		}
+		
+		h1 { font-weight: normal; font-size: 20px; font-family: Verdana, Arial, Helvetica, sans-serif; margin: 10px 20px; }
+		p { font-family: Arial, Helvetica, sans-serif; size: 12px; margin: 5px 20px; padding: 0; }
+
+		#container {
+			width: 100%;
+			height: 200px;
+		}
+	</style>
+	</head>
+	<body class="scriptor">
+		<div id="container"></div>
+	</body>
+</html>
