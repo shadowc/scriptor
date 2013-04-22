@@ -23,7 +23,7 @@
 						Type : 'object',
 						displayName : 'friend_grid.column_player',
 						Format: function(friend) {
-							return '<img class="playerimg" style="width: 16px; height: 16px;" src=""/>&nbsp; asdf';
+							return '<img class="playerimg" style="width: 16px; height: 16px;" src=""/>&nbsp; ' + friend.name;
 						},
 						Comparator: function(a, b) {
 							return a.id > b.id;
