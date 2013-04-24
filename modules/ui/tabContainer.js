@@ -132,11 +132,11 @@ Scriptor.TabContainer = function(opts) {
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
-		return;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
+		//return;
+	//}
 	
 	var localOpts = {
 		title : '',
@@ -189,7 +189,7 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	this._pageContainer.addPage(theTab.pane);
 	this._pageContainer.activate(this._selectedTabId);
 	
-	var theTabCloseHandler = document.getElementById(theTab.paneId + '_closeHandler');
+	var theTabCloseHandler = tabNode.firstChild.nextSibling;
 	if (!theTab.closable)
 	{
 		Scriptor.className.add(theTabCloseHandler, 'jsTabCloseHidden');
@@ -276,11 +276,11 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 };
 
 Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
-		return false;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
+		//return false;
+	//}
 	
 	if (arguments.length == 1)	// not a click event
 	{

@@ -442,11 +442,12 @@ var Scriptor = {
 		muteErrors : false,
 		
 		report : function(msg) {
-			if (Scriptor.error.alertErrors)
-				alert(msg);
+			console.error(msg);
+			//if (Scriptor.error.alertErrors)
+				//alert(msg);
 			
-			if (!Scriptor.error.muteErrors)
-				throw msg;
+			//if (!Scriptor.error.muteErrors)
+				//throw msg;
 		}
 	},
 	
