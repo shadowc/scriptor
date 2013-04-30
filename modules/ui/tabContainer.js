@@ -145,7 +145,7 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 		closable : false
 	};
 	Scriptor.mixin(localOpts, opts);
-	
+
 	if (!localOpts.pane || !localOpts.pane.CMP_SIGNATURE || !localOpts.pane.created)
 		return;
 	
@@ -166,6 +166,8 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	var tabs = this._tabList.cmpTarget.childNodes;
 	var tabNode = document.createElement('div');
 	tabNode.id = theTab.paneId + "_tablabel";
+	tabNode.paneId = theTab.paneId;
+	theTab.target = tabNode;
 	
 	tabNode.className = 'jsTabLabel';
 	if (theTab.closable)
@@ -190,12 +192,9 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	this._pageContainer.activate(this._selectedTabId);
 	
 	var theTabCloseHandler = tabNode.firstChild.nextSibling;
-	if (!theTab.closable)
-	{
+	if (!theTab.closable) {
 		Scriptor.className.add(theTabCloseHandler, 'jsTabCloseHidden');
-	}
-	else
-	{
+	} else {
 		Scriptor.className.add(tabNode, 'jsTabClosable');
 	}
 	
@@ -206,12 +205,35 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	this.resize();
 };
 
-Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
-		return;
+
+Scriptor.TabContainer.prototype.showTab = function(paneId) {
+	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
+		if (this._tabs[i].paneId == paneId) {
+			this._tabs[i].hidden = false;
+		}
 	}
+
+	this._tabList.showTab(paneId);
+	this._pageContainer.showPage(paneId);
+};
+
+Scriptor.TabContainer.prototype.hideTab = function(paneId) {
+	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
+		if (this._tabs[i].paneId == paneId) {
+			this._tabs[i].hidden = true;
+		}
+	}
+
+	this._tabList.hideTab(paneId);
+	this._pageContainer.hidePage(paneId);
+};
+
+Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
+		//return;
+	//}
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -618,10 +640,27 @@ TabListObj.prototype.onDropdownClick = function(e) {
 };
 
 TabListObj.prototype.showMore = function() {
-	if (!this._showingMore)
-	{
+	if (!this._showingMore) {
 		Scriptor.className.remove(document.getElementById(this.divId + '_more'), 'jsTabListDropdownHidden');
 		this._showingMore = true;
+	}
+};
+
+TabListObj.prototype.showTab = function(id) {
+	var tabs = this.cmpTarget.childNodes;
+	for (var i = 0, leni = tabs.length; i < leni; ++i) {
+		if (tabs[i].paneId == id) {
+			Scriptor.className.remove(tabs[i], 'jsComponentHidden');
+		}
+	}
+};
+
+TabListObj.prototype.hideTab = function(id) {
+	var tabs = this.cmpTarget.childNodes;
+	for (var i = 0, leni = tabs.length; i < leni; ++i) {
+		if (tabs[i].paneId == id) {
+			Scriptor.className.add(tabs[i], 'jsComponentHidden');
+		}
 	}
 };
 
@@ -674,6 +713,22 @@ TabPageContainer.prototype.removePage = function(pane, destroy) {
 		pane.destroy();
 };
 
+TabPageContainer.prototype.showPage = function(id) {
+	for (var i = 0, leni = this.components.length; i < leni; ++i) {
+		if (this.components[i].divId == id) {
+			this.components[i].show();
+		}
+	}
+};
+
+TabPageContainer.prototype.hidePage = function(id) {
+	for (var i = 0, leni = this.components.length; i < leni; ++i) {
+		if (this.components[i].divId == id) {
+			this.components[i].hide();
+		}
+	}
+};
+
 TabPageContainer.prototype.activate = function(paneId) {
 	for (var n=0; n < this.components.length; n++)
 		this.components[n].hide();
@@ -697,6 +752,7 @@ var TabInstance = function(opts) {
 	};
 	Scriptor.mixin(localOpts, opts);
 	
+	this.id = localOpts.id;
 	this.title = localOpts.title;
 	this.paneId = localOpts.paneId;
 	this.pane = localOpts.pane;

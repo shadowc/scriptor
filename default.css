@@ -32,7 +32,7 @@ div.jsComponent {
   overflow:hidden;
   color:#333333;
 }
-div.jsComponent.jsComponentHidden { visibility:hidden; }
+div.jsComponent.jsComponentHidden { display:none; }
 div.jsComponent.jsComponentChild {
   position:absolute;
   top:0;
@@ -187,6 +187,13 @@ span.jsTabCloseBtn {
   width:12px;
   height:12px;
   background:transparent url(images/close-btn.png) 0 0 no-repeat;
+}
+span.jsTabDetachBtn {
+  display:inline-block;
+  margin-left:6px;
+  width:11px;
+  height:11px;
+  background:transparent url(images/detach.png) 0 0 no-repeat;
 }
 span.jsTabCloseBtn:hover { background:transparent url(images/close-btn.png) 0 -12px no-repeat; }
 div.jsTabSelected span.jsTabCloseBtn { top:6px; }

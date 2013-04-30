@@ -457,11 +457,12 @@ var Scriptor = {
 		muteErrors : false,
 		
 		report : function(msg) {
-			if (Scriptor.error.alertErrors)
-				alert(msg);
+			console.error(msg);
+			//if (Scriptor.error.alertErrors)
+				//alert(msg);
 			
-			if (!Scriptor.error.muteErrors)
-				throw msg;
+			//if (!Scriptor.error.muteErrors)
+				//throw msg;
 		}
 	},
 	
@@ -1061,7 +1062,8 @@ var browserWindowWidth = 0;
 
 var _body = null;
 
-Scriptor.cookie.init();// JavaScript Document
+Scriptor.cookie.init();
+// JavaScript Document
 /* 
 *  httpReqiest version 2.0b
 *
@@ -3071,11 +3073,11 @@ Scriptor.TabContainer = function(opts) {
 };
 
 Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
-		return;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before adding tabs!");
+		//return;
+	//}
 	
 	var localOpts = {
 		title : '',
@@ -3084,7 +3086,7 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 		closable : false
 	};
 	Scriptor.mixin(localOpts, opts);
-	
+
 	if (!localOpts.pane || !localOpts.pane.CMP_SIGNATURE || !localOpts.pane.created)
 		return;
 	
@@ -3105,6 +3107,8 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	var tabs = this._tabList.cmpTarget.childNodes;
 	var tabNode = document.createElement('div');
 	tabNode.id = theTab.paneId + "_tablabel";
+	tabNode.paneId = theTab.paneId;
+	theTab.target = tabNode;
 	
 	tabNode.className = 'jsTabLabel';
 	if (theTab.closable)
@@ -3128,13 +3132,10 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	this._pageContainer.addPage(theTab.pane);
 	this._pageContainer.activate(this._selectedTabId);
 	
-	var theTabCloseHandler = document.getElementById(theTab.paneId + '_closeHandler');
-	if (!theTab.closable)
-	{
+	var theTabCloseHandler = tabNode.firstChild.nextSibling;
+	if (!theTab.closable) {
 		Scriptor.className.add(theTabCloseHandler, 'jsTabCloseHidden');
-	}
-	else
-	{
+	} else {
 		Scriptor.className.add(tabNode, 'jsTabClosable');
 	}
 	
@@ -3143,6 +3144,29 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 	Scriptor.event.attach(theTabCloseHandler, 'onclick', Scriptor.bindAsEventListener(this.closeTab, this, theTab.paneId));
 	
 	this.resize();
+};
+
+
+Scriptor.TabContainer.prototype.showTab = function(paneId) {
+	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
+		if (this._tabs[i].paneId == paneId) {
+			this._tabs[i].hidden = false;
+		}
+	}
+
+	this._tabList.showTab(paneId);
+	this._pageContainer.showPage(paneId);
+};
+
+Scriptor.TabContainer.prototype.hideTab = function(paneId) {
+	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
+		if (this._tabs[i].paneId == paneId) {
+			this._tabs[i].hidden = true;
+		}
+	}
+
+	this._tabList.hideTab(paneId);
+	this._pageContainer.hidePage(paneId);
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
@@ -3215,11 +3239,11 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 };
 
 Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
-		return false;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before selecting tabs!");
+		//return false;
+	//}
 	
 	if (arguments.length == 1)	// not a click event
 	{
@@ -3557,10 +3581,27 @@ TabListObj.prototype.onDropdownClick = function(e) {
 };
 
 TabListObj.prototype.showMore = function() {
-	if (!this._showingMore)
-	{
+	if (!this._showingMore) {
 		Scriptor.className.remove(document.getElementById(this.divId + '_more'), 'jsTabListDropdownHidden');
 		this._showingMore = true;
+	}
+};
+
+TabListObj.prototype.showTab = function(id) {
+	var tabs = this.cmpTarget.childNodes;
+	for (var i = 0, leni = tabs.length; i < leni; ++i) {
+		if (tabs[i].paneId == id) {
+			Scriptor.className.remove(tabs[i], 'jsComponentHidden');
+		}
+	}
+};
+
+TabListObj.prototype.hideTab = function(id) {
+	var tabs = this.cmpTarget.childNodes;
+	for (var i = 0, leni = tabs.length; i < leni; ++i) {
+		if (tabs[i].paneId == id) {
+			Scriptor.className.add(tabs[i], 'jsComponentHidden');
+		}
 	}
 };
 
@@ -3613,6 +3654,22 @@ TabPageContainer.prototype.removePage = function(pane, destroy) {
 		pane.destroy();
 };
 
+TabPageContainer.prototype.showPage = function(id) {
+	for (var i = 0, leni = this.components.length; i < leni; ++i) {
+		if (this.components[i].divId == id) {
+			this.components[i].show();
+		}
+	}
+};
+
+TabPageContainer.prototype.hidePage = function(id) {
+	for (var i = 0, leni = this.components.length; i < leni; ++i) {
+		if (this.components[i].divId == id) {
+			this.components[i].hide();
+		}
+	}
+};
+
 TabPageContainer.prototype.activate = function(paneId) {
 	for (var n=0; n < this.components.length; n++)
 		this.components[n].hide();
@@ -3636,6 +3693,7 @@ var TabInstance = function(opts) {
 	};
 	Scriptor.mixin(localOpts, opts);
 	
+	this.id = localOpts.id;
 	this.title = localOpts.title;
 	this.paneId = localOpts.paneId;
 	this.pane = localOpts.pane;
@@ -3870,6 +3928,10 @@ Scriptor.DataView = function(opts) {
 	Scriptor.event.registerCustomEvent(this, 'oncontentupdated');
 	Scriptor.event.registerCustomEvent(this, 'onselect');
 	Scriptor.event.registerCustomEvent(this, 'oncolumnresize');
+
+	Scriptor.event.registerCustomEvent(this, 'oncellclick');
+	Scriptor.event.registerCustomEvent(this, 'onrowcontextmenu');
+	Scriptor.event.registerCustomEvent(this, 'onheadercellclick');
 	
 	this.orderBy = false;
 	this.orderWay = 'ASC';
@@ -3950,6 +4012,7 @@ Scriptor.DataView = function(opts) {
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'click', Scriptor.bindAsEventListener(this._onHeaderColumnClicked, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.headerUl, 'mousedown', Scriptor.bindAsEventListener(this._onHeaderColumnMousedown, this)));
 			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'click', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
+			this._registeredEvents.push(Scriptor.event.attach(this._cached.rows_body, 'contextmenu', Scriptor.bindAsEventListener(this._onRowBodyClicked, this)));
 			
 			this.updateRows(true);
 		}
@@ -4648,13 +4711,11 @@ Scriptor.DataView.prototype.updateRow = function(data) {
 	}
 
 	for (var n = 0; n < this.rows.length; ++n) {
-		if (this.rows[n].id == identifier) {
-			this.rows[n] = data;
+		if (this.rows[n].id == data.id) {
+			this.rows[n] = new dataRow(this.columns, data);
 			break;
 		}
 	}
-
-    this.updateRows();
 
 	return data.id;
 };
@@ -4742,7 +4803,7 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	if (typeof(this.columns[colNdx].Format) == 'function') {
 		var funcRet = this.columns[colNdx].Format(value);
 		cell.innerHTML = '';
-		if (typeof funcRet === 'string' || typeof funcRet === 'number')
+		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined')
 			cell.innerHTML = funcRet;
 		else
 			cell.appendChild(funcRet);		
@@ -5240,6 +5301,15 @@ Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
 	}
 	else
 	{
+
+		while (target.nodeName.toLowerCase() != 'li') {
+			if (target == this._cached.rows_body)	// click out of range
+				return;
+
+			target = target.parentNode;
+		}
+		var cellId = target.id.substr(target.id.lastIndexOf('_')+1);
+
 		while (target.nodeName.toLowerCase() != 'ul')
 		{
 			if (target == this._cached.rows_body)	// click out of range
@@ -5258,6 +5328,20 @@ Scriptor.DataView.prototype._onRowBodyClicked = function(e) {
 			}
 		}
 	}
+
+	e.row = {
+		data: this.rows[n],
+		index: rowId
+	};
+	e.cell = {
+		index: cellId
+	};
+
+	if (e.button === 2) {
+		Scriptor.event.fire(this, 'onrowcontextmenu', e);
+	} else {
+		Scriptor.event.fire(this, 'oncellclick', e);
+	}
 };
 
 /*
@@ -5269,12 +5353,13 @@ Scriptor.DataView.prototype._onHeaderColumnClicked = function(e) {
 	if (!e) e = window.event;
 	
 	var target = e.target || e.srcElement;
+
+	Scriptor.event.fire(this, 'onheadercellclick', e);
 	
-	if (target.nodeName.toLowerCase() == 'a')
-	{
-		colNdx = Number(target.id.substr(target.id.lastIndexOf('_')+1));
-		if (!isNaN(colNdx))
-		{
+	if (target.nodeName.toLowerCase() == 'a') {
+		var colNdx = parseInt(target.id.substr(target.id.lastIndexOf('_') + 1), 10);
+
+		if (!isNaN(colNdx)) {
 			this.__setOrder(colNdx);
 		}
 		
@@ -5660,11 +5745,12 @@ Scriptor.DataView.prototype._adjustColumnsWidth = function(forceUIChange) {
 				var rowsbase = this.multiselect ? 1 : 0;
 				for (var a=0; a < rows.length; a++)
 				{
-					var rLis = rows[a].getElementsByTagName('li');
-					
-					for (var n=0; n < this.columns.length; n++)
-					{
-						rLis[rowsbase+n].style.width = this.columns[n].Width + 'px';
+					var rowId = rows[a].id.substr(rows[a].id.lastIndexOf('_')+1);
+					for (var n = rowsbase, lenn = this.columns.length, li; n < lenn; ++n) {
+						li = this._li[this.divId + '_cell_' + rowId + '_' + n];
+						if (li) {
+							li.style.width = this.columns[n].Width + 'px';
+						}
 					}
 				}
 			}
@@ -5714,53 +5800,38 @@ Scriptor.DataView.prototype.__calculateTotalWidth = function()
 *  For internal use only. Use global function __setOrder instead.
 */
 Scriptor.DataView.prototype.__sort = function(start) {
-	var n, tempRow, swap;	
 	
-	if (!this.orderBy)
+	if (!this.orderBy) {
 		return;
-		
-	for (n = start+1; n < this.rows.length; n++) {
-		var swap = false;
-		var	func = this.columns[this.__findColumn(this.orderBy)].Comparator;
-		
-		if (this.orderWay == 'ASC') {
-			
-			swap = (typeof(func) == 'function') ?
-				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy]) > 0 : 
-				(this.rows[start][this.orderBy] > this.rows[n][this.orderBy]);
-		}
-		else {
-			swap = (typeof(func) == 'function') ?
-				func(this.rows[start][this.orderBy], this.rows[n][this.orderBy] < 0) :
-				(this.rows[start][this.orderBy] < this.rows[n][this.orderBy]);
-		}
-		
-		if (swap) {
-			tempRow = this.rows[start];
-			this.rows[start] = this.rows[n];
-			this.rows[n] = tempRow;
-			
-			if (this.selectedRow == start) {
-				this.selectedRow = n;				
-			}
-			else {
-				if (this.selectedRow == n) {
-					this.selectedRow = start;					
-				}
-			}
-			
-			for (var a=0; a < this.selectedRows.length; a++) {
-				if (this.selectedRows[a] == start)
-					this.selectedRows[a] = n;
-				else
-					if (this.selectedRows[a] == n)
-						this.selectedRows[a] = start;
-			}
-		}
 	}
-	
-	if (start < this.rows.length -2)
-		this.__sort( start +1 );
+
+	var comparator, asc, desc;
+	var orderBy = this.orderBy;
+	var Comparator = this.columns[this.__findColumn(orderBy)].Comparator;
+
+	if (typeof Comparator === 'function' && this.orderWay === 'ASC') {
+		// Comparator and ASC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]) > 0;
+		};
+	} else if (typeof Comparator === 'function') {
+		// Comparator and DESC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]) < 0;
+		};
+	} else if (this.orderWay === 'ASC') {
+		// NO Comparator and ASC
+		comparator = function (a, b) {
+			return a[orderBy] > b[orderBy];
+		};
+	} else {
+		// NO Comparator and DESC
+		comparator = function (a, b) {
+			return a[orderBy] < b[orderBy];
+		};
+	}
+
+	this.rows.sort(comparator);
 };
 
 /*
