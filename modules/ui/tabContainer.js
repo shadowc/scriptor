@@ -479,11 +479,11 @@ Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
 };
 
 Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
-		return false;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
+		//return false;
+	//}
 	
 	if (arguments.length == 1)	// not a click event
 	{

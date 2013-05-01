@@ -206,6 +206,15 @@ Scriptor.Dialog = function(opts)
 	// TODO: Resizable!
 };
 
+Scriptor.Dialog.prototype.setClosable = function(closable) {
+	if (closable) {
+		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	} else {
+		Scriptor.className.remove(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	}
+	this.closable = closable;
+};
+
 Scriptor.Dialog.prototype._startDragging = function(e) {
 	if (!e)	e = window.event;
 	

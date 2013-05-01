@@ -284,7 +284,7 @@ var Component = {
 				var e = Scriptor.event.fire(this, 'onbeforedestroy');
 				if (!e.returnValue)
 					return;
-					
+
 				if (this.target) {
 					this.visible = false;
 					this.onDOMRemoved();
