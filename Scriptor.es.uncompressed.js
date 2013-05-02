@@ -1758,7 +1758,7 @@ var Component = {
 				var e = Scriptor.event.fire(this, 'onbeforedestroy');
 				if (!e.returnValue)
 					return;
-					
+
 				if (this.target) {
 					this.visible = false;
 					this.onDOMRemoved();
@@ -3170,11 +3170,11 @@ Scriptor.TabContainer.prototype.hideTab = function(paneId) {
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
-		return;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
+		//return;
+	//}
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -3364,11 +3364,11 @@ Scriptor.TabContainer.prototype.setTitle = function(ref, title) {
 };
 
 Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before calling to setClosable!");
-		return;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before calling to setClosable!");
+		//return;
+	//}
 	
 	var ndx = null;
 	
@@ -3420,11 +3420,11 @@ Scriptor.TabContainer.prototype.setClosable = function(ref, closable) {
 };
 
 Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
-	if (!this.inDOM)
-	{
-		Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
-		return false;
-	}
+	//if (!this.inDOM)
+	//{
+		//Scriptor.error.report("TabContainer must be added to DOM before closing tabs!");
+		//return false;
+	//}
 	
 	if (arguments.length == 1)	// not a click event
 	{
@@ -8827,7 +8827,7 @@ Scriptor.Dialog = function(opts)
 	else
 		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
 	this.target.insertBefore(this._titlePanel, this.cmpTarget);
-	
+
 	if (!this.closable)
 	{
 		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
@@ -8847,6 +8847,23 @@ Scriptor.Dialog = function(opts)
 	Scriptor.event.attach(document.getElementById(this.divId+'_closeHandle'), 'onclick', Scriptor.bind(this.hide, this));
 	
 	// TODO: Resizable!
+};
+
+Scriptor.Dialog.prototype.getTitle = function() {
+	return this._titlePanel.firstChild.innerHTML;
+};
+
+Scriptor.Dialog.prototype.setTitle = function(title) {
+	return this._titlePanel.firstChild.innerHTML = title;
+};
+
+Scriptor.Dialog.prototype.setClosable = function(closable) {
+	if (closable) {
+		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	} else {
+		Scriptor.className.remove(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	}
+	this.closable = closable;
 };
 
 Scriptor.Dialog.prototype._startDragging = function(e) {

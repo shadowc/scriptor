@@ -61,12 +61,9 @@ div.jsTargetComponent {
 }
 div.jsPanel {
   border:none;
-  background:#ffffff;
+  background:none;
 }
-div.jsPanel.jsComponentChild {
-  background:#fafaff;
-  border:1px solid #aaaaaa;
-}
+div.jsPanel.jsComponentChild { background:none; }
 div.jsComponent div.jsSplitter {
   position:absolute;
   border:none;
@@ -152,7 +149,7 @@ div.jsTabLabel {
   float:left;
   bottom:0;
   top:2px;
-  background:#ffffff url(images/tab-unsel-back.png) top repeat-x;
+  background:transparent url(images/tab-unsel-back.png) top repeat-x;
   padding:2px 6px;
   height:16px;
   color:#666666;
@@ -205,14 +202,14 @@ span.jsTabListDropdown {
   margin-right:2px;
   width:12px;
   height:23px;
-  background:#ffffff url(images/drop-down.png) -2px 5px no-repeat;
+  background:none url(images/drop-down.png) -2px 5px no-repeat;
   cursor:pointer;
 }
 span.jsTabListDropdown:hover { background-color:#bee4f4; }
 span.jsTabListDropdownHidden { visibility:hidden; }
 .dataViewMain {
   overflow:hidden;
-  background:#ffffff;
+  background:none;
   border:1px solid #888888;
 }
 .dataViewToolbar {
@@ -385,7 +382,7 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 .dataViewHeaderMenu a:hover { background-color:#bee4f4; }
 .treeView {
   border:1px solid #888888;
-  background:#ffffff;
+  background:none;
   overflow:auto !important;
 }
 .treeView div.treeViewMessageDiv {
@@ -423,8 +420,8 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   display:block;
   margin-left:15px;
   padding:2px 4px;
-  border:1px solid #ffffff;
-  background:#ffffff;
+  border:1px solid none;
+  background:none;
 }
 .treeView ul li a.treeViewSingleNode { margin-left:15px; }
 .treeView ul li a.treeViewExpandableNode {
@@ -453,10 +450,10 @@ span.jsTabListDropdownHidden { visibility:hidden; }
   -webkit-background-clip:padding-box;
   -moz-border-radius:4px;
 }
-.treeView.treeViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }
+.treeView.treeViewLoading { background:none URL('images/ajax-loader.gif') no-repeat center center; }
 .jsPageContainer ul.treeViewContainer { margin:0; }
 .calendarView {
-  background:#ffffff;
+  background:none;
   color:#333333;
   overflow:auto;
 }
@@ -620,12 +617,12 @@ span.jsTabListDropdownHidden { visibility:hidden; }
 }
 .calendarView div.calendarViewAdvanced p .calendarBtn:hover { background:#bee4f4; }
 .galleryViewWrapper {
-  background:#ffffff;
+  background:none;
   color:#333333;
   border:1px solid #888888;
 }
 div.galleryView {
-  background:#ffffff;
+  background:none;
   color:#333333;
   overflow:auto;
 }
@@ -636,7 +633,7 @@ div.galleryView div {
 div.galleryView div img {
   cursor:pointer;
   display:block;
-  border:2px solid #ffffff;
+  border:2px solid none;
 }
 div.galleryView div p {
   font-size:12px;
@@ -644,7 +641,7 @@ div.galleryView div p {
 }
 div.galleryView div.gvSelectedImage img { border:2px solid #333333; }
 div.galleryView div.gvSelectedImage p { font-weight:bold; }
-.galleryViewLoading { background:#ffffff URL('images/ajax-loader.gif') no-repeat center center; }
+.galleryViewLoading { background:none URL('images/ajax-loader.gif') no-repeat center center; }
 .galleryViewLoading div, .galleryViewMessage div { display:none; }
 .galleryViewMessage p {
   margin:10px;
@@ -708,7 +705,7 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 .jsToolbarExtraPanel span a:hover { text-decoration:underline; }
 .jsToolbarExtraPanel.jsToolbarExtraPanelHidden { visibility:hidden; }
 .jsComponent.jsDialog {
-  background:#ffffff;
+  background:none;
   border:1px solid #aaaaaa;
   position:absolute;
   border-radius:4px;

@@ -184,7 +184,7 @@ Scriptor.Dialog = function(opts)
 	else
 		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
 	this.target.insertBefore(this._titlePanel, this.cmpTarget);
-	
+
 	if (!this.closable)
 	{
 		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
@@ -204,6 +204,14 @@ Scriptor.Dialog = function(opts)
 	Scriptor.event.attach(document.getElementById(this.divId+'_closeHandle'), 'onclick', Scriptor.bind(this.hide, this));
 	
 	// TODO: Resizable!
+};
+
+Scriptor.Dialog.prototype.getTitle = function() {
+	return this._titlePanel.firstChild.innerHTML;
+};
+
+Scriptor.Dialog.prototype.setTitle = function(title) {
+	return this._titlePanel.firstChild.innerHTML = title;
 };
 
 Scriptor.Dialog.prototype.setClosable = function(closable) {
