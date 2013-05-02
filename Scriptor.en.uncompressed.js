@@ -3245,6 +3245,8 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		//return false;
 	//}
 	
+	var tab;
+
 	if (arguments.length == 1)	// not a click event
 	{
 		ref = e;
@@ -3256,6 +3258,7 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	if (typeof(ref) == 'number')
 	{
 		ndx = ref;
+		tab = this._tabs[ndx];
 	}
 	else if (typeof(ref) == 'string')
 	{
@@ -3264,6 +3267,7 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 			if (this._tabs[n].paneId == ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -3275,6 +3279,7 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 			if (this._tabs[n].pane === ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -3284,7 +3289,7 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	{
 		if (arguments.length > 1)
 		{
-			e.selectedTabId = this._selectedTabId;
+			e.selectedTabId = tab ? tab.id : null;
 			e.selecting = ndx;
 			e = Scriptor.event.fire(this, 'onselect', e);
 			

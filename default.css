@@ -705,7 +705,7 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 .jsToolbarExtraPanel span a:hover { text-decoration:underline; }
 .jsToolbarExtraPanel.jsToolbarExtraPanelHidden { visibility:hidden; }
 .jsComponent.jsDialog {
-  background:none;
+  background:#ffffff;
   border:1px solid #aaaaaa;
   position:absolute;
   border-radius:4px;
