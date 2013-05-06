@@ -496,11 +496,13 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	}
 	
 	var ndx = null;
+	var tab = null;
 	
 	// identify tab
 	if (typeof(ref) == 'number')
 	{
 		ndx = ref;
+		tab = this._tabs[ndx];
 	}
 	else if (typeof(ref) == 'string')
 	{
@@ -509,6 +511,7 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 			if (this._tabs[n].paneId == ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -520,6 +523,7 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 			if (this._tabs[n].pane === ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -529,7 +533,8 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	{
 		if (arguments.length > 1)
 		{
-			e.selectedTabId = this._selectedTabId;
+			e.closedTab = tab ? tab : null;
+			e.closedTabId = tab ? tab.id : null;
 			e.closing = ndx;
 			e = Scriptor.event.fire(this, 'ontabclosed', e);
 			
@@ -753,7 +758,8 @@ var TabInstance = function(opts) {
 		title : '',
 		paneId : null,
 		pane : null,
-		closable : false
+		closable : false,
+		onClose: function () {}
 	};
 	Scriptor.mixin(localOpts, opts);
 	
@@ -762,4 +768,5 @@ var TabInstance = function(opts) {
 	this.paneId = localOpts.paneId;
 	this.pane = localOpts.pane;
 	this.closable = localOpts.closable;
+	this.onClose = localOpts.onClose;
 };

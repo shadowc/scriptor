@@ -374,10 +374,17 @@ var Component = {
 						var maxBottomHeight = 0;
 						var bottomUniformWidth = (this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right) / bottomChildren.length;
 						var bottomResizable = false;
-						for (var n=0; n < bottomChildren.length; n++)
+						for (var n=0, bottomChild; n < bottomChildren.length; n++)
 						{
-							if (bottomChildren[n].height > maxBottomHeight)
-								maxBottomHeight = bottomChildren[n].height;
+							bottomChild = bottomChildren[n];
+
+							if (bottomChild.height > maxBottomHeight) {
+								maxBottomHeight = bottomChild.height;
+							}
+
+							if (bottomChild.target && bottomChild.target.offsetHeight > maxBottomHeight) {
+								maxBottomHeight = bottomChild.target.offsetHeight;
+							}
 							
 							if (bottomChildren[n].resizable)
 								bottomResizable = true;
