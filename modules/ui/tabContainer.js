@@ -781,7 +781,6 @@ TabPageContainer.prototype.activate = function(paneId) {
 		
 	for (var n=0; n < this.components.length; n++) {
 		if (this.components[n].divId == paneId) {
-			console.log(this.components[n]);
 			this.components[n].show();
 		}
 	}
