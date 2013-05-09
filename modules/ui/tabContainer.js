@@ -35,6 +35,42 @@ Scriptor.TabContainer = function(opts) {
 	
 	this._tabs = [];
 	this._selectedTabId = null;
+
+	this.show = function() {
+		var e = Scriptor.event.fire(this, 'onbeforeshow');
+		if (!e.returnValue)
+		return;
+
+		if (!this.created)
+		this.create();
+
+		if (!this.visible && this.target) {
+			Scriptor.className.remove(this.target, 'jsComponentHidden');
+			this.visible = true;
+
+			this.showImplementation.apply(this, arguments);
+
+			for (var n=0; n < this.components.length; n++) {
+				this.components[n].show();
+			}
+
+			var paneId = this._selectedTabId;
+			if (!paneId && this._tabs.length > 0) {
+				paneId = this._tabs[0].paneId;
+			}
+
+			this._pageContainer.activate(paneId);
+
+			if (this.parent)
+			this.parent.resize();
+			else
+			this.resize();	// we're doing component layout here!
+
+			this.focus();
+
+			Scriptor.event.fire(this, 'onshow');
+		}
+	};
 	
 	// redefine component implementation
 	this.resizeImplementation = function() {
@@ -722,7 +758,6 @@ TabPageContainer.prototype.removePage = function(pane, destroy) {
 	if (destroy)
 		pane.destroy();
 };
-
 TabPageContainer.prototype.showPage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {
 		if (this.components[i].divId == id) {
@@ -740,13 +775,13 @@ TabPageContainer.prototype.hidePage = function(id) {
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	for (var n=0; n < this.components.length; n++)
+	for (var n=0; n < this.components.length; n++) {
 		this.components[n].hide();
+	}
 		
-	for (var n=0; n < this.components.length; n++)
-	{
-		if (this.components[n].divId == paneId)
-		{
+	for (var n=0; n < this.components.length; n++) {
+		if (this.components[n].divId == paneId) {
+			console.log(this.components[n]);
 			this.components[n].show();
 		}
 	}
