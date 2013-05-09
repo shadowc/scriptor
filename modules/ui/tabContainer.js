@@ -801,6 +801,7 @@ var TabInstance = function(opts) {
 	this.title = localOpts.title;
 	this.paneId = localOpts.paneId;
 	this.pane = localOpts.pane;
+	this._panel = localOpts.pane;
 	this.closable = localOpts.closable;
 	this.onClose = localOpts.onClose;
 };
