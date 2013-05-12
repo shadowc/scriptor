@@ -185,6 +185,14 @@ span.jsTabCloseBtn {
   height:12px;
   background:transparent url(images/close-btn.png) 0 0 no-repeat;
 }
+span.jsTabAttachBtn {
+  display:inline-block;
+  width:11px;
+  height:11px;
+  background:transparent url(images/attach.png) 0 0 no-repeat;
+  float:right;
+  margin:5px;
+}
 span.jsTabDetachBtn {
   display:inline-block;
   margin-left:6px;

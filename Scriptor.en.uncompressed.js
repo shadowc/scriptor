@@ -1848,10 +1848,17 @@ var Component = {
 						var maxBottomHeight = 0;
 						var bottomUniformWidth = (this.width - innerBox.left - innerBox.right - outerBox.left - outerBox.right) / bottomChildren.length;
 						var bottomResizable = false;
-						for (var n=0; n < bottomChildren.length; n++)
+						for (var n=0, bottomChild; n < bottomChildren.length; n++)
 						{
-							if (bottomChildren[n].height > maxBottomHeight)
-								maxBottomHeight = bottomChildren[n].height;
+							bottomChild = bottomChildren[n];
+
+							if (bottomChild.height > maxBottomHeight) {
+								maxBottomHeight = bottomChild.height;
+							}
+
+							if (bottomChild.target && bottomChild.target.offsetHeight > maxBottomHeight) {
+								maxBottomHeight = bottomChild.target.offsetHeight;
+							}
 							
 							if (bottomChildren[n].resizable)
 								bottomResizable = true;
@@ -2976,6 +2983,42 @@ Scriptor.TabContainer = function(opts) {
 	
 	this._tabs = [];
 	this._selectedTabId = null;
+
+	this.show = function() {
+		var e = Scriptor.event.fire(this, 'onbeforeshow');
+		if (!e.returnValue)
+		return;
+
+		if (!this.created)
+		this.create();
+
+		if (!this.visible && this.target) {
+			Scriptor.className.remove(this.target, 'jsComponentHidden');
+			this.visible = true;
+
+			this.showImplementation.apply(this, arguments);
+
+			for (var n=0; n < this.components.length; n++) {
+				this.components[n].show();
+			}
+
+			var paneId = this._selectedTabId;
+			if (!paneId && this._tabs.length > 0) {
+				paneId = this._tabs[0].paneId;
+			}
+
+			this._pageContainer.activate(paneId);
+
+			if (this.parent)
+			this.parent.resize();
+			else
+			this.resize();	// we're doing component layout here!
+
+			this.focus();
+
+			Scriptor.event.fire(this, 'onshow');
+		}
+	};
 	
 	// redefine component implementation
 	this.resizeImplementation = function() {
@@ -3437,11 +3480,13 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	}
 	
 	var ndx = null;
+	var tab = null;
 	
 	// identify tab
 	if (typeof(ref) == 'number')
 	{
 		ndx = ref;
+		tab = this._tabs[ndx];
 	}
 	else if (typeof(ref) == 'string')
 	{
@@ -3450,6 +3495,7 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 			if (this._tabs[n].paneId == ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -3461,6 +3507,7 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 			if (this._tabs[n].pane === ref)
 			{
 				ndx = n;
+				tab = this._tabs[ndx];
 				break;
 			}
 		}
@@ -3470,7 +3517,8 @@ Scriptor.TabContainer.prototype.closeTab = function(e, ref) {
 	{
 		if (arguments.length > 1)
 		{
-			e.selectedTabId = this._selectedTabId;
+			e.closedTab = tab ? tab : null;
+			e.closedTabId = tab ? tab.id : null;
 			e.closing = ndx;
 			e = Scriptor.event.fire(this, 'ontabclosed', e);
 			
@@ -3658,7 +3706,6 @@ TabPageContainer.prototype.removePage = function(pane, destroy) {
 	if (destroy)
 		pane.destroy();
 };
-
 TabPageContainer.prototype.showPage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {
 		if (this.components[i].divId == id) {
@@ -3676,13 +3723,12 @@ TabPageContainer.prototype.hidePage = function(id) {
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	for (var n=0; n < this.components.length; n++)
+	for (var n=0; n < this.components.length; n++) {
 		this.components[n].hide();
+	}
 		
-	for (var n=0; n < this.components.length; n++)
-	{
-		if (this.components[n].divId == paneId)
-		{
+	for (var n=0; n < this.components.length; n++) {
+		if (this.components[n].divId == paneId) {
 			this.components[n].show();
 		}
 	}
@@ -3694,7 +3740,8 @@ var TabInstance = function(opts) {
 		title : '',
 		paneId : null,
 		pane : null,
-		closable : false
+		closable : false,
+		onClose: function () {}
 	};
 	Scriptor.mixin(localOpts, opts);
 	
@@ -3702,7 +3749,9 @@ var TabInstance = function(opts) {
 	this.title = localOpts.title;
 	this.paneId = localOpts.paneId;
 	this.pane = localOpts.pane;
+	this._panel = localOpts.pane;
 	this.closable = localOpts.closable;
+	this.onClose = localOpts.onClose;
 };
 /* JavaScript Document
 *

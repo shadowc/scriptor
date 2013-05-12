@@ -270,6 +270,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
 		//return;
 	//}
+
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -303,7 +304,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 			}
 		}
 	}
-	
+
 	if (ndx !== null)
 	{
 		// deselect tab
@@ -796,6 +797,8 @@ var TabInstance = function(opts) {
 		onClose: function () {}
 	};
 	Scriptor.mixin(localOpts, opts);
+
+	this.CMP_SIGNATURE = "Scriptor.ui.private.TabInstance";
 	
 	this.id = localOpts.id;
 	this.title = localOpts.title;
