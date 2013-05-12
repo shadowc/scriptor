@@ -289,8 +289,9 @@ var Component = {
 					this.visible = false;
 					this.onDOMRemoved();
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].destroy();
+					while (this.components.length) {
+						this.components[0].destroy();
+					}
 					
 					this.destroyImplementation.apply(this, arguments);
 					
