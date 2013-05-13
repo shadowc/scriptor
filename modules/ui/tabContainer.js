@@ -383,19 +383,6 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	
 	if (ndx !== null)
 	{
-		if (arguments.length > 1)
-		{
-			e.selectedTabId = tab ? tab.id : null;
-			e.selecting = ndx;
-			e = Scriptor.event.fire(this, 'onselect', e);
-			
-			if (e.returnValue == false)
-			{
-				Scriptor.event.cancel(e, true);
-				return false;
-			}
-		}
-		
 		Scriptor.className.remove(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		
 		if (this._tabs[ndx])
@@ -410,6 +397,20 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		this._pageContainer.activate(this._selectedTabId);
+
+		if (arguments.length > 1)
+		{
+			e.selectedTabId = tab ? tab.id : null;
+			e.selecting = ndx;
+			e = Scriptor.event.fire(this, 'onselect', e);
+			
+			if (e.returnValue == false)
+			{
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+		}
+		
 	}
 	
 	Scriptor.event.cancel(e, true);
@@ -419,8 +420,9 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 Scriptor.TabContainer.prototype.getSelectedTab = function() {
 	for (var n=0; n < this._tabs.length; n++)
 	{
-		if (this._tabs[n].paneId == this._selectedTabId)
+		if (this._tabs[n].paneId == this._selectedTabId) {
 			return this._tabs[n].pane;
+		}
 	}
 	
 	return null;
