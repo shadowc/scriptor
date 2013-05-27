@@ -809,4 +809,5 @@ var TabInstance = function(opts) {
 	this._panel = localOpts.pane;
 	this.closable = localOpts.closable;
 	this.onClose = localOpts.onClose;
+	this.onReattach = localOpts.onReattach;
 };

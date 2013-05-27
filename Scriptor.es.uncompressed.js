@@ -1763,8 +1763,9 @@ var Component = {
 					this.visible = false;
 					this.onDOMRemoved();
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].destroy();
+					while (this.components.length) {
+						this.components[0].destroy();
+					}
 					
 					this.destroyImplementation.apply(this, arguments);
 					
@@ -3218,6 +3219,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
 		//return;
 	//}
+
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -3251,7 +3253,7 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 			}
 		}
 	}
-	
+
 	if (ndx !== null)
 	{
 		// deselect tab
@@ -3330,19 +3332,6 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 	
 	if (ndx !== null)
 	{
-		if (arguments.length > 1)
-		{
-			e.selectedTabId = tab ? tab.id : null;
-			e.selecting = ndx;
-			e = Scriptor.event.fire(this, 'onselect', e);
-			
-			if (e.returnValue == false)
-			{
-				Scriptor.event.cancel(e, true);
-				return false;
-			}
-		}
-		
 		Scriptor.className.remove(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		
 		if (this._tabs[ndx])
@@ -3357,6 +3346,20 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 		
 		Scriptor.className.add(document.getElementById(this._selectedTabId + "_tablabel"), 'jsTabSelected');
 		this._pageContainer.activate(this._selectedTabId);
+
+		if (arguments.length > 1)
+		{
+			e.selectedTabId = tab ? tab.id : null;
+			e.selecting = ndx;
+			e = Scriptor.event.fire(this, 'onselect', e);
+			
+			if (e.returnValue == false)
+			{
+				Scriptor.event.cancel(e, true);
+				return false;
+			}
+		}
+		
 	}
 	
 	Scriptor.event.cancel(e, true);
@@ -3366,8 +3369,9 @@ Scriptor.TabContainer.prototype.selectTab = function(e, ref) {
 Scriptor.TabContainer.prototype.getSelectedTab = function() {
 	for (var n=0; n < this._tabs.length; n++)
 	{
-		if (this._tabs[n].paneId == this._selectedTabId)
+		if (this._tabs[n].paneId == this._selectedTabId) {
 			return this._tabs[n].pane;
+		}
 	}
 	
 	return null;
@@ -3744,6 +3748,8 @@ var TabInstance = function(opts) {
 		onClose: function () {}
 	};
 	Scriptor.mixin(localOpts, opts);
+
+	this.CMP_SIGNATURE = "Scriptor.ui.private.TabInstance";
 	
 	this.id = localOpts.id;
 	this.title = localOpts.title;
