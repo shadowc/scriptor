@@ -135,55 +135,47 @@ div.jsContextMenu ul li.OptionChecked a { background:#fbfbfb url(images/check.pn
 div.jsContextMenu ul li.OptionChecked a:hover { background:#2165aa url(images/check.png) no-repeat 2px center; }
 div.jsTabContainer div.jsTabList { height:24px; }
 div.jsTabContainer div.jsTabListInner {
-  border-bottom:1px solid #888888;
   height:23px;
   overflow:visible;
 }
 div.jsTabContainer div.jsPageContainer {
-  border:1px solid #888888;
-  border-top:none;
   padding:5px;
+  background:#f1f0ed;
 }
 div.jsTabLabel {
   position:relative;
   float:left;
-  bottom:0;
   top:2px;
-  background:transparent url(images/tab-unsel-back.png) top repeat-x;
-  padding:2px 6px;
-  height:16px;
-  color:#666666;
+  background:#dbdad6;
+  padding:3px 6px 2px 6px;
+  height:18px;
+  color:#51504d;
   cursor:pointer;
-  font-size:12px;
+  font-size:11px;
   margin-right:1px;
-  border:1px solid #888888;
   border-radius:4px 4px 0 0;
   -webkit-border-radius:4px 4px 0 0;
   -moz-border-radius:4px 4px 0 0;
   border-bottom:none;
-  font-weight:bold;
+  font-family:'trebuchet ms', arial, sans-serif;
 }
 div.jsTabLabel.jsTabSelected {
-  background:#ffffff url(images/tab-sel-back.png) top repeat-x;
-  bottom:-1px;
-  height:17px;
-  padding-top:4px;
-  top:0;
-  color:#333333;
+  font-weight:bold;
+  background:#f1f0ed;
+  height:18px;
+  top:2px;
 }
-div.jsTabLabel.jsTabClosable { padding-right:20px; }
 div.jsTabPage {
   border:none !important;
   background:transparent !important;
 }
 span.jsTabCloseBtn {
-  display:block;
-  position:absolute;
-  top:4px;
-  right:4px;
-  width:12px;
-  height:12px;
-  background:transparent url(images/close-btn.png) 0 0 no-repeat;
+  display:inline-block;
+  margin-left:5px;
+  width:14px;
+  height:14px;
+  vertical-align:middle;
+  background:transparent url(images/close.png) 0 0 no-repeat;
 }
 span.jsTabAttachBtn {
   display:inline-block;
@@ -191,16 +183,17 @@ span.jsTabAttachBtn {
   height:11px;
   background:transparent url(images/attach.png) 0 0 no-repeat;
   float:right;
-  margin:5px;
+  margin:4px;
 }
 span.jsTabDetachBtn {
   display:inline-block;
-  margin-left:6px;
+  margin-left:5px;
   width:11px;
   height:11px;
+  vertical-align:middle;
   background:transparent url(images/detach.png) 0 0 no-repeat;
 }
-span.jsTabCloseBtn:hover { background:transparent url(images/close-btn.png) 0 -12px no-repeat; }
+span.jsTabCloseBtn:hover { background:transparent url(images/close.png) -14px 0 no-repeat; }
 div.jsTabSelected span.jsTabCloseBtn { top:6px; }
 span.jsTabCloseHidden { display:none !important; }
 span.jsTabListDropdown {
@@ -714,37 +707,31 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 .jsToolbarExtraPanel.jsToolbarExtraPanelHidden { visibility:hidden; }
 .jsComponent.jsDialog {
   background:#ffffff;
-  border:1px solid #aaaaaa;
   position:absolute;
-  border-radius:4px;
-  -webkit-border-radius:4px;
+  border-radius:6px;
+  -webkit-border-radius:6px;
   -webkit-background-clip:padding-box;
-  -moz-border-radius:4px;
-  -webkit-box-shadow:1px 1px 5px #777777;
-  -moz-box-shadow:1px 1px 5px #777777;
-  box-shadow:1px 1px 5px #777777;
+  -moz-border-radius:6px;
+  -webkit-box-shadow:0px 4px 14px #888888;
+  -moz-box-shadow:0px 4px 14px #888888;
+  box-shadow:0px 4px 14px #888888;
 }
-.jsComponent.jsDialog.jsComponentFocused { border:1px solid #888888; }
 .jsComponent.jsDialog .jsDialogTitle {
-  padding:4px 22px 4px 6px;
-  color:#ffffff;
-  text-shadow:-1px -1px 0 #333333;
-  background:#1d6e95;
-  -webkit-box-shadow:inset 1px 1px 3px #3ea7da;
-  -moz-box-shadow:inset 1px 1px 3px #3ea7da;
-  box-shadow:inset 1px 1px 3px #3ea7da;
-  border-bottom:1px solid #154e6a;
+  padding:2px 2px 2px 7px;
+  background:#f2f0ed;
   cursor:pointer;
+  font-size:12px;
+  font-weight:bold;
+  color:#32302d;
 }
 .jsComponent.jsDialog .jsDialogTitle.jsDialogTitleHidden { display:none; }
 .jsComponent.jsDialog .jsDialogClose {
-  background:url("images/close-btn.png") no-repeat 0 0;
+  background:url("images/close.png") no-repeat 0 0;
   display:block;
-  height:12px;
-  position:absolute;
-  right:6px;
-  top:8px;
-  width:12px;
+  float:right;
+  height:14px;
+  width:14px;
+  margin:3px;
 }
-.jsComponent.jsDialog .jsDialogClose:hover { background:url("images/close-btn.png") no-repeat 0 -12px; }
+.jsComponent.jsDialog .jsDialogClose:hover { background:url("images/close.png") no-repeat -14px 0; }
 .jsComponent.jsDialog .jsDialogClose.jsDialogCloseHidden { display:none; }

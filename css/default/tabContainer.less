@@ -4,46 +4,39 @@ div.jsTabContainer div.jsTabList {
 }
 
 div.jsTabContainer div.jsTabListInner {
-	border-bottom: 1px solid @panelBorderColorFocus;
 	height: 23px;
 	overflow: visible;
 }
 
 div.jsTabContainer div.jsPageContainer {
-	border: 1px solid @panelBorderColorFocus;
-	border-top: none;
 	padding: 5px;
+	background: #f1f0ed;
 }
 
 div.jsTabLabel {
 	position: relative;
 	float: left;
-	bottom: 0;
 	top: 2px;
-	background: transparent url(images/tab-unsel-back.png) top repeat-x;
-	padding: 2px 6px;
-	height: 16px;
-	color: @tabUnselColor;
+	background: #dbdad6;
+	padding: 3px 6px 2px 6px;
+	height: 18px;
+	color: #51504d;
 	cursor: pointer;
-	font-size: 12px;
+	font-size: 11px;
 	margin-right: 1px;
-	border: 1px solid #888888;
 	.fullBorderRadius(4px;4px;0;0);
 	border-bottom: none;
-	font-weight: bold; 
+	font-family: 'trebuchet ms', arial, sans-serif;
 }
 
 div.jsTabLabel.jsTabSelected {
-	background: #fff url(images/tab-sel-back.png) top repeat-x;
-	bottom: -1px;
-	height: 17px;
-	padding-top: 4px;
-	top: 0;
-	color: @tabSelColor;
+	font-weight: bold;
+	background: #f1f0ed;
+	height: 18px;
+	top: 2px;
 }
 
 div.jsTabLabel.jsTabClosable {
-	padding-right: 20px;
 }
 
 div.jsTabPage {
@@ -52,13 +45,12 @@ div.jsTabPage {
 }
 
 span.jsTabCloseBtn {
-	display: block;
-	position: absolute;
-	top: 4px;
-	right: 4px; 
-	width: 12px;
-	height: 12px;
-	background: transparent url(images/close-btn.png) 0 0 no-repeat;
+	display: inline-block;
+	margin-left: 5px;
+	width: 14px;
+	height: 14px;
+	vertical-align: middle;
+	background: transparent url(images/close.png) 0 0 no-repeat;
 }
 
 span.jsTabAttachBtn {
@@ -67,19 +59,20 @@ span.jsTabAttachBtn {
   height:11px;
   background:transparent url(images/attach.png) 0 0 no-repeat;
   float: right;
-  margin: 5px;
+  margin: 4px;
 }
 
 span.jsTabDetachBtn {
 	display: inline-block;
-	margin-left: 6px;
+	margin-left: 5px;
 	width: 11px;
 	height: 11px;
+	vertical-align: middle;
 	background: transparent url(images/detach.png) 0 0 no-repeat;
 }
 
 span.jsTabCloseBtn:hover {
-	background: transparent url(images/close-btn.png) 0 -12px no-repeat;
+	background: transparent url(images/close.png) -14px 0 no-repeat;
 }
 
 div.jsTabSelected span.jsTabCloseBtn {
