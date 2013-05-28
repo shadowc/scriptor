@@ -2946,6 +2946,10 @@ Scriptor.Panel = function(opts) {
 		this.setContent(tmpContents);
 
 	Scriptor.className.add(this.target, "jsPanel");
+
+	if ('class' in opts) {
+		Scriptor.className.add(this.target, opts['class']);
+	}
 };
 /*
 *
