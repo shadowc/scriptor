@@ -186,6 +186,7 @@ var dataTypes = {
 */
 Scriptor.DataView = function(opts) {
 	var localOpts = {
+		footer: true,
 		canHaveChildren : true,
 		hasInvalidator : true,
 		multiselect : true,
@@ -397,8 +398,10 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		dvTemplate += '<div class="dataViewBody' + (this.multiselect ? ' dataViewMultiselect' : '') + '" id="'+this.divId+'_body"></div>';
 		dvTemplate += '</div>';
 		
-		// Create footer
-		dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
+		if (this.footer) {
+			// Create footer
+			dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
+		}
 		
 		this.cmpTarget.innerHTML = dvTemplate;
 
@@ -415,7 +418,9 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		this._cached.optionsMenuBtn = first.firstChild.nextSibling;
 		this._cached.outer_body = first.nextSibling;
 		this._cached.rows_body = this._cached.outer_body.firstChild;
-		this._cached.footer =this._cached.outer_body.nextSibling;
+		if (this.footer) {
+			this._cached.footer =this._cached.outer_body.nextSibling;
+		}
 		
 		this._templateRendered = true;
 		// if the component had a present DOM element at the time of instantiation, we have called
@@ -1488,6 +1493,10 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 Scriptor.DataView.prototype.__refreshFooter = function() {
 	if (!this.inDOM) {
 		Scriptor.error.report( "Attempt to refresh footer on DataView not added to DOM");
+		return;
+	}
+
+	if (!this._cached || !this._cached.footer) {
 		return;
 	}
 	
