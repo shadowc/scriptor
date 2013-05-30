@@ -62,7 +62,9 @@ Scriptor.Dialog = function(opts)
 		
 		var titleHeight = this._titlePanel.offsetHeight;
 		
-		this.cmpTarget.style.height = (this.title ? ((this.height - titleHeight - innerBox.top - innerBox.bottom) + 'px') : "100%");
+		if (typeof this.height === 'number') {
+			this.height = this.height - titleHeight;
+		}
 	};
 	
 	this.showing = false;
