@@ -3952,6 +3952,7 @@ var dataTypes = {
 */
 Scriptor.DataView = function(opts) {
 	var localOpts = {
+		footer: true,
 		canHaveChildren : true,
 		hasInvalidator : true,
 		multiselect : true,
@@ -4163,8 +4164,10 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		dvTemplate += '<div class="dataViewBody' + (this.multiselect ? ' dataViewMultiselect' : '') + '" id="'+this.divId+'_body"></div>';
 		dvTemplate += '</div>';
 		
-		// Create footer
-		dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
+		if (this.footer) {
+			// Create footer
+			dvTemplate += '<div id="' + this.divId + '_footer" class="dataViewFooter dataViewToolbar"></div>';
+		}
 		
 		this.cmpTarget.innerHTML = dvTemplate;
 
@@ -4181,7 +4184,9 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		this._cached.optionsMenuBtn = first.firstChild.nextSibling;
 		this._cached.outer_body = first.nextSibling;
 		this._cached.rows_body = this._cached.outer_body.firstChild;
-		this._cached.footer =this._cached.outer_body.nextSibling;
+		if (this.footer) {
+			this._cached.footer =this._cached.outer_body.nextSibling;
+		}
 		
 		this._templateRendered = true;
 		// if the component had a present DOM element at the time of instantiation, we have called
@@ -5254,6 +5259,10 @@ Scriptor.DataView.prototype.updateRows = function(clear) {
 Scriptor.DataView.prototype.__refreshFooter = function() {
 	if (!this.inDOM) {
 		Scriptor.error.report( "Attempt to refresh footer on DataView not added to DOM");
+		return;
+	}
+
+	if (!this._cached || !this._cached.footer) {
 		return;
 	}
 	
@@ -8770,7 +8779,9 @@ Scriptor.Dialog = function(opts)
 		
 		var titleHeight = this._titlePanel.offsetHeight;
 		
-		this.cmpTarget.style.height = (this.title ? ((this.height - titleHeight - innerBox.top - innerBox.bottom) + 'px') : "100%");
+		if (typeof this.height === 'number') {
+			this.height = this.height - titleHeight;
+		}
 	};
 	
 	this.showing = false;
@@ -8887,15 +8898,16 @@ Scriptor.Dialog = function(opts)
 	this._titlePanel.id = this.divId + '_title';
 	this._titlePanel.className = 'jsDialogTitle';
 	
-	if (this.title)
+	if (this.title) {
 		this._titlePanel.innerHTML = '<span id="'+this.divId+'_titleText">'+this.title+'</span><span id="'+this.divId+'_closeHandle" class="jsDialogClose"></span>';
-	else
+		this._closeHandle = this._titlePanel.firstChild.nextSibling;
+	} else {
 		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
+	}
 	this.target.insertBefore(this._titlePanel, this.cmpTarget);
 
-	if (!this.closable)
-	{
-		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	if (!this.closable && this._closeHandle ) {
+		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
 	}
 	
 	this.resize();
@@ -8923,10 +8935,10 @@ Scriptor.Dialog.prototype.setTitle = function(title) {
 };
 
 Scriptor.Dialog.prototype.setClosable = function(closable) {
-	if (closable) {
-		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
-	} else {
-		Scriptor.className.remove(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	if (!closable && this._closeHandle) {
+		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
+	} else if (this._closeHandle){
+		Scriptor.className.remove(this._closeHandle, 'jsDialogCloseHidden');
 	}
 	this.closable = closable;
 };

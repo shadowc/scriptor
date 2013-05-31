@@ -181,15 +181,16 @@ Scriptor.Dialog = function(opts)
 	this._titlePanel.id = this.divId + '_title';
 	this._titlePanel.className = 'jsDialogTitle';
 	
-	if (this.title)
+	if (this.title) {
 		this._titlePanel.innerHTML = '<span id="'+this.divId+'_titleText">'+this.title+'</span><span id="'+this.divId+'_closeHandle" class="jsDialogClose"></span>';
-	else
+		this._closeHandle = this._titlePanel.firstChild.nextSibling;
+	} else {
 		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
+	}
 	this.target.insertBefore(this._titlePanel, this.cmpTarget);
 
-	if (!this.closable)
-	{
-		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	if (!this.closable && this._closeHandle ) {
+		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
 	}
 	
 	this.resize();
@@ -217,10 +218,10 @@ Scriptor.Dialog.prototype.setTitle = function(title) {
 };
 
 Scriptor.Dialog.prototype.setClosable = function(closable) {
-	if (closable) {
-		Scriptor.className.add(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
-	} else {
-		Scriptor.className.remove(document.getElementById(this.divId+'_closeHandle'), 'jsDialogCloseHidden');
+	if (!closable && this._closeHandle) {
+		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
+	} else if (this._closeHandle){
+		Scriptor.className.remove(this._closeHandle, 'jsDialogCloseHidden');
 	}
 	this.closable = closable;
 };
