@@ -57,15 +57,6 @@ Scriptor.Dialog = function(opts)
 	/*
 	* We need to redefine show / hide for dialogs in order to provide animations!
 	*/
-	this.resizeImplementation = function() {
-		var innerBox = Scriptor.element.getInnerBox(this.target);
-		
-		var titleHeight = this._titlePanel.offsetHeight;
-		
-		if (typeof this.height === 'number') {
-			this.height = this.height - titleHeight;
-		}
-	};
 	
 	this.showing = false;
 	this.show = function() {
@@ -171,50 +162,85 @@ Scriptor.Dialog = function(opts)
 		
 		Scriptor.event.fire(this, 'onhide');
 	};
+
+	// replace the contents of the component's target div
+	// or child target with the passed HTMLElement or component
+	this.setContent = function(ref) {
+		if (ref) {
+			if (ref.CMP_SIGNATURE) {
+				this.addChild(ref);
+				return true;
+			} else if (Scriptor.isHtmlElement(ref)) {
+				this.cmpTarget.appendChild(ref);
+				this.resize();
+				return true;
+			} else if (typeof(ref) == "string") {
+				this.cmpTarget.innerHTML = ref;
+				this.resize();
+				return true;
+			}
+		}
+
+		return false;
+	};
 	
 	// create component
 	this.create();
 	Scriptor.className.add(this.target, "jsDialog");
 	Scriptor.body().appendChild(this.target);
 	
-	this._titlePanel = document.createElement('div');
-	this._titlePanel.id = this.divId + '_title';
-	this._titlePanel.className = 'jsDialogTitle';
-	
-	if (this.title) {
-		this._titlePanel.innerHTML = '<span id="'+this.divId+'_titleText">'+this.title+'</span><span id="'+this.divId+'_closeHandle" class="jsDialogClose"></span>';
-		this._closeHandle = this._titlePanel.firstChild.nextSibling;
-	} else {
-		Scriptor.className.add(this._titlePanel, 'jsDialogTitleHidden');
-	}
-	this.target.insertBefore(this._titlePanel, this.cmpTarget);
-
-	if (!this.closable && this._closeHandle ) {
-		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
-	}
-	
 	this.resize();
 	this.onDOMAdded();
 	
+	this._titlePanel = new Scriptor.Panel({
+		"id": this.divId + "_title",
+		"style": "height: 22px; width: 100%;",
+		"className": "jsDialogTitle",
+		"region": "top"
+	});
+	this.addChild(this._titlePanel);
+
+	this._titlePanel.setContent('<span id="'+this.divId+'_titleText">'+this.title+'</span><span id="'+this.divId+'_closeHandle" class="jsDialogClose"></span>');
+
+	this._closeHandle = this._titlePanel.cmpTarget.firstChild.nextSibling;
+	if (!this.title) {
+		Scriptor.className.add(this._titlePanel.cmpTarget, 'jsDialogTitleHidden');
+	}
+
+	if (!this.closable && this._closeHandle) {
+		Scriptor.className.add(this._closeHandle, 'jsDialogCloseHidden');
+	}
+
+	Scriptor.event.attach(this._closeHandle, 'onclick', Scriptor.bind(this.hide, this));
+
+
+	this._bodyPanel = new Scriptor.Panel({
+		"id": this.divId + "_body",
+		"style": "width: 100%; padding: 5px;",
+		"className": "jsDialogBody",
+		"region": "center"
+	});
+	this.addChild(this._bodyPanel);
+
+	
+	
 	// add drag events to title
-	Scriptor.event.attach(this._titlePanel, 'onmousedown', Scriptor.bindAsEventListener(this._startDragging, this));
+	Scriptor.event.attach(this._titlePanel.cmpTarget, 'onmousedown', Scriptor.bindAsEventListener(this._startDragging, this));
 	this._dragMoveEvent = null;
 	this._dragDropEvent = null;
 	this._cacheX = 0;
 	this._cacheY = 0;
 	
-	// add close button event handle after we redefine hide
-	Scriptor.event.attach(document.getElementById(this.divId+'_closeHandle'), 'onclick', Scriptor.bind(this.hide, this));
 	
 	// TODO: Resizable!
 };
 
 Scriptor.Dialog.prototype.getTitle = function() {
-	return this._titlePanel.firstChild.innerHTML;
+	return this._titlePanel.cmpTarget.firstChild.innerHTML;
 };
 
 Scriptor.Dialog.prototype.setTitle = function(title) {
-	return this._titlePanel.firstChild.innerHTML = title;
+	return this._titlePanel.cmpTarget.firstChild.innerHTML = title;
 };
 
 Scriptor.Dialog.prototype.setClosable = function(closable) {
