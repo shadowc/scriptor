@@ -46,7 +46,7 @@ Scriptor.Panel = function(opts) {
 
 	Scriptor.className.add(this.target, "jsPanel");
 
-	if ('class' in opts) {
-		Scriptor.className.add(this.target, opts['class']);
+	if ('class' in localOpts) {
+		Scriptor.className.add(this.target, localOpts['class']);
 	}
 };

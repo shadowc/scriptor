@@ -296,13 +296,13 @@ Scriptor.DataView = function(opts) {
 			
 			//assign some events
 			if (this.multiselect) 
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_selectAll'), 'click', Scriptor.bindAsEventListener(this.__selectAll, this)));
+				this._registeredEvents.push(Scriptor.event.attach(this._cached.headerSelectAll, 'click', Scriptor.bindAsEventListener(this.__selectAll, this)));
 			
 			if (this.paginating) {
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPagePrev'), 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this)));
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_goToPageNext'), 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this)));
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInput'), 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this)));
-				this._registeredEvents.push(Scriptor.event.attach(document.getElementById(this.divId + '_pageInputBtn'), 'click', Scriptor.bindAsEventListener(this.__goToPage, this)));
+				this._registeredEvents.push(Scriptor.event.attach(this._cached.pagination_header_goToPagePrev, 'click', Scriptor.bindAsEventListener(this.__goToPagePrev, this)));
+				this._registeredEvents.push(Scriptor.event.attach(this._cached.pagination_header_goToPageNext, 'click', Scriptor.bindAsEventListener(this.__goToPageNext, this)));
+				this._registeredEvents.push(Scriptor.event.attach(this._cached.pagination_header_pageInput, 'keypress', Scriptor.bindAsEventListener(this.__checkGoToPage, this)));
+				this._registeredEvents.push(Scriptor.event.attach(this._cached.pagination_header_pageInputBtn, 'click', Scriptor.bindAsEventListener(this.__goToPage, this)));
 			}
 			
 			for (var n=0; n < this.columns.length; n++)
@@ -410,11 +410,23 @@ Scriptor.DataView.prototype.renderTemplate = function() {
 		var first = this.cmpTarget.firstChild;
 		if (this.paginating) {
 			this._cached.pagination_header = first;
+
+			this._cached.pagination_header_goToPagePrev = this._cached.pagination_header.firstChild.firstChild.nextSibling.firstChild;
+			this._cached.pagination_header_goToPageNext = this._cached.pagination_header.firstChild.firstChild.nextSibling.firstChild.nextSibling;
+			this._cached.pagination_header_pageInput = this._cached.pagination_header.firstChild.firstChild.nextSibling.nextSibling.firstChild;
+			this._cached.pagination_header_pageInputBtn = this._cached.pagination_header.firstChild.firstChild.nextSibling.nextSibling.firstChild.nextSibling;
+
 			first = first.nextSibling;
 		}
 
 		this._cached.header = first;
 		this._cached.headerUl = first.firstChild;
+
+		if (this.multiselect) {
+			this._cached.headerSelectAll = this._cached.headerUl.firstChild.firstChild;
+		}
+
+
 		this._cached.optionsMenuBtn = first.firstChild.nextSibling;
 		this._cached.outer_body = first.nextSibling;
 		this._cached.rows_body = this._cached.outer_body.firstChild;
@@ -1200,8 +1212,8 @@ Scriptor.DataView.prototype.clearSelection = function()
 {
 	this.selectedRow = -1;
 	this.selectedRows = [];
-	
-	document.getElementById(this.divId + '_selectAll').checked = false;
+
+	this._cached.headerSelectAll.checked = false;
 	
 	if (this.inDOM)
 		this._UISelectAll(false);
@@ -1214,7 +1226,7 @@ Scriptor.DataView.prototype.clearSelection = function()
 Scriptor.DataView.prototype.__selectAll = function(e) {
 	if (!e) e = window.event;
 	
-	var elem = document.getElementById(this.divId + '_selectAll');
+	var elem = this._cached.headerSelectAll;
 	
 	if (this.rows.length) {
 		if (elem.checked) {
