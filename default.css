@@ -742,3 +742,13 @@ div.galleryView div.gvSelectedImage p { font-weight:bold; }
 }
 .jsComponent.jsDialog .jsDialogClose:hover { background:url("images/close.png") no-repeat -14px 0; }
 .jsComponent.jsDialog .jsDialogClose.jsDialogCloseHidden { display:none; }
+.jsComponent.jsDialog .jsDialogResize {
+  background:url("images/resize.png") no-repeat 0 0;
+  position:absolute;
+  bottom:0;
+  right:0;
+  display:block;
+  height:16px;
+  width:16px;
+  margin:0;
+}

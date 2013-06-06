@@ -8755,6 +8755,7 @@ Scriptor.Dialog = function(opts)
 		y : 0,
 		width: 400,
 		height: 300,
+		resizable: false,
 		closable : true,
 		title : "Dialog"
 	};
@@ -8961,7 +8962,16 @@ Scriptor.Dialog = function(opts)
 	this._cacheY = 0;
 	
 	
+
 	// TODO: Resizable!
+	var resizeHandle = document.createElement('div');
+	resizeHandle.className = 'jsDialogResize';
+	this.cmpTarget.appendChild(resizeHandle);
+
+	console.error(this.cmpTarget);
+
+	//if (localOpts.resizable) {
+	//}	
 };
 
 Scriptor.Dialog.prototype.getTitle = function() {

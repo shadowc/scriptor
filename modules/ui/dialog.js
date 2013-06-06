@@ -26,6 +26,7 @@ Scriptor.Dialog = function(opts)
 		y : 0,
 		width: 400,
 		height: 300,
+		resizable: false,
 		closable : true,
 		title : "Dialog"
 	};
@@ -216,7 +217,7 @@ Scriptor.Dialog = function(opts)
 
 	this._bodyPanel = new Scriptor.Panel({
 		"id": this.divId + "_body",
-		"style": "width: 100%; padding: 5px;",
+		"style": "width: 100%; height: 100%; padding: 5px 5px 27px 5px;",
 		"className": "jsDialogBody",
 		"region": "center"
 	});
@@ -232,8 +233,84 @@ Scriptor.Dialog = function(opts)
 	this._cacheY = 0;
 	
 	
-	// TODO: Resizable!
+
+	if (localOpts.resizable) {
+		var resizeHandle = document.createElement('div');
+		resizeHandle.className = 'jsDialogResize';
+		this.cmpTarget.appendChild(resizeHandle);
+		Scriptor.event.attach(resizeHandle, 'onmousedown', Scriptor.bindAsEventListener(this._startResizing, this));
+	}	
 };
+
+Scriptor.Dialog.prototype._calculateXY = function (e) {
+	var x = 0, y = 0;
+
+	if (e) {
+		if (typeof(e.pageX) == 'number') {
+			x = e.pageX;
+			y = e.pageY;
+		} else {
+			if (typeof(e.clientX) == 'number') {
+				x = (e.clientX + document.documentElement.scrollLeft);
+				y = (e.clientY + document.documentElement.scrollTop);
+			} else {
+				x = 0;
+				y = 0;
+			}
+		}
+	}
+
+	return {
+		x: x,
+		y: y
+	};
+};
+
+Scriptor.Dialog.prototype._startResizing = function(e) {
+	if (!e) e = window.event;
+	
+	this._resizingMoveEvent = Scriptor.event.attach(document, 'onmousemove', Scriptor.bindAsEventListener(this._moveResizing, this));
+	this._resizingDropEvent = Scriptor.event.attach(document, 'onmouseup', Scriptor.bindAsEventListener(this._stopResizing, this));
+	
+	var coords = this._calculateXY(e);
+	
+	this._cacheResizingX = coords.x;
+	this._cacheResizingY = coords.y;
+	
+	Scriptor.event.cancel(e, true);
+};
+
+Scriptor.Dialog.prototype._moveResizing = function(e) {
+	if (!e)	e = window.event;
+	
+	var coords = this._calculateXY(e);
+	
+	var deltaX = coords.x - this._cacheResizingX;
+	var deltaY = coords.y - this._cacheResizingY;
+	
+	this.resizeTo({
+		width: this.width + deltaX,
+		height: this.height + deltaY
+	});
+
+	this._cacheResizingX = coords.x;
+	this._cacheResizingY = coords.y;
+	
+	Scriptor.event.cancel(e, true);
+};
+
+Scriptor.Dialog.prototype._stopResizing = function(e) {
+	if (!e)	e = window.event;
+	
+	Scriptor.event.detach(this._resizingMoveEvent);
+	Scriptor.event.detach(this._resizingDropEvent);
+	
+	this._resizingMoveEvent = null;
+	this._resizingDropEvent = null;
+	
+	Scriptor.event.cancel(e, true);
+};
+
 
 Scriptor.Dialog.prototype.getTitle = function() {
 	return this._titlePanel.cmpTarget.firstChild.innerHTML;
