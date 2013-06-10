@@ -309,16 +309,16 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 	{
 		// deselect tab
 		var reselect = false;
-		if (this._selectedTabId == this._tabs[ndx].paneId)
-			var reselect = true
+		if (this._selectedTabId == this._tabs[ndx].paneId) {
+			reselect = true;
+		}
 		
 		// remove tab
 		this._tabList.cmpTarget.removeChild(this._tabList.cmpTarget.childNodes[ndx]);
 		this._pageContainer.removePage(this._tabs[ndx].pane, destroy);
 		this._tabs.splice(ndx, 1);
 		
-		if (reselect)
-		{
+		if (reselect) {
 			if (this._tabs[ndx])
 				this._selectedTabId = this._tabs[ndx].paneId;
 			else if (this._tabs.length)
