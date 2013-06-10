@@ -3262,16 +3262,16 @@ Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
 	{
 		// deselect tab
 		var reselect = false;
-		if (this._selectedTabId == this._tabs[ndx].paneId)
-			var reselect = true
+		if (this._selectedTabId == this._tabs[ndx].paneId) {
+			reselect = true;
+		}
 		
 		// remove tab
 		this._tabList.cmpTarget.removeChild(this._tabList.cmpTarget.childNodes[ndx]);
 		this._pageContainer.removePage(this._tabs[ndx].pane, destroy);
 		this._tabs.splice(ndx, 1);
 		
-		if (reselect)
-		{
+		if (reselect) {
 			if (this._tabs[ndx])
 				this._selectedTabId = this._tabs[ndx].paneId;
 			else if (this._tabs.length)
@@ -8757,7 +8757,8 @@ Scriptor.Dialog = function(opts)
 		height: 300,
 		resizable: false,
 		closable : true,
-		title : "Dialog"
+		title : "Dialog",
+		animation: false
 	};
 	
 	Scriptor.mixin(localOpts, opts);
@@ -8769,6 +8770,7 @@ Scriptor.Dialog = function(opts)
 	this.centerOnShow = localOpts.centerOnShow ? true : false;
 	this.closable = localOpts.closable ? true : false;
 	this.title = localOpts.title;
+	this.animation = localOpts.animation;
 	
 	// initialize events!
 	Scriptor.event.init(this);
@@ -8807,22 +8809,26 @@ Scriptor.Dialog = function(opts)
 			this.__updatePosition();
 				
 			Scriptor.className.remove(this.target, 'jsComponentHidden');
-			this.target.style.opacity = '0';
-			this.target.style.mozOpacity = '0';
-			
-			var eId = Scriptor.effects.scheduleEffect({
-				elem : this.target,
-				property : ['style.opacity', 'style.mozOpacity'],
-				start : [0, 0],
-				end : [1, 1],
-				unit : [0, 0],
-				duration : 200,
-				callback : Scriptor.bind(this.doShow, this)
-			});
-			
-			Scriptor.effects.start(eId);
 			
 			this.showing = true;
+
+			if (this.animation) {
+				this.target.style.opacity = '0';
+				this.target.style.mozOpacity = '0';
+
+				var eId = Scriptor.effects.scheduleEffect({
+					elem : this.target,
+					property : ['style.opacity', 'style.mozOpacity'],
+					start : [0, 0],
+					end : [1, 1],
+					unit : [0, 0],
+					duration : 200,
+					callback : Scriptor.bind(this.doShow, this)
+				});
+				Scriptor.effects.start(eId);
+			} else {
+				this.doShow();
+			}
 		}
 	};
 	
@@ -8853,22 +8859,27 @@ Scriptor.Dialog = function(opts)
 			return;
 		
 		if (this.visible && this.target && !this.hiding && !this.showing) {
-			this.target.style.opacity = '0';
-			this.target.style.mozOpacity = '0';
-			
-			var eId = Scriptor.effects.scheduleEffect({
-				elem : this.target,
-				property : ['style.opacity', 'style.mozOpacity'],
-				start : [1, 1],
-				end : [0, 0],
-				unit : [0, 0],
-				duration : 200,
-				callback : Scriptor.bind(this.doHide, this)
-			});
-			
-			Scriptor.effects.start(eId);
 			
 			this.hiding = true;
+
+			if (this.animation) {
+				this.target.style.opacity = '0';
+				this.target.style.mozOpacity = '0';
+
+				var eId = Scriptor.effects.scheduleEffect({
+					elem : this.target,
+					property : ['style.opacity', 'style.mozOpacity'],
+					start : [1, 1],
+					end : [0, 0],
+					unit : [0, 0],
+					duration : 200,
+					callback : Scriptor.bind(this.doHide, this)
+				});
+				
+				Scriptor.effects.start(eId);
+			} else {
+				this.doHide();
+			}
 		}
 	};
 	
