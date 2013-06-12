@@ -1815,7 +1815,7 @@ var Component = {
 			// layout the component acording to its size parameters
 			// and resizes its children.
 			resize : function() {
-				if (this.target) {
+				if (this.target && this.visible) {
 					this.__updatePosition();
 					
 					this.resizeImplementation.apply(this, arguments);
@@ -2224,7 +2224,7 @@ var Component = {
 			},
 			
 			__updatePosition : function() {
-				if (this.target)
+				if (this.target && this.visible)
 				{
 					var innerBox = this.__getInnerBox();
 					var outerBox = this.__getOuterBox();
@@ -2297,7 +2297,11 @@ var Component = {
 			// get top, bottom, left, right values according to the component's
 			// padding
 			__getInnerBox : function() {
-				var box = { top : 0, bottom: 0, left : 0, right : 0 };
+				//if (this.cachedInnerBox) {
+					//return this.cachedInnerBox;
+				//}
+
+				var box = this.cachedInnerBox = { top : 0, bottom: 0, left : 0, right : 0 };
 				
 				var innerTop = parseInt(Scriptor.className.getComputedProperty(this.target, 'padding-top'));
 				var innerBottom = parseInt(Scriptor.className.getComputedProperty(this.target, 'padding-bottom'));
@@ -2333,7 +2337,11 @@ var Component = {
 			// get top, bottom, left, right values according to the component's
 			// margin
 			__getOuterBox : function() {
-				var box = { top : 0, bottom: 0, left : 0, right : 0 };
+				//if (this.cachedOuterBox) {
+					//return this.cachedOuterBox;
+				//}
+
+				var box = this.cachedOuterBox = { top : 0, bottom: 0, left : 0, right : 0 };
 				
 				var outerTop = parseInt(Scriptor.className.getComputedProperty(this.target, 'margin-top'));
 				var outerBottom = parseInt(Scriptor.className.getComputedProperty(this.target, 'margin-bottom'));

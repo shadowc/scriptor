@@ -69,7 +69,7 @@ Scriptor.Dialog = function(opts)
 		
 		if (!this.created)
 			this.create();
-			
+
 		if (!this.visible && this.target && !this.showing && !this.hiding) {
 			if (this.centerOnShow)
 			{
@@ -77,11 +77,9 @@ Scriptor.Dialog = function(opts)
 				this.y = (Scriptor.body().offsetHeight /2) - (this.height / 2);
 			}
 			
-			this.__updatePosition();
-				
-			Scriptor.className.remove(this.target, 'jsComponentHidden');
-			
 			this.showing = true;
+			this.__updatePosition();
+			Scriptor.className.remove(this.target, 'jsComponentHidden');
 
 			if (this.animation) {
 				this.target.style.opacity = '0';
@@ -180,14 +178,14 @@ Scriptor.Dialog = function(opts)
 	this.setContent = function(ref) {
 		if (ref) {
 			if (ref.CMP_SIGNATURE) {
-				this.addChild(ref);
+				this._bodyPanel.addChild(ref);
 				return true;
 			} else if (Scriptor.isHtmlElement(ref)) {
-				this.cmpTarget.appendChild(ref);
+				this._bodyPanel.cmpTarget.appendChild(ref);
 				this.resize();
 				return true;
 			} else if (typeof(ref) == "string") {
-				this.cmpTarget.innerHTML = ref;
+				this._bodyPanel.cmpTarget.innerHTML = ref;
 				this.resize();
 				return true;
 			}

@@ -341,7 +341,7 @@ var Component = {
 			// layout the component acording to its size parameters
 			// and resizes its children.
 			resize : function() {
-				if (this.target && this.visible) {
+				if (this.target && (this.visible || this.CMP_SIGNATURE === "Scriptor.ui.Dialog")) {
 					this.__updatePosition();
 					
 					this.resizeImplementation.apply(this, arguments);
@@ -750,8 +750,7 @@ var Component = {
 			},
 			
 			__updatePosition : function() {
-				if (this.target && this.visible)
-				{
+				if (this.target && (this.visible || this.CMP_SIGNATURE === "Scriptor.ui.Dialog")) {
 					var innerBox = this.__getInnerBox();
 					var outerBox = this.__getOuterBox();
 					var testWidth = 0, testHeight = 0;
@@ -823,9 +822,9 @@ var Component = {
 			// get top, bottom, left, right values according to the component's
 			// padding
 			__getInnerBox : function() {
-				if (this.cachedInnerBox) {
-					return this.cachedInnerBox;
-				}
+				//if (this.cachedInnerBox) {
+					//return this.cachedInnerBox;
+				//}
 
 				var box = this.cachedInnerBox = { top : 0, bottom: 0, left : 0, right : 0 };
 				
@@ -863,9 +862,9 @@ var Component = {
 			// get top, bottom, left, right values according to the component's
 			// margin
 			__getOuterBox : function() {
-				if (this.cachedOuterBox) {
-					return this.cachedOuterBox;
-				}
+				//if (this.cachedOuterBox) {
+					//return this.cachedOuterBox;
+				//}
 
 				var box = this.cachedOuterBox = { top : 0, bottom: 0, left : 0, right : 0 };
 				
