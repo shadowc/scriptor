@@ -778,13 +778,13 @@ TabPageContainer.prototype.hidePage = function(id) {
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	for (var n=0; n < this.components.length; n++) {
-		this.components[n].hide();
-	}
-		
-	for (var n=0; n < this.components.length; n++) {
-		if (this.components[n].divId == paneId) {
-			this.components[n].show();
+	var components = this.components;
+	for (var i = 0, leni = components.length, component; i < leni; ++i) {
+		component = components[i];
+		if (component.divId != paneId) {
+			component.hide();
+		} else {
+			component.show();
 		}
 	}
 };

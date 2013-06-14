@@ -310,7 +310,7 @@ var Component = {
 				}
 			},
 			
-			show : function() {
+			show : function(preventResize) {
 				var e = Scriptor.event.fire(this, 'onbeforeshow');
 				if (!e.returnValue)
 					return;
@@ -324,13 +324,18 @@ var Component = {
 					
 					this.showImplementation.apply(this, arguments);
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].show();	
+
+					for (var i = 0, leni = this.components.length; i < leni; ++i) {
+						this.components[i].show(true);
+					}
 					
-					if (this.parent)
-						this.parent.resize();
-					else
-						this.resize();	// we're doing component layout here!
+					if (!preventResize) {
+						if (this.parent) {
+							this.parent.resize();
+						} else {
+							this.resize();	// we're doing component layout here!
+						}
+					}
 					
 					this.focus();
 					
@@ -342,6 +347,13 @@ var Component = {
 			// and resizes its children.
 			resize : function() {
 				if (this.target && (this.visible || this.CMP_SIGNATURE === "Scriptor.ui.Dialog")) {
+					//var indent = '';
+					//var p = this.parent;
+					//while (p) {
+						//indent += '  ';
+						//p = p.parent;
+					//}
+					//console.error(indent + ' resize ' + this.divId);
 					this.__updatePosition();
 					
 					this.resizeImplementation.apply(this, arguments);
@@ -596,7 +608,7 @@ var Component = {
 				}
 			},
 			
-			hide : function() {
+			hide : function(preventResize) {
 				var e = Scriptor.event.fire(this, 'onbeforehide');
 				if (!e.returnValue)
 					return;
@@ -607,13 +619,17 @@ var Component = {
 					
 					this.hideImplementation.apply(this, arguments);
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].hide();
+					for (var i = 0, leni = this.components.length; i < leni; ++i) {
+						this.components[i].hide(true);
+					}
 					
-					if (this.parent)
-						this.parent.resize();
-					else
-						this.resize();	// we're doing component layout here!
+					if (!preventResize) {
+						if (this.parent) {
+							this.parent.resize();
+						} else {
+							this.resize();	// we're doing component layout here!
+						}
+					}
 						
 					this.passFocus();
 					
