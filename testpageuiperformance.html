@@ -42,7 +42,7 @@
 			var panelAAA = new Scriptor.DataView({
 				id : 'panel_a_a_a',
 				region : "top",
-				style : "height: 50%; margin-bottom: 5px; background: blue;",
+				style : "height: 50%; margin-bottom: 5px; background: #ccc;",
 				resizable : true,
 				multiselect : false,
 				columns : [{
@@ -74,6 +74,30 @@
 					displayName : 'Apellido'
 				}]
 			});
+
+			var items = [{
+				id: 1,
+				User: "marek",
+				Pass: "ASDFASDF",
+				FirstName: "Marek",
+				LastName: "Pawlowski"
+			}, {
+				id: 2,
+				User: "marek",
+				Pass: "ASDFASDF",
+				FirstName: "Marek",
+				LastName: "Pawlowski"
+			}, {
+				id: 3,
+				User: "marek",
+				Pass: "ASDFASDF",
+				FirstName: "Marek",
+				LastName: "Pawlowski"
+			}];
+
+			panelAAA.addRow(panelAAA.createRow(items[0]), undefined, false);
+			panelAAA.addRow(panelAAA.createRow(items[1]), undefined, false);
+			panelAAA.addRow(panelAAA.createRow(items[2]), undefined, false);
 		
 			
 			panelA.addChild(panelAA);

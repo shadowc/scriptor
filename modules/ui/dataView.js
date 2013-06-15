@@ -762,6 +762,9 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 			
 		newUl.appendChild(newLi);
 	}
+
+	for (var a=0; a < this.columns.length; a++) 
+		this._addCellToUI(rowId, this.columns[a].Name, a);
 	
 	// if now rows, we simply appendChild
 	var actualRows = this._cached.rows_body.getElementsByTagName('ul');
@@ -794,8 +797,6 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 		}
 	}
 	
-	for (var a=0; a < this.columns.length; a++) 
-		this._addCellToUI(rowId, this.columns[a].Name, a);
 		
 	this.__refreshFooter();
 };
@@ -1118,7 +1119,6 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	
 	if (typeof(this.columns[colNdx].Format) == 'function') {
 		var funcRet = this.columns[colNdx].Format(value);
-		cell.innerHTML = '';
 		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined')
 			cell.innerHTML = funcRet;
 		else
