@@ -782,7 +782,7 @@ TabPageContainer.prototype.activate = function(paneId) {
 	for (var i = 0, leni = components.length, component; i < leni; ++i) {
 		component = components[i];
 		if (component.divId != paneId) {
-			component.hide();
+			component.hide(true);
 		} else {
 			component.show();
 		}

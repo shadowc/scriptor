@@ -1119,10 +1119,15 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	
 	if (typeof(this.columns[colNdx].Format) == 'function') {
 		var funcRet = this.columns[colNdx].Format(value);
-		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined')
-			cell.innerHTML = funcRet;
-		else
+		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined') {
+			if (typeof funcRet === 'string' && funcRet.indexOf('<') != -1) {
+				cell.innerHTML = funcRet;
+			} else {
+				cell.appendChild(document.createTextNode(funcRet));
+			}
+		} else {
 			cell.appendChild(funcRet);		
+		}
 	}
 	else {
 		cell.innerHTML = value;

@@ -329,13 +329,15 @@ var Component = {
 						this.components[i].show(true);
 					}
 					
-					if (!preventResize) {
-						if (this.parent) {
-							this.parent.resize();
-						} else {
-							this.resize();	// we're doing component layout here!
+					requestAnimationFrame(function () {
+						if (!preventResize) {
+							if (this.parent) {
+								this.parent.resize();
+							} else {
+								this.resize();	// we're doing component layout here!
+							}
 						}
-					}
+					}.bind(this));
 					
 					this.focus();
 					

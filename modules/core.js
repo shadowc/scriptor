@@ -1048,3 +1048,39 @@ var browserWindowWidth = 0;
 var _body = null;
 
 Scriptor.cookie.init();
+
+/**
+ * pollyfill for requestAnimationFrame
+ * https://gist.github.com/1579671
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+ * http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+ * requestAnimationFrame polyfill by Erik Möller
+ * fixes from Paul Irish and Tino Zijdel
+ */
+
+(function() {
+	var lastTime = 0;
+	var v = ['ms', 'moz', 'webkit', 'o', ''];
+	for (var x = 0; x < v.length && !window.requestAnimationFrame; ++x) {
+		window.requestAnimationFrame = window[v[x] + 'RequestAnimationFrame'];
+		window.cancelAnimationFrame = window[v[x] + 'CancelAnimationFrame'] ||
+		window[v[x] + 'CancelRequestAnimationFrame'];
+	}
+
+	if (!window.requestAnimationFrame)
+	window.requestAnimationFrame = function(callback, element) {
+		var currTime = +new Date();
+		var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+		var id = window.setTimeout(function() {
+		callback(currTime + timeToCall); }, timeToCall);
+
+		lastTime = currTime + timeToCall;
+		return id;
+	};
+
+	if (!window.cancelAnimationFrame)
+	window.cancelAnimationFrame = function(id) {
+		clearTimeout(id);
+	};
+}());
