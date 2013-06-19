@@ -1063,6 +1063,42 @@ var browserWindowWidth = 0;
 var _body = null;
 
 Scriptor.cookie.init();
+
+/**
+ * pollyfill for requestAnimationFrame
+ * https://gist.github.com/1579671
+ * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+ * http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+
+ * requestAnimationFrame polyfill by Erik Möller
+ * fixes from Paul Irish and Tino Zijdel
+ */
+
+(function() {
+	var lastTime = 0;
+	var v = ['ms', 'moz', 'webkit', 'o', ''];
+	for (var x = 0; x < v.length && !window.requestAnimationFrame; ++x) {
+		window.requestAnimationFrame = window[v[x] + 'RequestAnimationFrame'];
+		window.cancelAnimationFrame = window[v[x] + 'CancelAnimationFrame'] ||
+		window[v[x] + 'CancelRequestAnimationFrame'];
+	}
+
+	if (!window.requestAnimationFrame)
+	window.requestAnimationFrame = function(callback, element) {
+		var currTime = +new Date();
+		var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+		var id = window.setTimeout(function() {
+		callback(currTime + timeToCall); }, timeToCall);
+
+		lastTime = currTime + timeToCall;
+		return id;
+	};
+
+	if (!window.cancelAnimationFrame)
+	window.cancelAnimationFrame = function(id) {
+		clearTimeout(id);
+	};
+}());
 // JavaScript Document
 /* 
 *  httpReqiest version 2.0b
@@ -1784,7 +1820,7 @@ var Component = {
 				}
 			},
 			
-			show : function() {
+			show : function(preventResize) {
 				var e = Scriptor.event.fire(this, 'onbeforeshow');
 				if (!e.returnValue)
 					return;
@@ -1798,13 +1834,20 @@ var Component = {
 					
 					this.showImplementation.apply(this, arguments);
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].show();	
+
+					for (var i = 0, leni = this.components.length; i < leni; ++i) {
+						this.components[i].show(true);
+					}
 					
-					if (this.parent)
-						this.parent.resize();
-					else
-						this.resize();	// we're doing component layout here!
+					requestAnimationFrame(function () {
+						if (!preventResize) {
+							if (this.parent) {
+								this.parent.resize();
+							} else {
+								this.resize();	// we're doing component layout here!
+							}
+						}
+					}.bind(this));
 					
 					this.focus();
 					
@@ -1815,7 +1858,14 @@ var Component = {
 			// layout the component acording to its size parameters
 			// and resizes its children.
 			resize : function() {
-				if (this.target && this.visible) {
+				if (this.target && (this.visible || this.CMP_SIGNATURE === "Scriptor.ui.Dialog")) {
+					//var indent = '';
+					//var p = this.parent;
+					//while (p) {
+						//indent += '  ';
+						//p = p.parent;
+					//}
+					//console.error(indent + ' resize ' + this.divId);
 					this.__updatePosition();
 					
 					this.resizeImplementation.apply(this, arguments);
@@ -2070,7 +2120,7 @@ var Component = {
 				}
 			},
 			
-			hide : function() {
+			hide : function(preventResize) {
 				var e = Scriptor.event.fire(this, 'onbeforehide');
 				if (!e.returnValue)
 					return;
@@ -2081,13 +2131,17 @@ var Component = {
 					
 					this.hideImplementation.apply(this, arguments);
 					
-					for (var n=0; n < this.components.length; n++) 
-						this.components[n].hide();
+					for (var i = 0, leni = this.components.length; i < leni; ++i) {
+						this.components[i].hide(true);
+					}
 					
-					if (this.parent)
-						this.parent.resize();
-					else
-						this.resize();	// we're doing component layout here!
+					if (!preventResize) {
+						if (this.parent) {
+							this.parent.resize();
+						} else {
+							this.resize();	// we're doing component layout here!
+						}
+					}
 						
 					this.passFocus();
 					
@@ -2224,8 +2278,7 @@ var Component = {
 			},
 			
 			__updatePosition : function() {
-				if (this.target && this.visible)
-				{
+				if (this.target && (this.visible || this.CMP_SIGNATURE === "Scriptor.ui.Dialog")) {
 					var innerBox = this.__getInnerBox();
 					var outerBox = this.__getOuterBox();
 					var testWidth = 0, testHeight = 0;
@@ -3739,13 +3792,13 @@ TabPageContainer.prototype.hidePage = function(id) {
 };
 
 TabPageContainer.prototype.activate = function(paneId) {
-	for (var n=0; n < this.components.length; n++) {
-		this.components[n].hide();
-	}
-		
-	for (var n=0; n < this.components.length; n++) {
-		if (this.components[n].divId == paneId) {
-			this.components[n].show();
+	var components = this.components;
+	for (var i = 0, leni = components.length, component; i < leni; ++i) {
+		component = components[i];
+		if (component.divId != paneId) {
+			component.hide(true);
+		} else {
+			component.show();
 		}
 	}
 };
@@ -4536,6 +4589,9 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 			
 		newUl.appendChild(newLi);
 	}
+
+	for (var a=0; a < this.columns.length; a++) 
+		this._addCellToUI(rowId, this.columns[a].Name, a);
 	
 	// if now rows, we simply appendChild
 	var actualRows = this._cached.rows_body.getElementsByTagName('ul');
@@ -4568,8 +4624,6 @@ Scriptor.DataView.prototype._addRowToUI = function(rowNdx) {
 		}
 	}
 	
-	for (var a=0; a < this.columns.length; a++) 
-		this._addCellToUI(rowId, this.columns[a].Name, a);
 		
 	this.__refreshFooter();
 };
@@ -4892,11 +4946,15 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	
 	if (typeof(this.columns[colNdx].Format) == 'function') {
 		var funcRet = this.columns[colNdx].Format(value);
-		cell.innerHTML = '';
-		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined')
-			cell.innerHTML = funcRet;
-		else
+		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined') {
+			if (typeof funcRet === 'string' && funcRet.indexOf('<') != -1) {
+				cell.innerHTML = funcRet;
+			} else {
+				cell.appendChild(document.createTextNode(funcRet));
+			}
+		} else {
 			cell.appendChild(funcRet);		
+		}
 	}
 	else {
 		cell.innerHTML = value;
@@ -8806,7 +8864,7 @@ Scriptor.Dialog = function(opts)
 		
 		if (!this.created)
 			this.create();
-			
+
 		if (!this.visible && this.target && !this.showing && !this.hiding) {
 			if (this.centerOnShow)
 			{
@@ -8814,11 +8872,9 @@ Scriptor.Dialog = function(opts)
 				this.y = (Scriptor.body().offsetHeight /2) - (this.height / 2);
 			}
 			
-			this.__updatePosition();
-				
-			Scriptor.className.remove(this.target, 'jsComponentHidden');
-			
 			this.showing = true;
+			this.__updatePosition();
+			Scriptor.className.remove(this.target, 'jsComponentHidden');
 
 			if (this.animation) {
 				this.target.style.opacity = '0';
@@ -8917,14 +8973,14 @@ Scriptor.Dialog = function(opts)
 	this.setContent = function(ref) {
 		if (ref) {
 			if (ref.CMP_SIGNATURE) {
-				this.addChild(ref);
+				this._bodyPanel.addChild(ref);
 				return true;
 			} else if (Scriptor.isHtmlElement(ref)) {
-				this.cmpTarget.appendChild(ref);
+				this._bodyPanel.cmpTarget.appendChild(ref);
 				this.resize();
 				return true;
 			} else if (typeof(ref) == "string") {
-				this.cmpTarget.innerHTML = ref;
+				this._bodyPanel.cmpTarget.innerHTML = ref;
 				this.resize();
 				return true;
 			}

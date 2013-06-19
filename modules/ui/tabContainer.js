@@ -265,12 +265,6 @@ Scriptor.TabContainer.prototype.hideTab = function(paneId) {
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
-	//if (!this.inDOM)
-	//{
-		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
-		//return;
-	//}
-
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -756,10 +750,11 @@ TabPageContainer.prototype.addPage = function(pane) {
 };
 
 TabPageContainer.prototype.removePage = function(pane, destroy) {
-	this.removeChild(pane)
-	
-	if (destroy)
+	if (destroy) {
 		pane.destroy();
+	} else {
+		this.removeChild(pane)
+	}
 };
 TabPageContainer.prototype.showPage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {

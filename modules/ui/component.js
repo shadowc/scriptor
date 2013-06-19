@@ -762,9 +762,6 @@ var Component = {
 				this.inDOM = false;
 				
 				this.DOMRemovedImplementation();
-				
-				for (var n=0; n < this.components.length; n++)
-					this.components[n].onDOMRemoved();
 			},
 			
 			__updatePosition : function() {
