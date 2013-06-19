@@ -242,26 +242,36 @@ Scriptor.TabContainer.prototype.addTab = function(opts, panel, ndx) {
 };
 
 
-Scriptor.TabContainer.prototype.showTab = function(paneId) {
-	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
-		if (this._tabs[i].paneId == paneId) {
-			this._tabs[i].hidden = false;
+Scriptor.TabContainer.prototype.showTab = function(id) {
+	for (var i = 0, leni = this._tabs.length, tab, paneId; i < leni; ++i) {
+		tab = this._tabs[i];
+		if (tab.id == id) {
+			tab.hidden = false;
+
+			paneId = tab.paneId;
+
+			this._tabList.showTab(paneId);
+			this._pageContainer.showPage(paneId);
+			break;
 		}
 	}
 
-	this._tabList.showTab(paneId);
-	this._pageContainer.showPage(paneId);
 };
 
-Scriptor.TabContainer.prototype.hideTab = function(paneId) {
-	for (var i = 0, leni = this._tabs.length; i < leni; ++i) {
-		if (this._tabs[i].paneId == paneId) {
-			this._tabs[i].hidden = true;
+Scriptor.TabContainer.prototype.hideTab = function(id) {
+	for (var i = 0, leni = this._tabs.length, tab, paneId; i < leni; ++i) {
+		tab = this._tabs[i];
+		if (tab.id == id) {
+			tab.hidden = true;
+
+			paneId = tab.paneId;
+
+			this._tabList.hideTab(paneId);
+			this._pageContainer.hidePage(paneId);
+			break;
 		}
 	}
 
-	this._tabList.hideTab(paneId);
-	this._pageContainer.hidePage(paneId);
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
@@ -693,7 +703,8 @@ TabListObj.prototype.showTab = function(id) {
 	var tabs = this.cmpTarget.childNodes;
 	for (var i = 0, leni = tabs.length; i < leni; ++i) {
 		if (tabs[i].paneId == id) {
-			Scriptor.className.remove(tabs[i], 'jsComponentHidden');
+			Scriptor.className.remove(tabs[i], 'jsComponent jsComponentHidden');
+			break;
 		}
 	}
 };
@@ -702,7 +713,8 @@ TabListObj.prototype.hideTab = function(id) {
 	var tabs = this.cmpTarget.childNodes;
 	for (var i = 0, leni = tabs.length; i < leni; ++i) {
 		if (tabs[i].paneId == id) {
-			Scriptor.className.add(tabs[i], 'jsComponentHidden');
+			Scriptor.className.add(tabs[i], 'jsComponent jsComponentHidden');
+			break;
 		}
 	}
 };
@@ -760,6 +772,7 @@ TabPageContainer.prototype.showPage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {
 		if (this.components[i].divId == id) {
 			this.components[i].show();
+			break;
 		}
 	}
 };
@@ -767,7 +780,8 @@ TabPageContainer.prototype.showPage = function(id) {
 TabPageContainer.prototype.hidePage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {
 		if (this.components[i].divId == id) {
-			this.components[i].hide();
+			this.components[i].hide(true);
+			break;
 		}
 	}
 };

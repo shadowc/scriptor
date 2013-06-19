@@ -2272,9 +2272,6 @@ var Component = {
 				this.inDOM = false;
 				
 				this.DOMRemovedImplementation();
-				
-				for (var n=0; n < this.components.length; n++)
-					this.components[n].onDOMRemoved();
 			},
 			
 			__updatePosition : function() {
@@ -3279,12 +3276,6 @@ Scriptor.TabContainer.prototype.hideTab = function(paneId) {
 };
 
 Scriptor.TabContainer.prototype.removeTab = function(ref, destroy) {
-	//if (!this.inDOM)
-	//{
-		//Scriptor.error.report("TabContainer must be added to DOM before removing tabs!");
-		//return;
-	//}
-
 	
 	if (typeof(destroy) == 'undefined')
 		destroy = true;
@@ -3770,10 +3761,11 @@ TabPageContainer.prototype.addPage = function(pane) {
 };
 
 TabPageContainer.prototype.removePage = function(pane, destroy) {
-	this.removeChild(pane)
-	
-	if (destroy)
+	if (destroy) {
 		pane.destroy();
+	} else {
+		this.removeChild(pane)
+	}
 };
 TabPageContainer.prototype.showPage = function(id) {
 	for (var i = 0, leni = this.components.length; i < leni; ++i) {
@@ -4519,6 +4511,11 @@ Scriptor.DataView.prototype._addColumnToUI = function(column, ndx) {
 */
 Scriptor.DataView.prototype._removeColumnFromUI = function(ndx) {
 	var baseNdx = this.multiselect ? 2 : 0;
+
+	if (!this._cached) {
+		return;
+	}
+
 	var columns = this._cached.headerUl.getElementsByTagName('li');
 	
 	if (ndx >= 0 && (baseNdx + (ndx*2)) < columns.length)
@@ -4950,6 +4947,7 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 			if (typeof funcRet === 'string' && funcRet.indexOf('<') != -1) {
 				cell.innerHTML = funcRet;
 			} else {
+				while (cell.firstChild && cell.removeChild(cell.firstChild)) {}
 				cell.appendChild(document.createTextNode(funcRet));
 			}
 		} else {
