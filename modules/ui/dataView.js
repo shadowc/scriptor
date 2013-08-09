@@ -916,7 +916,7 @@ Scriptor.DataView.prototype.createRow = function(data) {
 *  as an argument, an empty row will be added. If dataView is visible it will call
 *  updateRows to reflect the changes.
 */
-Scriptor.DataView.prototype.addRow = function(rowObj, ndx, ui) {
+Scriptor.DataView.prototype.addRow = function(rowObj, sorted, ndx, ui) {
 	if (ui === undefined)
 		ui = true;
 		
@@ -932,7 +932,9 @@ Scriptor.DataView.prototype.addRow = function(rowObj, ndx, ui) {
 		if (!rowObj.id)
 			rowObj.id = this.getNextRowId();
 	
-	if (ndx === undefined)
+	if (sorted)
+		ndx = this.__getRowSortedIndex(rowObj);
+	else if (ndx === undefined)
 		ndx = this.rows.length;
 	else if (ndx < 0 || ndx > this.rows.length)
 		ndx = this.rows.length;
@@ -2143,12 +2145,12 @@ Scriptor.DataView.prototype.__sort = function(start) {
 	if (typeof Comparator === 'function' && this.orderWay === 'ASC') {
 		// Comparator and ASC
 		comparator = function (a, b) {
-			return Comparator(a[orderBy], b[orderBy]) > 0;
+			return Comparator(a[orderBy], b[orderBy]);
 		};
 	} else if (typeof Comparator === 'function') {
 		// Comparator and DESC
 		comparator = function (a, b) {
-			return Comparator(a[orderBy], b[orderBy]) < 0;
+			return Comparator(a[orderBy], b[orderBy]);
 		};
 	} else if (this.orderWay === 'ASC') {
 		// NO Comparator and ASC
@@ -2163,6 +2165,55 @@ Scriptor.DataView.prototype.__sort = function(start) {
 	}
 
 	this.rows.sort(comparator);
+};
+
+Scriptor.DataView.prototype.__getRowSortedIndex = function(rowObj) {
+	if (!this.orderBy) {
+		return;
+	}
+
+	var comparator, asc, desc;
+	var orderBy = this.orderBy;
+	var Comparator = this.columns[this.__findColumn(orderBy)].Comparator;
+
+	if (typeof Comparator === 'function' && this.orderWay === 'ASC') {
+		// Comparator and ASC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]);
+		};
+	} else if (typeof Comparator === 'function') {
+		// Comparator and DESC
+		comparator = function (a, b) {
+			return Comparator(a[orderBy], b[orderBy]);
+		};
+	} else if (this.orderWay === 'ASC') {
+		// NO Comparator and ASC
+		comparator = function (a, b) {
+			return a[orderBy] > b[orderBy];
+		};
+	} else {
+		// NO Comparator and DESC
+		comparator = function (a, b) {
+			return a[orderBy] < b[orderBy];
+		};
+	}
+
+	var index = 0;
+	var tempRows = this.rows.slice(0);
+	tempRows.push(rowObj); 
+	tempRows = tempRows.sort(comparator);
+
+	if (tempRows.indexOf) {
+		index = tempRows.indexOf(rowObj);
+	} else {
+		for (index in tempRows) {
+			if (tempRows[index] === rowObj) {
+				break;
+			}
+		}
+	}
+
+	return index;
 };
 
 /*
