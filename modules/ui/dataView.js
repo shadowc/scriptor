@@ -1123,7 +1123,7 @@ Scriptor.DataView.prototype.setCellValue = function(rowId, columnName, value) {
 	var cell = this._li[this.divId + '_cell_' + rowId + '_' + colNdx];
 	
 	if (typeof(this.columns[colNdx].Format) == 'function') {
-		var funcRet = this.columns[colNdx].Format(value);
+		var funcRet = this.columns[colNdx].Format(value, this.getById(rowId), cell);
 		if (typeof funcRet === 'string' || typeof funcRet === 'number' || typeof funcRet === 'undefined') {
 			if (typeof funcRet === 'string' && funcRet.indexOf('<') != -1) {
 				cell.innerHTML = funcRet;
