@@ -1,4 +1,4 @@
-/* Scriptor 2.1b3
+/* Scriptor 2.3b1
   
   A tiny Javascript component library plus a few usefull functions
   
@@ -11,15 +11,14 @@
   http://github.com/shadowc/scriptor
 */
 
-window.Scriptor = (function(document, undefined) {
+window.__tmpScriptor = (function(document, undefined) {
 	
-
 // define the Scriptor object
 var Scriptor = {
 	version : {
 		major : 2,
-		minor : 2,
-		instance : "beta 4",
+		minor : 3,
+		instance : "beta 1",
 		toString : function() {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
@@ -80,326 +79,6 @@ var Scriptor = {
 		}
 	},
 	
-	// dojo mixin
-	mixin : function(/*Object*/obj, /*Object...*/props) {
-		if(!obj){ obj = {}; }
-		for(var i=1, l=arguments.length; i<l; i++){
-			Scriptor._mixin(obj, arguments[i]);
-		}
-		return obj; // Object
-	},
-	
-	_mixin : function(/*Object*/ target, /*Object*/ source) {
-		var extraNames, extraLen, empty = {};
-		for(var i in {toString: 1}){ extraNames = []; break; }
-		extraNames = extraNames || ["hasOwnProperty", "valueOf", "isPrototypeOf",
-				"propertyIsEnumerable", "toLocaleString", "toString", "constructor"];
-		extraLen = extraNames.length;
-		
-		var name, s, i;
-		for(name in source){
-			// the "tobj" condition avoid copying properties in "source"
-			// inherited from Object.prototype.  For example, if target has a custom
-			// toString() method, don't overwrite it with the toString() method
-			// that source inherited from Object.prototype
-			s = source[name];
-			if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
-				target[name] = s;
-			}
-		}
-		// IE doesn't recognize some custom functions in for..in
-		if(extraLen && source){
-			for(i = 0; i < extraLen; ++i){
-				name = extraNames[i];
-				s = source[name];
-				if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
-					target[name] = s;
-				}
-			}
-		}
-		return target; // Object
-	},
-
-	// tiny event system 
-	event : {
-		/* init
-		* Initializes an object to work with custom events
-		*/
-		init : function(obj) {
-			obj._customEventStacks = {};
-		},
-		
-		/*
-		* Adds a custom event stack to start registering
-		* custom events
-		*/
-		registerCustomEvent : function(obj, customName, context) {
-			context = context || obj;
-			
-			if (obj._customEventStacks)
-				obj._customEventStacks[customName] = { context : context, stack : [] };
-		},
-		
-		attach : function(htmlElement, evt, funcObj) {
-			if (Scriptor.isHtmlElement(htmlElement) || htmlElement === document || htmlElement === window)
-			{
-				if (evt.substr(0,2) == 'on')	// strip the 'on' part
-					evt = evt.substr(2);
-				
-				if (htmlElement.addEventListener) {
-					htmlElement.addEventListener(evt, funcObj, false);
-				}
-				else {
-					if (htmlElement.attachEvent) {
-						htmlElement.attachEvent('on' + evt, funcObj);
-					}
-				}
-			}
-			else if (htmlElement._customEventStacks)
-			{
-				if (htmlElement._customEventStacks[evt]) {
-					// first, detach event if already attached, it will move to the end of
-					// the stack
-					Scriptor.event.detach(htmlElement, evt, funcObj);
-					htmlElement._customEventStacks[evt].stack.push(funcObj);
-				}
-			}
-			
-			return [htmlElement, evt, funcObj];
-		},
-		
-		detach : function(/* array | htmlElement, [ evt, funcObj ] */) {
-			var htmlEleemnt, evt, funcObj;
-			
-			if (typeof(arguments[0]) == 'object' && arguments[0].length)
-			{
-				htmlElement = arguments[0][0];
-				evt = arguments[0][1];
-				funcObj = arguments[0][2];
-			}
-			else
-			{
-				htmlElement = arguments[0];
-				evt = arguments[1];
-				funcObj = arguments[2];
-			}
-			
-			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
-			{
-				if (evt.substr(0,2) == 'on')	// strip the 'on' part
-					evt = evt.substr(2);
-				if (htmlElement.removeEventListener) {
-					htmlElement.removeEventListener(evt, funcObj, false);
-				}
-				else {
-					if (htmlElement.detachEvent) {
-						htmlElement.detachEvent('on' + evt, funcObj);
-					}
-				}
-			}
-			else if (htmlElement._customEventStacks)
-			{
-				if (htmlElement._customEventStacks[evt]) {
-					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
-						if (htmlElement._customEventStacks[evt].stack[n] == funcObj) {
-							htmlElement._customEventStacks[evt].stack.splice(n, 1);
-							break;
-						}
-					}
-				}
-			}
-		},
-	
-		// this will execute in the context of _customEvents object
-		// obj is the object with custom event system initialized
-		// evt is the event name register as a custom event
-		// evtExtend is the event object (if present) with any extensions you might like
-		fire : function(obj, evt, evtExtend) {
-			// create fake event object
-			evtExtend = typeof(evtExtend) == 'object' ? evtExtend : {};
-			evtExtend.customEventName = evt;
-			if (evtExtend.returnValue === undefined)
-				evtExtend.returnValue = true;
-			
-			// no event registered? return
-			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
-				!obj._customEventStacks[evt].stack.length)
-				return evtExtend;
-			
-			// create argument list and push fake event to callback arguments
-			var args = [evtExtend];
-			
-			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
-				obj._customEventStacks[evt].stack[n].apply(obj._customEventStacks[evt].context, args);
-			
-			return evtExtend;
-		},
-	
-		cancel : function(e, alsoStopPropagation) {
-			if (!e)
-				return;
-			
-			if (typeof(alsoStopPropagation) == 'undefined')
-				alsoStopPropagation = true;
-				
-			if (typeof(e.preventDefault) == 'function')
-				e.preventDefault();
-	
-			e.returnValue = false;
-	
-			if (alsoStopPropagation) {
-				if (typeof(e.stopPropagation) == 'function')
-					e.stopPropagation();
-	
-				e.cancelBubble = true;
-			}
-			
-		},
-	
-		getPointXY : function(evt) {
-			// check we have a real event object
-			if (evt.pageX === undefined && evt.clientX === undefined)
-				return {x: 0, y : 0};
-			
-			return {
-				x: evt.pageX || (evt.clientX +
-					(document.documentElement.scrollLeft || document.body.scrollLeft)),
-				y: evt.pageY || (evt.clientY +
-					(document.documentElement.scrollTop || document.body.scrollTop))
-		  };
-		}
-	},
-	
-	// add classname / remove classname
-	className : {
-		// check if an element has a className
-		has : function(elem, className) {	
-			if (!(elem)) return false;
-			
-			var elementClassName = elem.className;
-			var classNameRegexp = new RegExp("(^|\\s)" + className + "(\\s|$)");
-			return (elementClassName.length > 0 && (elementClassName == className ||
-				classNameRegexp.test(elementClassName)));
-		},
-		
-		// add a classname if not already added
-		add : function(elem, className) {
-			if (typeof(className) != 'string')
-				return;
-			
-			if (!(elem)) return;
-			
-			if (elem.className === undefined)
-				elem.className = '';
-			
-			if (!Scriptor.className.has(elem, className))
-				elem.className += (elem.className ? ' ' : '') + className;
-		},
-		
-		// remove a classname if present in an element's className
-		remove : function(elem, className) {
-			if (typeof(className) != 'string')
-				return;
-
-			if (!(elem)) return;
-		
-			if (elem.className === undefined)
-				elem.className = '';
-			
-			elem.className = elem.className.replace(
-			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').replace(/^\s+/, '').replace(/\s+$/, '');
-		},
-		
-		// returns the actual computed style of an element
-		// property must be a css property name like border-top-width
-		// (with dashes)
-		getComputedProperty : function(el, property) {
-			if (window.getComputedStyle)	// DOM Implementation
-			{
-				var st = window.getComputedStyle(el, null);
-				if (st)
-				{
-					return st.getPropertyValue(property);
-				}
-			}
-			else if (el.currentStyle)	// IE implementation
-			{
-				st = el.currentStyle;
-				
-				if (st)
-				{
-					// convert dashed-css-declaration to javascriptCssDeclaration
-					var convprop = '';
-					var capt = false;
-					for (var n=0; n < property.length; n++)
-					{
-						var c = property.substr(n, 1);
-						if (c == '-')
-						{
-							capt = true;
-						}
-						else if (capt)
-						{
-							convprop += c.toUpperCase();
-							capt = false;
-						}
-						else
-						{
-							convprop += c;
-						}
-					}
-					
-					return st[convprop];
-				}
-			}
-			
-			return null;
-		}
-	},
-	
-	// Basic cookie handling system
-	cookie : {
-		cookies : {},
-	
-		init : function() {
-			var ca = document.cookie.split(';');
-			for(var i=0;i < ca.length;i++)
-			{
-				var c = ca[i];
-				while (c.charAt(0)==' ')
-					c = c.substring(1,c.length);
-					
-				var nameEQ = c.substring(0, c.indexOf('='));
-				this.cookies[nameEQ] = c.substring(nameEQ.length+1,c.length);
-			}
-		},
-		
-		get : function(name)
-		{
-			return this.cookies[name] ? this.cookies[name] : '';
-		},
-		
-		create : function(name,value,days)
-		{
-			if (days)
-			{
-				var date = new Date();
-				date.setTime(date.getTime()+(days*24*60*60*1000));
-				var expires = "; expires="+date.toGMTString();
-			}
-			else var expires = "";
-			document.cookie = name+"="+value+expires+"; path=/";
-			
-			this.cookies[name] = value;
-		},
-	
-		erase : function(name)
-		{
-			this.create(name,"",-1);
-			delete this.cookies[name];
-		}
-	},
-	
 	// function to identify if obj is an html element
 	isHtmlElement : function(o) {
 		// some common comarisons that would break the further testing
@@ -434,8 +113,78 @@ var Scriptor = {
 		}
 	},
 	
-	// window addOnLoad system
-	addOnLoad : function(f) {
+	body : function() {
+		if (!_body)
+		{
+			_body = document.getElementsByTagName('body')[0];
+		}
+		
+		return _body;
+	}
+};
+
+var _body = null;
+// internal id generation system
+var __nextIdNdx = 0;
+var __lastId = 'scriptor_' + __nextIdNdx;
+var __getNextHtmlId = function() {
+	__lastId = 'scriptor_' + __nextIdNdx;
+	__nextIdNdx++;
+	
+	while (document.getElementById(__lastId))
+	{
+		__nextIdNdx++;
+		__lastId = 'scriptor_' + __nextIdNdx;
+	}
+	
+	return __lastId;
+};
+
+var browserWindowHeight = 0;
+var browserWindowWidth = 0;
+
+// dojo mixin
+Scriptor.mixin = function(/*Object*/obj, /*Object...*/props) {
+		if(!obj){ obj = {}; }
+		for(var i=1, l=arguments.length; i<l; i++){
+			Scriptor._mixin(obj, arguments[i]);
+		}
+		return obj; // Object
+	};
+	
+Scriptor._mixin = function(/*Object*/ target, /*Object*/ source) {
+		var extraNames, extraLen, empty = {};
+		for(var i in {toString: 1}){ extraNames = []; break; }
+		extraNames = extraNames || ["hasOwnProperty", "valueOf", "isPrototypeOf",
+				"propertyIsEnumerable", "toLocaleString", "toString", "constructor"];
+		extraLen = extraNames.length;
+		
+		var name, s, i;
+		for(name in source){
+			// the "tobj" condition avoid copying properties in "source"
+			// inherited from Object.prototype.  For example, if target has a custom
+			// toString() method, don't overwrite it with the toString() method
+			// that source inherited from Object.prototype
+			s = source[name];
+			if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
+				target[name] = s;
+			}
+		}
+		// IE doesn't recognize some custom functions in for..in
+		if(extraLen && source){
+			for(i = 0; i < extraLen; ++i){
+				name = extraNames[i];
+				s = source[name];
+				if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
+					target[name] = s;
+				}
+			}
+		}
+		return target; // Object
+	};
+
+// window addOnLoad system
+Scriptor.addOnLoad = function(f) {
 		if (window.onload)
 		{
 			var oldF = window.onload;
@@ -449,24 +198,10 @@ var Scriptor = {
 		{
 			window.onload = f;
 		}
-	},
-	
-	// error reporting system!
-	error : {
-		alertErrors : false,
-		muteErrors : false,
-		
-		report : function(msg) {
-			if (Scriptor.error.alertErrors)
-				alert(msg);
-			
-			if (!Scriptor.error.muteErrors)
-				throw msg;
-		}
-	},
+	};
 	
 	// make obj transparent by ndx
-	makeTransparent : function(obj, ndx) { 
+Scriptor.makeTransparent = function(obj, ndx) { 
 		if (obj.style) {
 			if (obj.style.opacity !== undefined)
 				obj.style.opacity = '0.' + ndx;
@@ -475,17 +210,8 @@ var Scriptor = {
 			else if (obj.style.filter !== undefined) 
 				obj.style.filter = 'alpha(opacity=' + ndx + ');';
 		}
-	},
-	
-	body : function() {
-		if (!_body)
-		{
-			_body = document.getElementsByTagName('body')[0];
-		}
-		
-		return _body;
-	},
-	
+	};
+
 	/*
 	* Scriptor.getInactiveLocation
 	*
@@ -493,9 +219,9 @@ var Scriptor = {
 	* Useful for A elements which need an inactive href, to ensure we won't
 	*   be switching the page when clicked or change tha page's hash information
 	*/
-	getInactiveLocation : function() {
+Scriptor.getInactiveLocation = function() {
 		return String((window.location.href.indexOf('#') != -1) ? window.location.href : window.location.href + "#");
-	},
+	};
 	
 	/*
 	* Scriptor.invalidate
@@ -506,9 +232,10 @@ var Scriptor = {
 	*
 	*   Optional msg parameter can be passed to show a message
 	*   with an "ajax" spinner
-	*   
+	*
+	*	Requires Scriptor.event
 	*/
-	invalidate : function(state, msg)
+Scriptor.invalidate = function(state, msg)
 	{
 		if (state)
 		{
@@ -547,9 +274,9 @@ var Scriptor = {
 			
 			Scriptor.event.detach(window, 'onresize', Scriptor._calculateBrowserSize);
 		}
-	},
+	};
 	
-	_calculateBrowserSize : function()
+Scriptor._calculateBrowserSize = function()
 	{
 		// calculate window width - height
 		if (navigator.userAgent.indexOf('MSIE') != -1) {
@@ -598,71 +325,10 @@ var Scriptor = {
 				inv.firstChild.style.top = ((browserWindowHeight / 2) - 15) + 'px';
 			}
 		}
-	},
-	
-	/* some usefull html element functions */
-	element : {
-		// get top, bottom, left, right values according to the component's
-		// padding
-		getInnerBox : function(elem) {
-			var box = { top : 0, bottom: 0, left : 0, right : 0 };
-			
-			var innerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-top'));
-			var innerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-bottom'));
-			var innerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-left'));
-			var innerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-right'));
-			
-			if (!isNaN(innerTop))
-				box.top = innerTop;
-			if (!isNaN(innerBottom))
-				box.bottom = innerBottom;
-			if (!isNaN(innerLeft))
-				box.left = innerLeft;
-			if (!isNaN(innerRight))
-				box.right = innerRight;
-			
-			var borderTop = parseInt(Scriptor.className.getComputedProperty(elem, 'border-top-width'));
-			var borderBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'border-bottom-width'))
-			var borderLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'border-left-width'))
-			var borderRight = parseInt(Scriptor.className.getComputedProperty(elem, 'border-right-width'))
-			
-			if (!isNaN(borderTop))
-				box.top += borderTop;
-			if (!isNaN(borderBottom))
-				box.bottom += borderBottom;
-			if (!isNaN(borderLeft))
-				box.left += borderLeft;
-			if (!isNaN(borderRight))
-				box.right += borderRight;
-				
-			return box;
-		},
-			
-		// get top, bottom, left, right values according to the component's
-		// margin
-		getOuterBox : function(elem) {
-			var box = { top : 0, bottom: 0, left : 0, right : 0 };
-			
-			var outerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-top'));
-			var outerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-bottom'));
-			var outerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-left'));
-			var outerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-right'));
-			
-			if (!isNaN(outerTop))
-				box.top = outerTop;
-			if (!isNaN(outerBottom))
-				box.bottom = outerBottom;
-			if (!isNaN(outerLeft))
-				box.left = outerLeft;
-			if (!isNaN(outerRight))
-				box.right = outerRight;
-				
-			return box;
-		}
-	},
+	};
 	
 	// SHA1 support
-	SHA1 : function(msg) {
+Scriptor.SHA1 = function(msg) {
 	
 	   var rotate_left = function(n,s) {
 		   var t4 = ( n<<s ) | (n>>>(32-s));
@@ -828,7 +494,7 @@ var Scriptor = {
 	
 	   return temp.toLowerCase();
  
-	},
+	};
 	
 	// MD5 support
 	/**
@@ -838,7 +504,7 @@ var Scriptor = {
 	*
 	**/
 	 
-	MD5 : function (string) {
+Scriptor.MD5 = function (string) {
 	 
 		var RotateLeft = function(lValue, iShiftBits) {
 			return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
@@ -1037,31 +703,580 @@ var Scriptor = {
 		var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
 	 
 		return temp.toLowerCase();
-	}
-};
+	};
 
-// internal id generation system
-var __nextIdNdx = 0;
-var __lastId = 'scriptor_' + __nextIdNdx;
-var __getNextHtmlId = function() {
-	__lastId = 'scriptor_' + __nextIdNdx;
-	__nextIdNdx++;
+// local support for JSON parsing
+// JSON implementation for unsupported browsers
+if (typeof(JSON) == 'undefined') {
+    JSON = {};
+}
+
+(function () {
+
+    function f(n) {
+        // Format integers to have at least two digits.
+        return n < 10 ? '0' + n : n;
+    }
+
+    if (typeof Date.prototype.toJSON !== 'function') {
+
+        Date.prototype.toJSON = function (key) {
+
+            return isFinite(this.valueOf()) ?
+                   this.getUTCFullYear()   + '-' +
+                 f(this.getUTCMonth() + 1) + '-' +
+                 f(this.getUTCDate())      + 'T' +
+                 f(this.getUTCHours())     + ':' +
+                 f(this.getUTCMinutes())   + ':' +
+                 f(this.getUTCSeconds())   + 'Z' : null;
+        };
+
+        String.prototype.toJSON =
+        Number.prototype.toJSON =
+        Boolean.prototype.toJSON = function (key) {
+            return this.valueOf();
+        };
+    }
+
+    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        gap,
+        indent,
+        meta = {    // table of character substitutions
+            '\b': '\\b',
+            '\t': '\\t',
+            '\n': '\\n',
+            '\f': '\\f',
+            '\r': '\\r',
+            '"' : '\\"',
+            '\\': '\\\\'
+        },
+        rep;
+
+
+    function quote(string) {
+
+        escapable.lastIndex = 0;
+        return escapable.test(string) ?
+            '"' + string.replace(escapable, function (a) {
+                var c = meta[a];
+                return typeof c === 'string' ? c :
+                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+            }) + '"' :
+            '"' + string + '"';
+    }
+
+
+    function str(key, holder) {
+        var i,          // The loop counter.
+            k,          // The member key.
+            v,          // The member value.
+            length,
+            mind = gap,
+            partial,
+            value = holder[key];
+
+        if (value && typeof value === 'object' &&
+                typeof value.toJSON === 'function') {
+            value = value.toJSON(key);
+        }
+
+        if (typeof rep === 'function') {
+            value = rep.call(holder, key, value);
+        }
+
+        switch (typeof value) {
+        case 'string':
+            return quote(value);
+
+        case 'number':
+
+            return isFinite(value) ? String(value) : 'null';
+
+        case 'boolean':
+        case 'null':
+
+            return String(value);
+
+        case 'object':
+
+            if (!value) {
+                return 'null';
+            }
+
+            gap += indent;
+            partial = [];
+
+            if (Object.prototype.toString.apply(value) === '[object Array]') {
+                length = value.length;
+                for (i = 0; i < length; i += 1) {
+                    partial[i] = str(i, value) || 'null';
+                }
+                v = partial.length === 0 ? '[]' :
+                    gap ? '[\n' + gap +
+                            partial.join(',\n' + gap) + '\n' +
+                                mind + ']' :
+                          '[' + partial.join(',') + ']';
+                gap = mind;
+                return v;
+            }
+
+            if (rep && typeof rep === 'object') {
+                length = rep.length;
+                for (i = 0; i < length; i += 1) {
+                    k = rep[i];
+                    if (typeof k === 'string') {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            } else {
+                for (k in value) {
+                    if (Object.hasOwnProperty.call(value, k)) {
+                        v = str(k, value);
+                        if (v) {
+                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
+                        }
+                    }
+                }
+            }
+
+            v = partial.length === 0 ? '{}' :
+                gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
+                        mind + '}' : '{' + partial.join(',') + '}';
+            gap = mind;
+            return v;
+        }
+    }
+
+    if (typeof JSON.stringify !== 'function') {
+        JSON.stringify = function (value, replacer, space) {
+
+            var i;
+            gap = '';
+            indent = '';
+            if (typeof space === 'number') {
+                for (i = 0; i < space; i += 1) {
+                    indent += ' ';
+                }
+            } else if (typeof space === 'string') {
+                indent = space;
+            }
+            rep = replacer;
+            if (replacer && typeof replacer !== 'function' &&
+                    (typeof replacer !== 'object' ||
+                     typeof replacer.length !== 'number')) {
+                throw new Error('JSON.stringify');
+            }
+            return str('', {'': value});
+        };
+    }
+
+    if (typeof JSON.parse !== 'function') {
+        JSON.parse = function (text, reviver) {
+
+            var j;
+
+            function walk(holder, key) {
+
+                var k, v, value = holder[key];
+                if (value && typeof value === 'object') {
+                    for (k in value) {
+                        if (Object.hasOwnProperty.call(value, k)) {
+                            v = walk(value, k);
+                            if (v !== undefined) {
+                                value[k] = v;
+                            } else {
+                                delete value[k];
+                            }
+                        }
+                    }
+                }
+                return reviver.call(holder, key, value);
+            }
+            cx.lastIndex = 0;
+            if (cx.test(text)) {
+                text = text.replace(cx, function (a) {
+                    return '\\u' +
+                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+                });
+            }
+
+            if (/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+                j = eval('(' + text + ')');
+                return typeof reviver === 'function' ?
+                    walk({'': j}, '') : j;
+            }
+            throw new SyntaxError('JSON.parse');
+        };
+    }
+}());
+// tiny event system 
+
+Scriptor.event = {
+		/* init
+		* Initializes an object to work with custom events
+		*/
+		init : function(obj) {
+			obj._customEventStacks = {};
+		},
+		
+		/*
+		* Adds a custom event stack to start registering
+		* custom events
+		*/
+		registerCustomEvent : function(obj, customName, context) {
+			context = context || obj;
+			
+			if (obj._customEventStacks)
+				obj._customEventStacks[customName] = { context : context, stack : [] };
+		},
+		
+		attach : function(htmlElement, evt, funcObj, context) {
+			if (Scriptor.isHtmlElement(htmlElement) || htmlElement === document || htmlElement === window)
+			{
+				if (context)
+					funcObj = Scriptor.bindAsEventListener(funcObj, context);
+
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
+				
+				if (htmlElement.addEventListener) {
+					if (context)
+						htmlElement.addEventListener(evt, funcObj, false);
+					else
+						htmlElement.addEventListener(evt, funcObj, false);
+				}
+				else {
+					if (htmlElement.attachEvent) {
+						htmlElement.attachEvent('on' + evt, funcObj);
+					}
+				}
+			}
+			else if (htmlElement._customEventStacks)
+			{
+				if (htmlElement._customEventStacks[evt]) {
+					// first, detach event if already attached, it will move to the end of
+					// the stack
+					Scriptor.event.detach(htmlElement, evt, funcObj);
+					htmlElement._customEventStacks[evt].stack.push({ callback: funcObj, context: context });
+				}
+			}
+			
+			return [htmlElement, evt, funcObj];
+		},
+		
+		detach : function(/* array | htmlElement, [ evt, funcObj ] */) {
+			var htmlEleemnt, evt, funcObj;
+			
+			if (typeof(arguments[0]) == 'object' && arguments[0].length)
+			{
+				htmlElement = arguments[0][0];
+				evt = arguments[0][1];
+				funcObj = arguments[0][2];
+			}
+			else
+			{
+				htmlElement = arguments[0];
+				evt = arguments[1];
+				funcObj = arguments[2];
+			}
+			
+			if (Scriptor.isHtmlElement(htmlElement)  || htmlElement === document || htmlElement === window)
+			{
+				if (evt.substr(0,2) == 'on')	// strip the 'on' part
+					evt = evt.substr(2);
+				if (htmlElement.removeEventListener) {
+					htmlElement.removeEventListener(evt, funcObj, false);
+				}
+				else {
+					if (htmlElement.detachEvent) {
+						htmlElement.detachEvent('on' + evt, funcObj);
+					}
+				}
+			}
+			else if (htmlElement._customEventStacks)
+			{
+				if (htmlElement._customEventStacks[evt]) {
+					for (var n=0; n < htmlElement._customEventStacks[evt].stack.length; n++) {
+						if (htmlElement._customEventStacks[evt].stack[n].callback == funcObj) {
+							htmlElement._customEventStacks[evt].stack.splice(n, 1);
+							break;
+						}
+					}
+				}
+			}
+		},
 	
-	while (document.getElementById(__lastId))
-	{
-		__nextIdNdx++;
-		__lastId = 'scriptor_' + __nextIdNdx;
-	}
+		// this will execute in the context of _customEvents object
+		// obj is the object with custom event system initialized
+		// evt is the event name register as a custom event
+		// evtExtend is the event object (if present) with any extensions you might like
+		fire : function(obj, evt, evtExtend) {
+			// create fake event object
+			evtExtend = typeof(evtExtend) == 'object' ? evtExtend : {};
+			evtExtend.customEventName = evt;
+			if (evtExtend.returnValue === undefined)
+				evtExtend.returnValue = true;
+			
+			// no event registered? return
+			if (!obj._customEventStacks || !obj._customEventStacks[evt] ||
+				!obj._customEventStacks[evt].stack.length)
+				return evtExtend;
+			
+			// create argument list and push fake event to callback arguments
+			var args = [evtExtend];
+			
+			for (var n=0; n < obj._customEventStacks[evt].stack.length; n++)
+			{
+				var context = obj._customEventStacks[evt].stack[n].context || obj._customEventStacks[evt].context;
+				obj._customEventStacks[evt].stack[n].callback.apply(context, args);
+			}
+			
+			return evtExtend;
+		},
 	
-	return __lastId;
-};
+		cancel : function(e, alsoStopPropagation) {
+			if (!e)
+				return;
+			
+			if (typeof(alsoStopPropagation) == 'undefined')
+				alsoStopPropagation = true;
+				
+			if (typeof(e.preventDefault) == 'function')
+				e.preventDefault();
+	
+			e.returnValue = false;
+	
+			if (alsoStopPropagation) {
+				if (typeof(e.stopPropagation) == 'function')
+					e.stopPropagation();
+	
+				e.cancelBubble = true;
+			}
+		},
+	
+		getPointXY : function(evt) {
+			// check we have a real event object
+			if (evt.pageX === undefined && evt.clientX === undefined)
+				return {x: 0, y : 0};
+			
+			return {
+				x: evt.pageX || (evt.clientX +
+					(document.documentElement.scrollLeft || document.body.scrollLeft)),
+				y: evt.pageY || (evt.clientY +
+					(document.documentElement.scrollTop || document.body.scrollTop))
+		  };
+		}
+	};
+/* some usefull html element functions */
+/* requires: Scriptor.classname */
+Scriptor.element = {
+		// get top, bottom, left, right values according to the component's
+		// padding
+		getInnerBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var innerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-top'));
+			var innerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-bottom'));
+			var innerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-left'));
+			var innerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'padding-right'));
+			
+			if (!isNaN(innerTop))
+				box.top = innerTop;
+			if (!isNaN(innerBottom))
+				box.bottom = innerBottom;
+			if (!isNaN(innerLeft))
+				box.left = innerLeft;
+			if (!isNaN(innerRight))
+				box.right = innerRight;
+			
+			var borderTop = parseInt(Scriptor.className.getComputedProperty(elem, 'border-top-width'));
+			var borderBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'border-bottom-width'))
+			var borderLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'border-left-width'))
+			var borderRight = parseInt(Scriptor.className.getComputedProperty(elem, 'border-right-width'))
+			
+			if (!isNaN(borderTop))
+				box.top += borderTop;
+			if (!isNaN(borderBottom))
+				box.bottom += borderBottom;
+			if (!isNaN(borderLeft))
+				box.left += borderLeft;
+			if (!isNaN(borderRight))
+				box.right += borderRight;
+				
+			return box;
+		},
+			
+		// get top, bottom, left, right values according to the component's
+		// margin
+		getOuterBox : function(elem) {
+			var box = { top : 0, bottom: 0, left : 0, right : 0 };
+			
+			var outerTop = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-top'));
+			var outerBottom = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-bottom'));
+			var outerLeft = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-left'));
+			var outerRight = parseInt(Scriptor.className.getComputedProperty(elem, 'margin-right'));
+			
+			if (!isNaN(outerTop))
+				box.top = outerTop;
+			if (!isNaN(outerBottom))
+				box.bottom = outerBottom;
+			if (!isNaN(outerLeft))
+				box.left = outerLeft;
+			if (!isNaN(outerRight))
+				box.right = outerRight;
+				
+			return box;
+		}
+	};
+// error reporting system!
+Scriptor.error = {
+		alertErrors : false,
+		muteErrors : false,
+		
+		report : function(msg) {
+			if (Scriptor.error.alertErrors)
+				alert(msg);
+			
+			if (!Scriptor.error.muteErrors)
+				throw msg;
+		}
+	};
+	
+// add classname / remove classname
+Scriptor.className = {
+		// check if an element has a className
+		has : function(elem, className) {	
+			if (!(elem)) return false;
+			
+			var elementClassName = elem.className;
+			var classNameRegexp = new RegExp("(^|\\s)" + className + "(\\s|$)");
+			return (elementClassName.length > 0 && (elementClassName == className ||
+				classNameRegexp.test(elementClassName)));
+		},
+		
+		// add a classname if not already added
+		add : function(elem, className) {
+			if (typeof(className) != 'string')
+				return;
+			
+			if (!(elem)) return;
+			
+			if (elem.className === undefined)
+				elem.className = '';
+			
+			if (!Scriptor.className.has(elem, className))
+				elem.className += (elem.className ? ' ' : '') + className;
+		},
+		
+		// remove a classname if present in an element's className
+		remove : function(elem, className) {
+			if (typeof(className) != 'string')
+				return;
 
-var browserWindowHeight = 0;
-var browserWindowWidth = 0;
+			if (!(elem)) return;
+		
+			if (elem.className === undefined)
+				elem.className = '';
+			
+			elem.className = elem.className.replace(
+			new RegExp("(^|\\s+)" + className + "(\\s+|$)"), ' ').replace(/^\s+/, '').replace(/\s+$/, '');
+		},
+		
+		// returns the actual computed style of an element
+		// property must be a css property name like border-top-width
+		// (with dashes)
+		getComputedProperty : function(el, property) {
+			if (window.getComputedStyle)	// DOM Implementation
+			{
+				var st = window.getComputedStyle(el, null);
+				if (st)
+				{
+					return st.getPropertyValue(property);
+				}
+			}
+			else if (el.currentStyle)	// IE implementation
+			{
+				st = el.currentStyle;
+				
+				if (st)
+				{
+					// convert dashed-css-declaration to javascriptCssDeclaration
+					var convprop = '';
+					var capt = false;
+					for (var n=0; n < property.length; n++)
+					{
+						var c = property.substr(n, 1);
+						if (c == '-')
+						{
+							capt = true;
+						}
+						else if (capt)
+						{
+							convprop += c.toUpperCase();
+							capt = false;
+						}
+						else
+						{
+							convprop += c;
+						}
+					}
+					
+					return st[convprop];
+				}
+			}
+			
+			return null;
+		}
+	};
+	// Basic cookie handling system
+Scriptor.cookie = {
+		cookies : {},
+	
+		init : function() {
+			var ca = document.cookie.split(';');
+			for(var i=0;i < ca.length;i++)
+			{
+				var c = ca[i];
+				while (c.charAt(0)==' ')
+					c = c.substring(1,c.length);
+					
+				var nameEQ = c.substring(0, c.indexOf('='));
+				this.cookies[nameEQ] = c.substring(nameEQ.length+1,c.length);
+			}
+		},
+		
+		get : function(name)
+		{
+			return this.cookies[name] ? this.cookies[name] : '';
+		},
+		
+		create : function(name,value,days)
+		{
+			if (days)
+			{
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				var expires = "; expires="+date.toGMTString();
+			}
+			else var expires = "";
+			document.cookie = name+"="+value+expires+"; path=/";
+			
+			this.cookies[name] = value;
+		},
+	
+		erase : function(name)
+		{
+			this.create(name,"",-1);
+			delete this.cookies[name];
+		}
+	};
 
-var _body = null;
-
-Scriptor.cookie.init();// JavaScript Document
+Scriptor.cookie.init();
+// JavaScript Document
 /* 
 *  httpReqiest version 2.0b
 *
@@ -8814,211 +9029,8 @@ Scriptor.Dialog.prototype._stopDragging = function(e) {
 	return Scriptor;
 })(document);
 
-// local support for JSON parsing
-// JSON implementation for unsupported browsers
-if (typeof(JSON) == 'undefined') {
-    JSON = {};
-}
+if (!window.Scriptor)
+    window.Scriptor = {};
 
-(function () {
-
-    function f(n) {
-        // Format integers to have at least two digits.
-        return n < 10 ? '0' + n : n;
-    }
-
-    if (typeof Date.prototype.toJSON !== 'function') {
-
-        Date.prototype.toJSON = function (key) {
-
-            return isFinite(this.valueOf()) ?
-                   this.getUTCFullYear()   + '-' +
-                 f(this.getUTCMonth() + 1) + '-' +
-                 f(this.getUTCDate())      + 'T' +
-                 f(this.getUTCHours())     + ':' +
-                 f(this.getUTCMinutes())   + ':' +
-                 f(this.getUTCSeconds())   + 'Z' : null;
-        };
-
-        String.prototype.toJSON =
-        Number.prototype.toJSON =
-        Boolean.prototype.toJSON = function (key) {
-            return this.valueOf();
-        };
-    }
-
-    var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
-        gap,
-        indent,
-        meta = {    // table of character substitutions
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            '"' : '\\"',
-            '\\': '\\\\'
-        },
-        rep;
-
-
-    function quote(string) {
-
-        escapable.lastIndex = 0;
-        return escapable.test(string) ?
-            '"' + string.replace(escapable, function (a) {
-                var c = meta[a];
-                return typeof c === 'string' ? c :
-                    '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-            }) + '"' :
-            '"' + string + '"';
-    }
-
-
-    function str(key, holder) {
-        var i,          // The loop counter.
-            k,          // The member key.
-            v,          // The member value.
-            length,
-            mind = gap,
-            partial,
-            value = holder[key];
-
-        if (value && typeof value === 'object' &&
-                typeof value.toJSON === 'function') {
-            value = value.toJSON(key);
-        }
-
-        if (typeof rep === 'function') {
-            value = rep.call(holder, key, value);
-        }
-
-        switch (typeof value) {
-        case 'string':
-            return quote(value);
-
-        case 'number':
-
-            return isFinite(value) ? String(value) : 'null';
-
-        case 'boolean':
-        case 'null':
-
-            return String(value);
-
-        case 'object':
-
-            if (!value) {
-                return 'null';
-            }
-
-            gap += indent;
-            partial = [];
-
-            if (Object.prototype.toString.apply(value) === '[object Array]') {
-                length = value.length;
-                for (i = 0; i < length; i += 1) {
-                    partial[i] = str(i, value) || 'null';
-                }
-                v = partial.length === 0 ? '[]' :
-                    gap ? '[\n' + gap +
-                            partial.join(',\n' + gap) + '\n' +
-                                mind + ']' :
-                          '[' + partial.join(',') + ']';
-                gap = mind;
-                return v;
-            }
-
-            if (rep && typeof rep === 'object') {
-                length = rep.length;
-                for (i = 0; i < length; i += 1) {
-                    k = rep[i];
-                    if (typeof k === 'string') {
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            } else {
-                for (k in value) {
-                    if (Object.hasOwnProperty.call(value, k)) {
-                        v = str(k, value);
-                        if (v) {
-                            partial.push(quote(k) + (gap ? ': ' : ':') + v);
-                        }
-                    }
-                }
-            }
-
-            v = partial.length === 0 ? '{}' :
-                gap ? '{\n' + gap + partial.join(',\n' + gap) + '\n' +
-                        mind + '}' : '{' + partial.join(',') + '}';
-            gap = mind;
-            return v;
-        }
-    }
-
-    if (typeof JSON.stringify !== 'function') {
-        JSON.stringify = function (value, replacer, space) {
-
-            var i;
-            gap = '';
-            indent = '';
-            if (typeof space === 'number') {
-                for (i = 0; i < space; i += 1) {
-                    indent += ' ';
-                }
-            } else if (typeof space === 'string') {
-                indent = space;
-            }
-            rep = replacer;
-            if (replacer && typeof replacer !== 'function' &&
-                    (typeof replacer !== 'object' ||
-                     typeof replacer.length !== 'number')) {
-                throw new Error('JSON.stringify');
-            }
-            return str('', {'': value});
-        };
-    }
-
-    if (typeof JSON.parse !== 'function') {
-        JSON.parse = function (text, reviver) {
-
-            var j;
-
-            function walk(holder, key) {
-
-                var k, v, value = holder[key];
-                if (value && typeof value === 'object') {
-                    for (k in value) {
-                        if (Object.hasOwnProperty.call(value, k)) {
-                            v = walk(value, k);
-                            if (v !== undefined) {
-                                value[k] = v;
-                            } else {
-                                delete value[k];
-                            }
-                        }
-                    }
-                }
-                return reviver.call(holder, key, value);
-            }
-            cx.lastIndex = 0;
-            if (cx.test(text)) {
-                text = text.replace(cx, function (a) {
-                    return '\\u' +
-                        ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-                });
-            }
-
-            if (/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-                j = eval('(' + text + ')');
-                return typeof reviver === 'function' ?
-                    walk({'': j}, '') : j;
-            }
-            throw new SyntaxError('JSON.parse');
-        };
-    }
-}());
+Scriptor.mixin(window.Scriptor, window.__tmpScriptor);
+delete window.__tmpScriptor;

@@ -1,4 +1,4 @@
-/* Scriptor 2.1b3
+/* Scriptor 2.3b1
   
   A tiny Javascript component library plus a few usefull functions
   
@@ -11,5 +11,5 @@
   http://github.com/shadowc/scriptor
 */
 
-window.Scriptor = (function(document, undefined) {
+window.__tmpScriptor = (function(document, undefined) {
 	

@@ -1,4 +1,18 @@
+/* Scriptor 2.3b1
+  
+  A tiny Javascript component library plus a few usefull functions
+  
+  Published under the Creative Commons License
+  http://creativecommons.org/licenses/by/3.0/
+  
+  by Matias Jose
+  http://www.matiasjose.com
+  
+  http://github.com/shadowc/scriptor
+*/
 
+window.__tmpScriptor = (function(document, undefined) {
+	
 // define the Scriptor object
 var Scriptor = {
 	version : {
@@ -110,3 +124,56 @@ var Scriptor = {
 };
 
 var _body = null;
+// Basic cookie handling system
+Scriptor.cookie = {
+		cookies : {},
+	
+		init : function() {
+			var ca = document.cookie.split(';');
+			for(var i=0;i < ca.length;i++)
+			{
+				var c = ca[i];
+				while (c.charAt(0)==' ')
+					c = c.substring(1,c.length);
+					
+				var nameEQ = c.substring(0, c.indexOf('='));
+				this.cookies[nameEQ] = c.substring(nameEQ.length+1,c.length);
+			}
+		},
+		
+		get : function(name)
+		{
+			return this.cookies[name] ? this.cookies[name] : '';
+		},
+		
+		create : function(name,value,days)
+		{
+			if (days)
+			{
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				var expires = "; expires="+date.toGMTString();
+			}
+			else var expires = "";
+			document.cookie = name+"="+value+expires+"; path=/";
+			
+			this.cookies[name] = value;
+		},
+	
+		erase : function(name)
+		{
+			this.create(name,"",-1);
+			delete this.cookies[name];
+		}
+	};
+
+Scriptor.cookie.init();
+
+	return Scriptor;
+})(document);
+
+if (!window.Scriptor)
+    window.Scriptor = {};
+
+Scriptor.mixin(window.Scriptor, window.__tmpScriptor);
+delete window.__tmpScriptor;
