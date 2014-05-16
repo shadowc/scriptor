@@ -23,6 +23,46 @@ var Scriptor = {
 			return this.major + "." + this.minor + " " + this.instance;
 		}
 	},
+
+	// dojo mixin
+	mixin : function(/*Object*/obj, /*Object...*/props) {
+		if(!obj){ obj = {}; }
+		for(var i=1, l=arguments.length; i<l; i++){
+			Scriptor._mixin(obj, arguments[i]);
+		}
+		return obj; // Object
+	},
+	
+	_mixin : function(/*Object*/ target, /*Object*/ source) {
+		var extraNames, extraLen, empty = {};
+		for(var i in {toString: 1}){ extraNames = []; break; }
+		extraNames = extraNames || ["hasOwnProperty", "valueOf", "isPrototypeOf",
+				"propertyIsEnumerable", "toLocaleString", "toString", "constructor"];
+		extraLen = extraNames.length;
+		
+		var name, s, i;
+		for(name in source){
+			// the "tobj" condition avoid copying properties in "source"
+			// inherited from Object.prototype.  For example, if target has a custom
+			// toString() method, don't overwrite it with the toString() method
+			// that source inherited from Object.prototype
+			s = source[name];
+			if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
+				target[name] = s;
+			}
+		}
+		// IE doesn't recognize some custom functions in for..in
+		if(extraLen && source){
+			for(i = 0; i < extraLen; ++i){
+				name = extraNames[i];
+				s = source[name];
+				if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
+					target[name] = s;
+				}
+			}
+		}
+		return target; // Object
+	},
 	
 	// prototype bind
 	bind : function(func, obj/*, staticArg1, staticArg2... */) {
@@ -142,46 +182,6 @@ var __getNextHtmlId = function() {
 
 var browserWindowHeight = 0;
 var browserWindowWidth = 0;
-
-// dojo mixin
-Scriptor.mixin = function(/*Object*/obj, /*Object...*/props) {
-		if(!obj){ obj = {}; }
-		for(var i=1, l=arguments.length; i<l; i++){
-			Scriptor._mixin(obj, arguments[i]);
-		}
-		return obj; // Object
-	};
-	
-Scriptor._mixin = function(/*Object*/ target, /*Object*/ source) {
-		var extraNames, extraLen, empty = {};
-		for(var i in {toString: 1}){ extraNames = []; break; }
-		extraNames = extraNames || ["hasOwnProperty", "valueOf", "isPrototypeOf",
-				"propertyIsEnumerable", "toLocaleString", "toString", "constructor"];
-		extraLen = extraNames.length;
-		
-		var name, s, i;
-		for(name in source){
-			// the "tobj" condition avoid copying properties in "source"
-			// inherited from Object.prototype.  For example, if target has a custom
-			// toString() method, don't overwrite it with the toString() method
-			// that source inherited from Object.prototype
-			s = source[name];
-			if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
-				target[name] = s;
-			}
-		}
-		// IE doesn't recognize some custom functions in for..in
-		if(extraLen && source){
-			for(i = 0; i < extraLen; ++i){
-				name = extraNames[i];
-				s = source[name];
-				if(!(name in target) || (target[name] !== s && (!(name in empty) || empty[name] !== s))){
-					target[name] = s;
-				}
-			}
-		}
-		return target; // Object
-	};
 
 // window addOnLoad system
 Scriptor.addOnLoad = function(f) {
@@ -9032,5 +9032,5 @@ Scriptor.Dialog.prototype._stopDragging = function(e) {
 if (!window.Scriptor)
     window.Scriptor = {};
 
-Scriptor.mixin(window.Scriptor, window.__tmpScriptor);
+__tmpScriptor.mixin(window.Scriptor, window.__tmpScriptor);
 delete window.__tmpScriptor;
