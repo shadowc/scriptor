@@ -187,9 +187,6 @@ Scriptor.cookie = {
 		
 		get : function(name)
 		{
-			if (!Scriptor.cookies.initialized)
-				Scriptor.cookies.init();
-
 			return this.cookies[name] ? this.cookies[name] : '';
 		},
 		

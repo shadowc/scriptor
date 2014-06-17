@@ -815,9 +815,6 @@ this.cookies[_6b]=c.substring(_6b.length+1,c.length);
 }
 }
 },get:function(_6c){
-if(!Scriptor.cookies.initialized){
-Scriptor.cookies.init();
-}
 return this.cookies[_6c]?this.cookies[_6c]:"";
 },create:function(_6d,_6e,_6f,_70){
 if(_70===_2){

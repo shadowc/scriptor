@@ -120,9 +120,6 @@ this.cookies[_16]=c.substring(_16.length+1,c.length);
 }
 }
 },get:function(_17){
-if(!_3.cookies.initialized){
-_3.cookies.init();
-}
 return this.cookies[_17]?this.cookies[_17]:"";
 },create:function(_18,_19,_1a,_1b){
 if(_1b===_2){

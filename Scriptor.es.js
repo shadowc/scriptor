@@ -923,9 +923,6 @@ this.cookies[_7b]=c.substring(_7b.length+1,c.length);
 }
 }
 },get:function(_7c){
-if(!_3.cookies.initialized){
-_3.cookies.init();
-}
 return this.cookies[_7c]?this.cookies[_7c]:"";
 },create:function(_7d,_7e,_7f,_80){
 if(_80===_2){
