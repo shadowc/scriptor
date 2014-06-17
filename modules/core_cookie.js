@@ -1,27 +1,37 @@
 // Basic cookie handling system
 Scriptor.cookie = {
 		cookies : {},
+		initialized: false,
 	
 		init : function() {
-			var ca = document.cookie.split(';');
-			for(var i=0;i < ca.length;i++)
+			if (!Scriptor.cookie.initialized)
 			{
-				var c = ca[i];
-				while (c.charAt(0)==' ')
-					c = c.substring(1,c.length);
-					
-				var nameEQ = c.substring(0, c.indexOf('='));
-				this.cookies[nameEQ] = c.substring(nameEQ.length+1,c.length);
+				var ca = document.cookie.split(';');
+				for(var i=0;i < ca.length;i++)
+				{
+					var c = ca[i];
+					while (c.charAt(0)==' ')
+						c = c.substring(1,c.length);
+						
+					var nameEQ = c.substring(0, c.indexOf('='));
+					this.cookies[nameEQ] = c.substring(nameEQ.length+1,c.length);
+				}
 			}
 		},
 		
 		get : function(name)
 		{
+			if (!Scriptor.cookies.initialized)
+				Scriptor.cookies.init();
+
 			return this.cookies[name] ? this.cookies[name] : '';
 		},
 		
-		create : function(name,value,days)
+		create : function(name,value,days,path)
 		{
+			if (path === undefined)
+				path = '/';
+
 			if (days)
 			{
 				var date = new Date();
@@ -29,7 +39,7 @@ Scriptor.cookie = {
 				var expires = "; expires="+date.toGMTString();
 			}
 			else var expires = "";
-			document.cookie = name+"="+value+expires+"; path=/";
+			document.cookie = name+"="+value+expires+"; path="+path;
 			
 			this.cookies[name] = value;
 		},
